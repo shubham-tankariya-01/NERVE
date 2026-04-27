@@ -89,5 +89,114 @@ def migrate_data():
 
     print("MongoDB Migration complete.")
 
+def migrate_multi_user():
+    """
+    Extends the database for multi-user, multi-company support.
+    Idempotent: Safe to run multiple times.
+    """
+    from passlib.context import CryptContext
+    from datetime import datetime, timezone
+    import pymongo
+
+    db = get_sync_db()
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+    # 1. Create a default company
+    print("Initializing default company...")
+    company_id = "company_demo"
+    db.companies.update_one(
+        {"id": company_id},
+        {"$set": {
+            "id": company_id,
+            "name": "Demo Logistics Co",
+            "plan": "professional",
+            "is_active": True,
+            "created_at": datetime.now(timezone.utc),
+            "owner_email": "admin@demo.com"
+        }},
+        upsert=True
+    )
+
+    # 2. Create platform admin user
+    print("Creating platform admin...")
+    admin_pwd = pwd_context.hash("nerve_admin_2024")
+    db.users.update_one(
+        {"username": "platform_admin"},
+        {"$set": {
+            "username": "platform_admin",
+            "email": "admin@nerve.io",
+            "role": "platform_admin",
+            "company_id": None,
+            "hashed_password": admin_pwd,
+            "is_active": True,
+            "full_name": "System Administrator"
+        }},
+        upsert=True
+    )
+
+    # 3. Create demo logistics manager
+    print("Creating demo logistics manager...")
+    manager_pwd = pwd_context.hash("demo1234")
+    db.users.update_one(
+        {"username": "manager"},
+        {"$set": {
+            "username": "manager",
+            "email": "manager@demo.com",
+            "role": "logistics_manager",
+            "company_id": company_id,
+            "hashed_password": manager_pwd,
+            "is_active": True,
+            "full_name": "Demo Manager"
+        }},
+        upsert=True
+    )
+
+    # 4. Create demo node operator
+    print("Creating demo node operator...")
+    operator_pwd = pwd_context.hash("demo1234")
+    db.users.update_one(
+        {"username": "operator"},
+        {"$set": {
+            "username": "operator",
+            "email": "operator@demo.com",
+            "role": "node_operator",
+            "company_id": company_id,
+            "assigned_node_ids": ["N05", "N08"],
+            "hashed_password": operator_pwd,
+            "is_active": True,
+            "full_name": "Demo Operator"
+        }},
+        upsert=True
+    )
+
+    # 5. Add company_id to existing nodes
+    print("Tagging existing nodes with company_id...")
+    db.nodes.update_many(
+        {"company_id": {"$exists": False}},
+        {"$set": {"company_id": company_id}}
+    )
+
+    # 6. Add company_id to existing shipments
+    print("Tagging existing shipments with company_id...")
+    db.shipments.update_many(
+        {"company_id": {"$exists": False}},
+        {"$set": {"company_id": company_id}}
+    )
+
+    # 7. Create indexes
+    print("Creating indexes...")
+    # reroute_approvals: company_id, status, created_at
+    db.reroute_approvals.create_index([("company_id", 1), ("status", 1), ("created_at", -1)])
+    
+    # node_checkins: shipment_id, node_id, timestamp
+    db.node_checkins.create_index([("shipment_id", 1), ("node_id", 1), ("timestamp", -1)])
+    
+    # users: email (unique), username (unique)
+    db.users.create_index("email", unique=True)
+    db.users.create_index("username", unique=True)
+
+    print("Multi-user migration complete.")
+
 if __name__ == "__main__":
     migrate_data()
+    migrate_multi_user()

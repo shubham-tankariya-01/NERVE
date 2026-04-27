@@ -1,11 +1,34 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
+from enum import Enum
+import uuid
+
+class UserRole(str, Enum):
+    PLATFORM_ADMIN = "platform_admin"
+    LOGISTICS_MANAGER = "logistics_manager"
+    NODE_OPERATOR = "node_operator"
+    CUSTOMER = "customer"
+
+class Company(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    plan: str = "starter" # starter | professional | enterprise
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    owner_email: str
 
 class User(BaseModel):
     username: str
-    password_hash: str
-    role: str = "VIEWER"
+    full_name: str = ""
+    email: str = ""
+    mobile: str = "" # Added for OTP flow
+    hashed_password: str = "" # Renamed from password_hash
+    role: UserRole = UserRole.LOGISTICS_MANAGER
+    company_id: Optional[str] = None # Link to Company.id
+    assigned_node_ids: List[str] = [] # For node operators only
+    is_active: bool = True
+    is_verified: bool = False # Added for OTP flow
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Node(BaseModel):
@@ -18,6 +41,7 @@ class Node(BaseModel):
     current_load: float
     status: str
     risk_level: str
+    company_id: Optional[str] = None # Added for multi-tenancy
 
 class Route(BaseModel):
     id: str
@@ -42,6 +66,7 @@ class Shipment(BaseModel):
     route_taken: List[str]
     estimated_arrival: Optional[str] = None
     departure_time: Optional[str] = None
+    company_id: Optional[str] = None # Added for multi-tenancy
 
 class DecisionLog(BaseModel):
     shipment_id: str
@@ -49,3 +74,32 @@ class DecisionLog(BaseModel):
     reasoning: str
     performed_by: str # User ID or 'AGENT'
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class NodeCheckin(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    shipment_id: str
+    node_id: str
+    operator_id: str # User.username
+    company_id: str
+    event_type: str # arrived | departed | flagged | inspected
+    notes: Optional[str] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    weight_verified: Optional[float] = None
+    condition: str = "good" # good | damaged | partial
+
+class RerouteApproval(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    company_id: str
+    shipment_id: str
+    suggested_route: List[str]
+    original_route: List[str]
+    agent_reasoning: str
+    disrupted_node: str
+    estimated_delay_hrs: float
+    priority: str
+    status: str = "pending" # pending | approved | rejected | auto_expired
+    reviewed_by: Optional[str] = None # User.username
+    review_reason: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    reviewed_at: Optional[datetime] = None
+    expires_at: datetime = Field(default_factory=lambda: datetime.utcnow() + timedelta(minutes=30))

@@ -1,11 +1,15 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { NetworkProvider } from './context/NetworkContext';
 import { AgentProvider } from './context/AgentContext';
 import AppShell from './components/layout/AppShell';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
+import Login from './pages/Login';
+import Register from './pages/Register';
 import CommandCenter from './pages/CommandCenter';
 import Dashboard from './pages/Dashboard';
 import Shipments from './pages/Shipments';
@@ -17,36 +21,96 @@ import AgentControl from './pages/AgentControl';
 import Weather from './pages/Weather';
 import BookShipment from './pages/BookShipment';
 import AdminPanel from './pages/AdminPanel';
+import ReroutingQueue from './pages/ReroutingQueue';
 
 import './styles/globals.css';
 import './styles/map.css';
 
+// Operator UI
+import OperatorShell from './layouts/OperatorShell';
+import ExpectedShipments from './pages/operator/ExpectedShipments';
+import TodayCheckins from './pages/operator/TodayCheckins';
+import FlagIssue from './pages/operator/FlagIssue';
+
+// Admin Pages
+import AdminShell from './layouts/AdminShell';
+import Companies from './pages/admin/Companies';
+import SystemStatus from './pages/admin/SystemStatus';
+
+// Placeholders
+const CustomerTracking = () => <div style={{ padding: '40px', color: 'var(--text-primary)' }}>Public Tracking View - Coming Soon</div>;
+
 export default function App() {
   return (
     <ThemeProvider>
-      <WebSocketProvider>
-        <NetworkProvider>
-          <AgentProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<AppShell />}>
-                  <Route index element={<CommandCenter />} />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="shipments" element={<Shipments />} />
-                  <Route path="shipment/:id" element={<ShipmentDetail />} />
-                  <Route path="nodes" element={<Nodes />} />
-                  <Route path="node/:id" element={<NodeDetail />} />
-                  <Route path="disruptions" element={<Disruptions />} />
-                  <Route path="agents" element={<AgentControl />} />
-                  <Route path="weather" element={<Weather />} />
-                  <Route path="book" element={<BookShipment />} />
-                  <Route path="admin" element={<AdminPanel />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </AgentProvider>
-        </NetworkProvider>
-      </WebSocketProvider>
+      <AuthProvider>
+        <WebSocketProvider>
+          <NetworkProvider>
+            <AgentProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/track/:shipmentId" element={<CustomerTracking />} />
+
+                  {/* Protected Routes - Logistics & Admins */}
+                  <Route 
+                    path="/" 
+                    element={
+                      <ProtectedRoute allowedRoles={['logistics_manager', 'platform_admin']}>
+                        <AppShell />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<CommandCenter />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="shipments" element={<Shipments />} />
+                    <Route path="shipment/:id" element={<ShipmentDetail />} />
+                    <Route path="nodes" element={<Nodes />} />
+                    <Route path="node/:id" element={<NodeDetail />} />
+                    <Route path="disruptions" element={<Disruptions />} />
+                    <Route path="agents" element={<AgentControl />} />
+                    <Route path="weather" element={<Weather />} />
+                    <Route path="book" element={<BookShipment />} />
+                    <Route path="mission-control" element={<AdminPanel />} /> {/* ← MODIFIED: moved from /admin to avoid conflict */}
+                    <Route path="manager/rerouting" element={<ReroutingQueue />} />
+                  </Route>
+
+                  {/* Role-Specific Shells */}
+                  <Route 
+                    path="/operator" 
+                    element={
+                      <ProtectedRoute allowedRoles={['node_operator']}>
+                        <OperatorShell />
+                      </ProtectedRoute>
+                    } 
+                  >
+                    <Route index element={<ExpectedShipments />} />
+                    <Route path="today" element={<TodayCheckins />} />
+                    <Route path="flag" element={<FlagIssue />} />
+                  </Route>
+                  {/* Admin Shell */}
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedRoute allowedRoles={['platform_admin']}>
+                        <AdminShell />
+                      </ProtectedRoute>
+                    } 
+                  >
+                    <Route index element={<Companies />} />
+                    <Route path="system" element={<SystemStatus />} />
+                  </Route>
+
+                  {/* Catch-all */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </AgentProvider>
+          </NetworkProvider>
+        </WebSocketProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

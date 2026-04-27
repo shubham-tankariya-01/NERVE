@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAgent } from '../../context/AgentContext';
+import { useAppWebSocket } from '../../context/WebSocketContext';
+import { useAuth } from '../../context/AuthContext'; // ← NEW
 import { 
-  LayoutDashboard, Map, Package, Box, Route as RouteIcon, 
+  LayoutDashboard, Map, Package, Box, GitBranch, // ← MODIFIED: GitBranch replaces RouteIcon
   AlertTriangle, Bot, BarChart2, CloudRain, PlusCircle, Settings, ChevronLeft, ChevronRight, Shield
 } from 'lucide-react';
 
@@ -45,9 +47,41 @@ const NavItem = React.memo(({ item, collapsed }) => (
   </NavLink>
 ));
 
+// ← NEW: Dynamic user chip in sidebar footer
+const UserChip = ({ collapsed }) => {
+  const { user } = useAuth();
+  if (!user) return null;
+  const initials = (user.full_name || user.username || '?')
+    .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const roleLabel = (user.role || 'user').replace(/_/g, ' ');
+
+  return (
+    <div style={{ 
+      display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', 
+      background: 'rgba(255,255,255,0.03)', borderRadius: '10px',
+      border: '1px solid var(--glass-border)',
+      justifyContent: collapsed ? 'center' : 'flex-start', transition: 'all 0.2s'
+    }}>
+      <div style={{ 
+        width: '24px', height: '24px', borderRadius: '4px', 
+        background: 'linear-gradient(135deg, #A855F7, #6366F1)', 
+        color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+        fontSize: '0.7rem', fontWeight: 'bold', flexShrink: 0
+      }}>{initials}</div>
+      {!collapsed && (
+        <div style={{ display: 'flex', flexDirection: 'column', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>{user.full_name || user.username}</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{roleLabel}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const { unreadCount } = useAgent();
+  const { pendingRerouteCount } = useAppWebSocket();
   const collapsed = !isHovered;
 
   const navItems = useMemo(() => [
@@ -55,12 +89,13 @@ export default function Sidebar() {
     { to: '/dashboard', icon: <LayoutDashboard size={20} />, label: 'Executive Dashboard' },
     { to: '/shipments', icon: <Package size={20} />, label: 'Shipments' },
     { to: '/nodes', icon: <Box size={20} />, label: 'Nodes', color: 'var(--info)' },
-    { to: '/disruptions', icon: <AlertTriangle size={20} />, label: 'Disruptions', color: 'var(--danger)' },
-    { to: '/agents', icon: <Bot size={20} />, label: 'Agent Control', badge: unreadCount, color: 'var(--warning)' },
+    { to: '/disruptions', icon: <AlertTriangle size={20} />, label: 'Disruptions', color: 'var(--status-critical)' },
+    { to: '/manager/rerouting', icon: <GitBranch size={20} />, label: 'Rerouting Queue', badge: pendingRerouteCount || null, color: 'var(--status-critical)' }, // ← MODIFIED: GitBranch + red badge
+    { to: '/agents', icon: <Bot size={20} />, label: 'Agent Control', badge: unreadCount || null, color: 'var(--status-warning)' },
     { to: '/weather', icon: <CloudRain size={20} />, label: 'Weather' },
     { to: '/book', icon: <PlusCircle size={20} />, label: 'Book Shipment' },
-    { to: '/admin', icon: <Shield size={20} />, label: 'Admin Mission Control', color: 'var(--accent-primary)' },
-  ], [unreadCount]);
+    { to: '/mission-control', icon: <Shield size={20} />, label: 'Admin Mission Control', color: 'var(--accent-primary)' }, // ← MODIFIED: path changed to avoid /admin conflict
+  ], [unreadCount, pendingRerouteCount]); // ← MODIFIED: added pendingRerouteCount dep
 
   return (
     <aside 
@@ -124,30 +159,7 @@ export default function Sidebar() {
           {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>Settings</span>}
         </NavLink>
         
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '1rem', 
-          padding: '0.75rem', 
-          background: 'rgba(255,255,255,0.03)',
-          borderRadius: '10px',
-          border: '1px solid var(--glass-border)',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          transition: 'all 0.2s'
-        }}>
-          <div style={{ 
-            width: '24px', height: '24px', borderRadius: '4px', 
-            background: 'linear-gradient(135deg, #A855F7, #6366F1)', 
-            color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            fontSize: '0.7rem', fontWeight: 'bold'
-          }}>ST</div>
-          {!collapsed && (
-            <div style={{ display: 'flex', flexDirection: 'column', whiteSpace: 'nowrap' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>Shubham T.</span>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Admin</span>
-            </div>
-          )}
-        </div>
+        <UserChip collapsed={collapsed} />
       </div>
     </aside>
   );

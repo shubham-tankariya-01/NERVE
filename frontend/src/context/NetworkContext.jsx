@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchNetwork, fetchShipments, fetchAlerts } from '../services/api';
 import { useAppWebSocket } from './WebSocketContext';
+import { useAuth } from './AuthContext';
 
 const NetworkContext = createContext();
 
@@ -16,15 +17,20 @@ export function NetworkProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const { data: wsData } = useAppWebSocket();
+  const { isAuthenticated, isLoading: authLoading, getAuthHeaders } = useAuth();
 
   // Initial Fetch
   useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+
     const loadInitialData = async () => {
+      setLoading(true);
       try {
+        const headers = getAuthHeaders();
         const [networkRes, shipmentsRes, alertsRes] = await Promise.all([
-          fetchNetwork(),
-          fetchShipments(),
-          fetchAlerts()
+          fetchNetwork(headers),
+          fetchShipments(headers),
+          fetchAlerts(headers)
         ]);
         
         setNodes(networkRes.nodes || []);
@@ -44,7 +50,7 @@ export function NetworkProvider({ children }) {
     };
 
     loadInitialData();
-  }, []);
+  }, [isAuthenticated, authLoading, getAuthHeaders]);
 
   // Sync with WebSocket
   useEffect(() => {

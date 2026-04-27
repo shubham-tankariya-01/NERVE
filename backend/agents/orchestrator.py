@@ -15,13 +15,16 @@ same disruption landscape is active.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+import json
+from datetime import datetime, timezone, timedelta
+import uuid
 
 from backend.ml.anomaly import DisruptionAlert
 from backend.graph.supply_graph import SupplyChainGraph
 
 from backend.agents.llm_graph import get_agent_graph
 from backend.agents.llm_config import is_llm_available
+from backend.database import get_async_db
 
 log = logging.getLogger("nerve.orchestrator")
 
@@ -45,19 +48,22 @@ class AgentOrchestrator:
         self.processed_shipments.clear()
         self._last_disrupted_nodes = frozenset()
 
-    def process_anomalies(
+    async def process_anomalies(
         self,
         alerts: list[DisruptionAlert],
         scg: SupplyChainGraph,
         risk_scores: dict[str, float] | None = None,
         cascade_debt: list[dict] | None = None,
+        company_id: str = "company_demo",
     ) -> tuple[list[dict], dict]:
         """
         Run the full agent pipeline via LangGraph.
+        Saves suggestions for human approval instead of auto-applying.
 
         Returns (agent_event_logs, reroutes_dict).
         """
         global_logs: list[dict] = []
+        db = get_async_db()
 
         def stamp_logs(log_batch: list[dict]) -> None:
             ts = datetime.now(timezone.utc).isoformat()
@@ -101,7 +107,7 @@ class AgentOrchestrator:
 
                 ts = datetime.now(timezone.utc).isoformat()
                 for s_id in to_remove:
-                    if self.processed_shipments[s_id]["result"] == "rerouted":
+                    if s_id in self.processed_shipments and self.processed_shipments[s_id]["result"] == "rerouted":
                         global_logs.append({
                             "agent": "Monitor",
                             "action": (
@@ -110,7 +116,8 @@ class AgentOrchestrator:
                             ),
                             "timestamp": ts,
                         })
-                    del self.processed_shipments[s_id]
+                    if s_id in self.processed_shipments:
+                        del self.processed_shipments[s_id]
 
             self._last_disrupted_nodes = current_disrupted
 
@@ -135,6 +142,8 @@ class AgentOrchestrator:
 
             agent_logs = final_state.get("agent_logs", [])
             reroutes = final_state.get("reroutes", {})
+            reasoning = final_state.get("optimizer_reasoning", {})
+            actionable_alerts = final_state.get("actionable_alerts", [])
 
             # Update processed_shipments from the graph run
             if "processed_shipments" in final_state:
@@ -148,52 +157,25 @@ class AgentOrchestrator:
             log.error("LangGraph pipeline failed: %s — running heuristic fallback", e)
             return self._fallback_process(alerts, scg, risk_scores, cascade_debt)
 
-        # ── Apply reroutes to in-memory shipment state & record history ──
+        # ── SAVE reroute suggestions for human approval ────────────────
         if reroutes:
-            disrupted_node_ids = {a.node_id for a in alerts}
-            for s_id, new_path in reroutes.items():
-                for ship in scg.shipments:
-                    if ship["id"] == s_id:
-                        old_route = list(ship["planned_route"])
-                        curr = ship["current_node"]
-                        try:
-                            ci = ship["planned_route"].index(curr)
-                            ship["planned_route"] = ship["planned_route"][:ci] + new_path
-                        except ValueError:
-                            ship["planned_route"] = new_path
-
-                        # Record in persistent history
-                        avoided = [n for n in old_route if n in disrupted_node_ids]
-                        reasons = []
-                        for a in alerts:
-                            if a.node_id in avoided:
-                                reasons.append(f"{a.node_name}: {'; '.join(a.reasons)}")
-                        self.reroute_history.append({
-                            "shipment_id": s_id,
-                            "old_route": old_route,
-                            "new_route": list(ship["planned_route"]),
-                            "avoided_nodes": avoided,
-                            "reason": "; ".join(reasons) if reasons else "AI-optimized route selection",
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                        })
+            await self._save_reroute_suggestions(
+                reroutes, actionable_alerts, reasoning, company_id, scg
+            )
 
         # ── Persistent reroute history log ────────────────────────
-        # Always show active reroutes so they survive refresh cycles
+        # Shows APPROVED reroutes from DB
         ts = datetime.now(timezone.utc).isoformat()
-        active_rerouted = [
-            sid for sid, info in self.processed_shipments.items()
-            if info["result"] == "rerouted"
-        ]
-        if active_rerouted:
-            # Build route summaries
-            reroute_details = []
-            for sid in active_rerouted:
-                route = self.processed_shipments[sid].get("route", [])
-                path_str = " → ".join(route) if route else "unknown"
-                reroute_details.append(f"{sid} ({path_str})")
+        approved = await db.reroute_approvals.find({
+            "company_id": company_id,
+            "status": "approved"
+        }).to_list(length=None)
+        
+        if approved:
+            reroute_details = [f"{a['shipment_id']} ({' → '.join(a['suggested_route'])})" for a in approved]
             global_logs.append({
                 "agent": "Reroute Log",
-                "action": f"Active reroutes ({len(active_rerouted)}): {'; '.join(reroute_details)}",
+                "action": f"Approved reroutes ({len(approved)}): {'; '.join(reroute_details)}",
                 "timestamp": ts,
             })
 
@@ -211,6 +193,102 @@ class AgentOrchestrator:
 
         return global_logs, reroutes
 
+    async def _save_reroute_suggestions(
+        self,
+        reroutes: dict,
+        alerts: list,
+        reasoning: dict,
+        company_id: str,
+        scg: SupplyChainGraph
+    ) -> None:
+        """
+        Saves agent reroute suggestions to MongoDB for human approval.
+        Does NOT apply routes automatically.
+        """
+        from backend.database import get_async_db
+        from backend.state import broadcast_to_company
+        
+        db = get_async_db()
+        
+        # Build alert lookup for context
+        alert_lookup = {a.node_id: a for a in alerts}
+        
+        for s_id, new_path in reroutes.items():
+            # Find original shipment
+            original_route = []
+            priority = "medium"
+            for ship in scg.shipments:
+                if ship["id"] == s_id:
+                    original_route = ship.get("planned_route", [])
+                    priority = ship.get("priority", "medium")
+                    break
+            
+            # Find which disrupted node triggered this
+            disrupted_node = ""
+            estimated_delay = 0.0
+            for node_id in original_route:
+                if node_id in alert_lookup:
+                    disrupted_node = node_id
+                    estimated_delay = alert_lookup[node_id].estimated_delay_hrs
+                    break
+            
+            # Check if suggestion already exists for this shipment (pending)
+            existing = await db.reroute_approvals.find_one({
+                "shipment_id": s_id,
+                "status": "pending",
+                "company_id": company_id
+            })
+            
+            if existing:
+                # Update existing suggestion if route changed
+                if existing["suggested_route"] != new_path:
+                    await db.reroute_approvals.update_one(
+                        {"id": existing["id"]},
+                        {"$set": {
+                            "suggested_route": new_path,
+                            "agent_reasoning": reasoning.get(s_id, ""),
+                            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=30)
+                        }}
+                    )
+                continue
+            
+            # Create new suggestion
+            approval_id = str(uuid.uuid4())
+            approval = {
+                "id": approval_id,
+                "company_id": company_id,
+                "shipment_id": s_id,
+                "suggested_route": new_path,
+                "original_route": original_route,
+                "agent_reasoning": reasoning.get(s_id, "Auto-generated by optimization agents"),
+                "disrupted_node": disrupted_node,
+                "estimated_delay_hrs": estimated_delay,
+                "priority": priority,
+                "status": "pending",
+                "reviewed_by": None,
+                "review_reason": None,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "reviewed_at": None,
+                "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat()
+            }
+            
+            await db.reroute_approvals.insert_one(approval)
+            log.info("Reroute suggestion saved for %s (approval_id: %s)", s_id, approval_id)
+        
+        # Count pending approvals and broadcast notification
+        pending_count = await db.reroute_approvals.count_documents({
+            "company_id": company_id,
+            "status": "pending"
+        })
+        
+        # Broadcast pending count update via WebSocket
+        notification = {
+            "type": "reroute_approval_update",
+            "pending_count": pending_count,
+            "company_id": company_id
+        }
+        await broadcast_to_company(company_id, notification)
+
     def _fallback_process(
         self,
         alerts: list[DisruptionAlert],
@@ -220,7 +298,7 @@ class AgentOrchestrator:
     ) -> tuple[list[dict], dict]:
         """
         Heuristic fallback pipeline — used when LangGraph fails.
-        Uses the original heuristic methods on each agent.
+        Fallback mode: routes applied without approval queue (graceful degradation).
         """
         from backend.agents.scout import ScoutAgent
         from backend.agents.mapper import MapperAgent
@@ -242,9 +320,11 @@ class AgentOrchestrator:
 
         global_logs.append({
             "agent": "System",
-            "action": "LLM pipeline unavailable — running heuristic agents.",
+            "action": "LLM pipeline unavailable — running heuristic agents. Fallback mode: routes applied without approval queue.",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         })
+
+        log.warning("Fallback mode: routes applied without approval queue")
 
         # 1. Scout
         actionable, s_logs = scout.inspect(alerts)

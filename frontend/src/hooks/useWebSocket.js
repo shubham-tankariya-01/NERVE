@@ -6,19 +6,19 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const WS_URL = 'ws://127.0.0.1:8000/ws';
 const RECONNECT_DELAY_MS = 3000;
 
-export default function useWebSocket() {
+export default function useWebSocket(url) {
   const [connected, setConnected] = useState(false);
   const [data, setData] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
   const connect = useCallback(() => {
+    if (!url) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const ws = new WebSocket(WS_URL);
+    const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -45,7 +45,7 @@ export default function useWebSocket() {
       console.error('[WS] Error:', err);
       ws.close();
     };
-  }, []);
+  }, [url]);
 
   useEffect(() => {
     connect();

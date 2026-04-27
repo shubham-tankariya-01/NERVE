@@ -69,8 +69,17 @@ _next_shipment_id = 100
 # active weather overrides for simulation
 weather_overrides: dict[str, dict[str, float]] = {}
 
-# connected WebSocket clients
-clients: set[WebSocket] = set()
+# Link to app_state for external routers to access shared objects
+from backend import state as app_state
+app_state.scg = scg
+app_state.weather_feed = weather_feed
+app_state.detector = detector
+app_state.agent_orchestrator = agent_orchestrator
+app_state.route_planner = route_planner
+app_state.weather_overrides = weather_overrides
+
+# Use shared clients set from state.py
+clients = app_state.clients
 
 
 # ── helpers ───────────────────────────────────────────────────────
@@ -142,14 +151,9 @@ def build_payload(
 
 
 async def broadcast(message: str) -> None:
-    """Send a message to every connected WebSocket client."""
-    disconnected: set[WebSocket] = set()
-    for ws in clients:
-        try:
-            await ws.send_text(message)
-        except Exception:
-            disconnected.add(ws)
-    clients.difference_update(disconnected)
+    """Send a message to every connected WebSocket client via shared state."""
+    from backend import state as app_state
+    await app_state.broadcast_to_all(message)
 
 
 # ── background scanner ────────────────────────────────────────────
@@ -214,10 +218,12 @@ async def scan_loop() -> None:
             network_health = compute_network_health(scg, risk_scores, alerts)
 
             # Run agents with full context
-            agent_logs, _ = agent_orchestrator.process_anomalies(
+            # Updated for Phase 3: Suggestion mode is now async
+            agent_logs, _ = await agent_orchestrator.process_anomalies(
                 alerts, scg,
                 risk_scores=risk_scores,
                 cascade_debt=cascade_debt,
+                company_id="company_demo"
             )
 
             # terminal logging
@@ -243,15 +249,16 @@ async def scan_loop() -> None:
                     log.info("  [%s] %s", alog["agent"].upper(), alog["action"])
 
             # push to browsers
-            if clients:
+            if app_state.count_clients() > 0:
                 msg = build_payload(
                     alerts, agent_logs,
                     risk_scores=risk_scores,
                     cascade_debt=cascade_debt,
                     network_health=network_health,
                 )
-                await broadcast(msg)
-                log.info("Pushed to %d client(s)", len(clients))
+                # Broadcast to all for now, will be scoped per company in subsequent phases
+                await app_state.broadcast_to_all(msg)
+                log.info("Pushed to %d client(s)", app_state.count_clients())
             else:
                 log.info("No clients connected, skipping broadcast")
 
@@ -265,6 +272,15 @@ async def scan_loop() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Link to app_state for external routers to access shared objects
+    from backend import state as app_state
+    app_state.scg = scg
+    app_state.weather_feed = weather_feed
+    app_state.detector = detector
+    app_state.agent_orchestrator = agent_orchestrator
+    app_state.route_planner = route_planner
+    app_state.weather_overrides = weather_overrides
+
     # Check MongoDB connectivity for logging
     from backend.database import sync_client
     try:
@@ -298,11 +314,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from backend.routers import auth, companies, checkins, rerouting
+app.include_router(auth.router)
+app.include_router(companies.router)
+app.include_router(checkins.router)
+app.include_router(rerouting.router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "Authorization"],
 )
 
 
@@ -785,25 +807,46 @@ async def get_decision_logs(db = Depends(get_async_db)):
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
-    clients.add(ws)
-    log.info("Client connected  (%d total)", len(clients))
-
-    # immediately send latest data on connect
+    
+    # Try to get company_id from query parameter token
+    # URL format: ws://localhost:8000/ws?token=<jwt>
+    company_id = "company_demo"  # default for backward compat
+    
+    token = ws.query_params.get("token")
+    if token:
+        try:
+            from backend.auth.jwt_handler import decode_token
+            payload = decode_token(token)
+            # If platform_admin, use a special key to receive everything
+            if payload.get("role") == "platform_admin":
+                company_id = "platform_admin"
+            else:
+                company_id = payload.get("company_id") or "company_demo"
+        except Exception:
+            pass  # Invalid token -> use default company
+    
+    from backend import state as app_state
+    app_state.register_client(ws, company_id)
+    log.info("WS client connected: company=%s total=%d", company_id, app_state.count_clients())
+    
+    # Send immediate snapshot on connect
     try:
+        # Build company-filtered payload
+        # Note: In a production scenario, build_payload would filter shipments by company_id here
         msg = build_payload(detector.alerts)
         await ws.send_text(msg)
     except Exception:
         pass
-
+    
     try:
-        # keep the connection alive; listen for pings / messages
         while True:
+            # Keep connection alive; listen for messages if needed
             _ = await ws.receive_text()
     except WebSocketDisconnect:
         pass
     finally:
-        clients.discard(ws)
-        log.info("Client disconnected  (%d remaining)", len(clients))
+        app_state.unregister_client(ws)
+        log.info("WS client disconnected: company=%s remaining=%d", company_id, app_state.count_clients())
 
 
 # ── entry point ───────────────────────────────────────────────────
