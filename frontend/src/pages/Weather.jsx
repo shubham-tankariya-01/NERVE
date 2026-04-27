@@ -11,18 +11,24 @@ export default function Weather() {
   const activeAlerts = (data?.alerts || []).filter(a => a.type === 'weather');
 
   return (
-    <div className="animate-slide-up" style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100%' }}>
+    <div className="animate-slide-up" style={{ padding: '2.5rem 3rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'flex-end', 
-        marginBottom: '3rem', 
-        borderLeft: '4px solid var(--accent-primary)', 
-        paddingLeft: '1.5rem' 
+        alignItems: 'center', 
+        background: 'var(--bg-elevated)', 
+        padding: '1.25rem 2rem', 
+        borderLeft: '4px solid var(--accent-primary)',
+        borderRadius: '0 8px 8px 0',
+        marginBottom: '2.5rem'
       }}>
-        <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>GLOBAL WEATHER INTELLIGENCE</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', fontWeight: 600 }}>Real-Time Environmental Telemetry · Station Network [24 Units]</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              GLOBAL WEATHER INTELLIGENCE
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', fontWeight: 600 }}>Real-Time Environmental Telemetry • Station Network [24 Units]</p>
+          </div>
         </div>
         <div style={{ textAlign: 'right' }}>
            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Network Sync</div>

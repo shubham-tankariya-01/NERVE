@@ -27,16 +27,26 @@ export default function Nodes() {
   };
 
   return (
-    <div className="animate-slide-up" style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', borderLeft: '4px solid var(--accent-primary)', paddingLeft: '1.5rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>NETWORK INFRASTRUCTURE</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', fontWeight: 600 }}>Active Node Telemetry · Global Distribution</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 1 }}>{nodes.length}</div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800 }}>TOTAL NODES</div>
+    <div className="animate-slide-up" style={{ padding: '2.5rem 3rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        background: 'var(--bg-elevated)', 
+        padding: '1.25rem 2rem', 
+        borderLeft: '4px solid var(--brand)',
+        borderRadius: '0 8px 8px 0',
+        marginBottom: '2.5rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              NETWORK INFRASTRUCTURE
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', fontWeight: 600 }}>Active Node Telemetry • Global Distribution</p>
+          </div>
+          <div style={{ background: 'var(--brand)', color: '#000', padding: '0.3rem 0.8rem', borderRadius: '4px', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+            {nodes.length} TOTAL NODES
           </div>
         </div>
       </header>

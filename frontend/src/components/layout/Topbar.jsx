@@ -53,7 +53,7 @@ const UserInfoChip = () => {
           position: 'absolute', top: '100%', right: 0, marginTop: '6px',
           background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)',
           borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-          minWidth: '160px', zIndex: 200, overflow: 'hidden'
+          minWidth: '160px', zIndex: 9999, overflow: 'hidden'
         }}>
           <div 
             onClick={() => { setIsOpen(false); }}
@@ -80,7 +80,7 @@ export default function Topbar() {
   const healthColor = networkHealth >= 80 ? 'green' : networkHealth >= 50 ? 'amber' : 'red';
 
   return (
-    <header style={{ height: '64px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'var(--bg-surface)', zIndex: 40 }}>
+    <header style={{ height: '64px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'var(--bg-surface)', position: 'relative', zIndex: 1000 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontFamily: 'Space Grotesk', fontSize: '1.25rem', letterSpacing: '-0.02em', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
           <div style={{ background: 'var(--brand)', color: '#000', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '14px' }}>N</div>

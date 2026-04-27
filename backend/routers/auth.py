@@ -354,3 +354,66 @@ async def get_me(current_user: dict = Depends(get_current_user), db = Depends(ge
 async def logout():
     """Confirms the logout intent for the client."""
     return {"message": "Logged out"}
+
+
+# ==========================================
+# PROFILE UPDATE ENDPOINT
+# ==========================================
+
+class UpdateProfileRequest(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    current_password: Optional[str] = None
+    new_password: Optional[str] = None
+
+@router.patch("/profile")
+async def update_profile(
+    payload: UpdateProfileRequest,
+    current_user: dict = Depends(get_current_user),
+    db = Depends(get_async_db)
+):
+    """Update the authenticated user's profile (email, full name, password)."""
+    if current_user["user_id"] == "system":
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    user = await db.users.find_one({"username": current_user["user_id"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    updates = {}
+
+    # ── Full name change ──
+    if payload.full_name is not None:
+        if len(payload.full_name.strip()) < 2:
+            raise HTTPException(status_code=400, detail="Full name must be at least 2 characters")
+        updates["full_name"] = payload.full_name.strip()
+
+    # ── Email change ──
+    if payload.email is not None:
+        new_email = payload.email.strip().lower()
+        if new_email != user.get("email"):
+            existing = await db.users.find_one({"email": new_email})
+            if existing:
+                raise HTTPException(status_code=409, detail="Email already in use by another account")
+            updates["email"] = new_email
+
+    # ── Password change ──
+    if payload.new_password is not None:
+        if not payload.current_password:
+            raise HTTPException(status_code=400, detail="Current password is required to set a new password")
+        if not verify_password(payload.current_password, user.get("hashed_password", "")):
+            raise HTTPException(status_code=401, detail="Current password is incorrect")
+        if len(payload.new_password) < 8:
+            raise HTTPException(status_code=400, detail="New password must be at least 8 characters")
+        updates["hashed_password"] = hash_password(payload.new_password)
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No changes provided")
+
+    await db.users.update_one({"username": current_user["user_id"]}, {"$set": updates})
+
+    # Return updated user (without sensitive fields)
+    updated_user = await db.users.find_one({"username": current_user["user_id"]})
+    updated_user.pop("hashed_password", None)
+    updated_user.pop("_id", None)
+    return {"message": "Profile updated successfully", "user": updated_user}

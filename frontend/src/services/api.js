@@ -90,7 +90,7 @@ export const fetchNetwork = async (headers = {}) => {
 };
 
 export const fetchShipments = async (headers = {}) => {
-  const response = await fetch(`${API_BASE}/shipments`, { headers });
+  const response = await fetch(`${API_BASE}/shipments`, { headers: { ...getStoredAuthHeaders(), ...headers } });
   if (!response.ok) throw new Error('Failed to fetch shipments');
   return response.json();
 };
@@ -139,7 +139,7 @@ export const clearDisruptions = async (headers = {}) => {
 // ── Admin Panel Endpoints ──
 
 export const fetchDecisionLogs = async (headers = {}) => {
-  const response = await fetch(`${API_BASE}/admin/logs`, { headers });
+  const response = await fetch(`${API_BASE}/admin/logs`, { headers: { ...getStoredAuthHeaders(), ...headers } });
   if (!response.ok) throw new Error('Failed to fetch decision logs');
   return response.json();
 };

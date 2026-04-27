@@ -116,6 +116,10 @@ export function AuthProvider({ children }) {
     return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
   };
 
+  const updateUser = useCallback((patches) => {
+    setUser((prev) => prev ? { ...prev, ...patches } : prev);
+  }, []);
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -125,6 +129,7 @@ export function AuthProvider({ children }) {
       login, 
       completeLogin,
       logout, 
+      updateUser,
       refreshToken: refreshSession,
       getAuthHeaders 
     }}>

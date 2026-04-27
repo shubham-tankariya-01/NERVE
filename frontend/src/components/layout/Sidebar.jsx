@@ -111,7 +111,6 @@ export default function Sidebar() {
         },
         { to: '/weather',           icon: <CloudRain size={20} />,    label: 'Weather' },
         { to: '/book',              icon: <PlusCircle size={20} />,   label: 'Book Shipment' },
-        { to: '/mission-control',   icon: <Shield size={20} />,       label: 'Mission Control' },
       ];
     }
 

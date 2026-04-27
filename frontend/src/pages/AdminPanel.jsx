@@ -74,14 +74,25 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="admin-container animate-fade-in" style={{ padding: '2rem', background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)' }}>
-      <header style={{ marginBottom: '3rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={styles.title}>
-            <Shield style={{ color: '#ef476f' }} size={32} />
-            MISSION CONTROL
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>High-level override and institutional audit trail</p>
+    <div className="admin-container animate-fade-in" style={{ padding: '2.5rem 3rem', maxWidth: '1400px', margin: '0 auto', width: '100%', minHeight: '100vh', color: 'var(--text-main)' }}>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        background: 'var(--bg-elevated)', 
+        padding: '1.25rem 2rem', 
+        borderLeft: '4px solid #ef476f',
+        borderRadius: '0 8px 8px 0',
+        marginBottom: '2.5rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Shield style={{ color: '#ef476f' }} size={24} />
+              MISSION CONTROL
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', fontWeight: 600 }}>High-level override and institutional audit trail</p>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div className="glass-panel" style={{ padding: '0.75rem 1.25rem', textAlign: 'center', borderBottom: '2px solid #ef476f' }}>

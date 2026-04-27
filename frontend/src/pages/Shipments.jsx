@@ -72,22 +72,22 @@ export default function Shipments() {
   });
 
   return (
-    <div className="animate-slide-up" style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="animate-slide-up" style={{ padding: '2rem 3rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '2.5rem',
-        padding: '1.5rem',
-        background: 'rgba(255,255,255,0.02)',
-        borderLeft: '4px solid var(--accent-primary)',
-        borderRadius: '0 8px 8px 0'
+        background: 'var(--bg-elevated)', 
+        padding: '1.25rem 2rem', 
+        borderLeft: '4px solid var(--brand)',
+        borderRadius: '0 8px 8px 0',
+        marginBottom: '2.5rem'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             Shipment Intelligence Center
           </h1>
-          <div style={{ background: 'var(--accent-primary)', color: '#000', padding: '0.3rem 0.8rem', borderRadius: '2px', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+          <div style={{ background: 'var(--brand)', color: '#000', padding: '0.3rem 0.8rem', borderRadius: '4px', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.05em' }}>
             {shipments.length} ACTIVE UNITS
           </div>
         </div>

@@ -27,15 +27,26 @@ export default function AgentControl() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
-      <header style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>Agent Control</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--brand)' }}>
-               <span style={{ width: '8px', height: '8px', background: 'var(--brand)', borderRadius: '50%' }}></span>
-               STATUS: {status}
-            </span>
-            <span style={{ color: 'var(--text-secondary)' }}>{unreadCount} new events</span>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        background: 'var(--bg-elevated)', 
+        padding: '1.25rem 2rem', 
+        borderLeft: '4px solid var(--brand)',
+        borderRadius: '0 8px 8px 0',
+        margin: '1.5rem 2rem 0'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>AGENT CONTROL</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--brand)' }}>
+                 <span style={{ width: '8px', height: '8px', background: 'var(--brand)', borderRadius: '50%' }}></span>
+                 STATUS: {status}
+              </span>
+              <span style={{ color: 'var(--text-secondary)' }}>{unreadCount} new events</span>
+            </div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>

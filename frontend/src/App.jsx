@@ -22,6 +22,7 @@ import Weather from './pages/Weather';
 import BookShipment from './pages/BookShipment';
 import AdminPanel from './pages/AdminPanel';
 import ReroutingQueue from './pages/ReroutingQueue';
+import Settings from './pages/Settings';
 
 import './styles/globals.css';
 import './styles/map.css';
@@ -81,6 +82,7 @@ export default function App() {
                     <Route path="weather" element={<Weather />} />
                     <Route path="book" element={<BookShipment />} />
                     <Route path="manager/rerouting" element={<ReroutingQueue />} />
+                    <Route path="settings" element={<Settings />} />
                   </Route>
 
                   {/* Role-Specific Shells */}
@@ -97,6 +99,7 @@ export default function App() {
                     <Route path="nodes" element={<NodeManager />} />
                     <Route path="weather" element={<NodeWeather />} />
                     <Route path="flag" element={<FlagIssue />} />
+                    <Route path="settings" element={<Settings />} />
                   </Route>
 
                   {/* Admin Shell */}
@@ -111,6 +114,7 @@ export default function App() {
                     <Route index element={<CompanyManagement />} />
                     <Route path="companies/:id" element={<CompanyDetail />} />
                     <Route path="mission-control" element={<AdminPanel />} />
+                    <Route path="settings" element={<Settings />} />
                   </Route>
 
                   {/* Customer Shell */}
@@ -125,6 +129,7 @@ export default function App() {
                     <Route index element={<MyShipments />} />
                     <Route path="track/:id" element={<TrackShipment />} />
                     <Route path="alerts" element={<div style={{ padding: '20px', color: 'var(--text-primary)', fontSize: '14px' }}>Alerts — Coming soon</div>} />
+                    <Route path="settings" element={<Settings />} />
                   </Route>
 
                   {/* Catch-all */}
