@@ -31,11 +31,18 @@ import OperatorShell from './layouts/OperatorShell';
 import ExpectedShipments from './pages/operator/ExpectedShipments';
 import TodayCheckins from './pages/operator/TodayCheckins';
 import FlagIssue from './pages/operator/FlagIssue';
+import NodeManager from './pages/operator/NodeManager';
+import NodeWeather from './pages/operator/NodeWeather';
 
 // Admin Pages
 import AdminShell from './layouts/AdminShell';
-import Companies from './pages/admin/Companies';
-import SystemStatus from './pages/admin/SystemStatus';
+import CompanyManagement from './pages/admin/CompanyManagement';
+import CompanyDetail from './pages/admin/CompanyDetail';
+
+// Customer UI
+import CustomerShell from './layouts/CustomerShell';
+import MyShipments from './pages/customer/MyShipments';
+import TrackShipment from './pages/customer/TrackShipment';
 
 // Placeholders
 const CustomerTracking = () => <div style={{ padding: '40px', color: 'var(--text-primary)' }}>Public Tracking View - Coming Soon</div>;
@@ -73,7 +80,6 @@ export default function App() {
                     <Route path="agents" element={<AgentControl />} />
                     <Route path="weather" element={<Weather />} />
                     <Route path="book" element={<BookShipment />} />
-                    <Route path="mission-control" element={<AdminPanel />} /> {/* ← MODIFIED: moved from /admin to avoid conflict */}
                     <Route path="manager/rerouting" element={<ReroutingQueue />} />
                   </Route>
 
@@ -88,8 +94,11 @@ export default function App() {
                   >
                     <Route index element={<ExpectedShipments />} />
                     <Route path="today" element={<TodayCheckins />} />
+                    <Route path="nodes" element={<NodeManager />} />
+                    <Route path="weather" element={<NodeWeather />} />
                     <Route path="flag" element={<FlagIssue />} />
                   </Route>
+
                   {/* Admin Shell */}
                   <Route 
                     path="/admin" 
@@ -99,8 +108,23 @@ export default function App() {
                       </ProtectedRoute>
                     } 
                   >
-                    <Route index element={<Companies />} />
-                    <Route path="system" element={<SystemStatus />} />
+                    <Route index element={<CompanyManagement />} />
+                    <Route path="companies/:id" element={<CompanyDetail />} />
+                    <Route path="mission-control" element={<AdminPanel />} />
+                  </Route>
+
+                  {/* Customer Shell */}
+                  <Route 
+                    path="/customer" 
+                    element={
+                      <ProtectedRoute allowedRoles={['customer']}>
+                        <CustomerShell />
+                      </ProtectedRoute>
+                    } 
+                  >
+                    <Route index element={<MyShipments />} />
+                    <Route path="track/:id" element={<TrackShipment />} />
+                    <Route path="alerts" element={<div style={{ padding: '20px', color: 'var(--text-primary)', fontSize: '14px' }}>Alerts — Coming soon</div>} />
                   </Route>
 
                   {/* Catch-all */}

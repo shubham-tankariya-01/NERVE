@@ -17,7 +17,23 @@ export function NetworkProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const { data: wsData } = useAppWebSocket();
-  const { isAuthenticated, isLoading: authLoading, getAuthHeaders } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, getAuthHeaders, user } = useAuth();
+
+  // ── Client-side company filter (safety layer until backend broadcast is fully deployed) ──
+  const filterShipmentsByRole = (allShipments) => {
+    if (!user || user.role === 'platform_admin') return allShipments;
+    if (user.role === 'node_operator') {
+      const assignedNodes = new Set(user.assigned_node_ids || []);
+      if (assignedNodes.size === 0) return [];
+      return allShipments.filter(s =>
+        (s.planned_route || []).some(n => assignedNodes.has(n))
+      );
+    }
+    // logistics_manager and any other role: filter by company_id, allow legacy data with no company_id
+    return allShipments.filter(s =>
+      !s.company_id || s.company_id === user.company_id
+    );
+  };
 
   // Initial Fetch
   useEffect(() => {
@@ -40,7 +56,9 @@ export function NetworkProvider({ children }) {
           to: e.to,
           mode: e.transport_mode
         })));
-        setShipments(shipmentsRes.shipments || []);
+        // Defensive client-side filter — backend returns pre-filtered data after fix,
+        // but this guards against legacy broadcasts or timing issues.
+        setShipments(filterShipmentsByRole(shipmentsRes.shipments || []));
         setAlerts(alertsRes.alerts || []);
       } catch (err) {
         console.error('Failed to load initial network data:', err);
@@ -65,10 +83,13 @@ export function NetworkProvider({ children }) {
         setRiskHorizon(wsData.risk_horizon || []);
       }
       if (wsData.alerts) {
-        setAlerts(wsData.alerts);
+        // node_operator: ignore alert updates from WS (their shell doesn't show alerts)
+        if (!user || user.role !== 'node_operator') {
+          setAlerts(wsData.alerts);
+        }
       }
       if (wsData.shipments) {
-        setShipments(wsData.shipments);
+        setShipments(filterShipmentsByRole(wsData.shipments));
       }
       if (wsData.weather) {
         setWeatherData(wsData.weather);

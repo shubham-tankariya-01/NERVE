@@ -67,6 +67,7 @@ class Shipment(BaseModel):
     estimated_arrival: Optional[str] = None
     departure_time: Optional[str] = None
     company_id: Optional[str] = None # Added for multi-tenancy
+    customer_id: Optional[str] = None # Link to customer user_id
 
 class DecisionLog(BaseModel):
     shipment_id: str

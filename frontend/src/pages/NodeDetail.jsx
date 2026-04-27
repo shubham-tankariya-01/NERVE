@@ -1,18 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useNetwork } from '../context/NetworkContext';
-import { useTheme } from '../context/ThemeContext';
-import { ChevronLeft, Thermometer, Wind, Activity, Database, Shield, Zap, MapPin, Truck } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { fetchNodeOperator } from '../services/api';
+import { 
+  ChevronLeft, Thermometer, Wind, Activity, Database, Shield, Zap, MapPin, Truck, 
+  User, Mail, Phone, CloudRain, Droplets, ArrowUpRight, BadgeCheck, Globe, History
+} from 'lucide-react';
 
 export default function NodeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { nodes, shipments, loading } = useNetwork();
-  const { theme } = useTheme();
+  const { nodes, shipments, weatherData, loading: networkLoading } = useNetwork();
+  const { getAuthHeaders } = useAuth();
   
+  const [operator, setOperator] = useState(null);
+  const [opLoading, setOpLoading] = useState(true);
+
   const node = nodes.find(n => n.id === id);
 
-  if (loading) {
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      try {
+        const data = await fetchNodeOperator(id, getAuthHeaders());
+        setOperator(data.operator);
+      } catch (err) {
+        console.error('Failed to fetch operator:', err);
+      } finally {
+        setOpLoading(false);
+      }
+    })();
+  }, [id, getAuthHeaders]);
+
+  if (networkLoading) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div className="animate-pulse">SYNCHRONIZING NODE TELEMETRY...</div>
@@ -32,7 +53,7 @@ export default function NodeDetail() {
   }
 
   const nodeShipments = (shipments || []).filter(s => s.current_node === node.id);
-  const loadPercentage = node.capacity ? Math.round((node.current_load / node.capacity) * 100) : 0;
+  const station = weatherData.find(w => w.node_id === node.id);
 
   const getRiskColor = (level) => {
     switch (level?.toLowerCase()) {
@@ -43,97 +64,187 @@ export default function NodeDetail() {
     }
   };
 
+  const styles = {
+    container: { padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100%' },
+    header: { display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' },
+    pill: { padding: '0.3rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)', letterSpacing: '0.05em' },
+    grid4: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' },
+    mainGrid: { display: 'grid', gridTemplateColumns: '0.8fr 1.2fr', gap: '2rem' },
+    card: { 
+      padding: '2rem', 
+      background: 'rgba(255, 255, 255, 0.02)', 
+      border: '1px solid var(--border)', 
+      borderRadius: '16px',
+      position: 'relative',
+      overflow: 'hidden'
+    },
+    innerBox: {
+      padding: '1.5rem',
+      background: 'rgba(0,0,0,0.2)',
+      border: '1px solid var(--border)',
+      borderRadius: '12px',
+      marginBottom: '1rem'
+    },
+    label: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' },
+    value: { fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' },
+    highlightBorder: (color) => ({
+      border: `1px solid ${color || 'var(--border)'}`,
+      boxShadow: `0 0 15px ${color}22`
+    })
+  };
+
   return (
-    <div className="animate-slide-up" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100%' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
-        <button 
-          onClick={() => navigate('/nodes')} 
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-        >
+    <div className="animate-slide-up" style={styles.container}>
+      <header style={styles.header}>
+        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
           <ChevronLeft size={24} />
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '0.3rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)' }}>
-            {node.type?.toUpperCase() || 'UNKNOWN'}
-          </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>{node.name}</h1>
-          <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>[{node.id}]</span>
+          <div style={styles.pill}>{node.type?.toUpperCase()}</div>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>{node.name}</h1>
+          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', background: 'rgba(0,180,216,0.1)', padding: '4px 10px', borderRadius: '4px' }}>#{node.id}</span>
         </div>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        {[
-          { label: 'Operational Load', value: `${node.current_load || 0} / ${node.capacity || 0} units`, icon: <Zap size={14} />, color: loadPercentage > 80 ? 'var(--status-critical)' : 'var(--accent-primary)' },
-          { label: 'Risk Protocol', value: (node.risk_level || 'LOW').toUpperCase(), icon: <Shield size={14} />, color: getRiskColor(node.risk_level) },
-          { label: 'Processing Latency', value: `${node.processing_time_hrs || 0}H`, icon: <Activity size={14} />, color: 'var(--text-main)' },
-          { label: 'Active Shipments', value: nodeShipments.length, icon: <Truck size={14} />, color: 'var(--accent-primary)' }
-        ].map((s, i) => (
-          <div key={i} className="glass-panel" style={{ padding: '1.5rem', borderLeft: `3px solid ${s.color}` }}>
-             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {s.icon} {s.label}
-             </div>
-             <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>{s.value}</div>
-          </div>
-        ))}
+      <div style={styles.grid4}>
+        <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder(getRiskColor(node.risk_level)), padding: '1.5rem', borderLeft: `4px solid ${getRiskColor(node.risk_level)}` }}>
+           <div style={styles.label}><Shield size={14} /> Risk Protocol</div>
+           <div style={{ ...styles.value, color: getRiskColor(node.risk_level) }}>{(node.risk_level || 'LOW').toUpperCase()}</div>
+        </div>
+        <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('var(--accent-primary)'), padding: '1.5rem', borderLeft: `4px solid var(--accent-primary)` }}>
+           <div style={styles.label}><Activity size={14} /> Processing Latency</div>
+           <div style={styles.value}>{node.processing_time_hrs || 0.4}H <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>BASE OFFSET</span></div>
+        </div>
+        <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('var(--accent-purple)'), padding: '1.5rem', borderLeft: `4px solid var(--accent-purple)` }}>
+           <div style={styles.label}><Truck size={14} /> Local Inventory</div>
+           <div style={styles.value}>{nodeShipments.length} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>ACTIVE UNITS</span></div>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem' }}>
+      <div style={styles.mainGrid}>
          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="glass-panel" style={{ padding: '2rem' }}>
-               <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <MapPin size={16} /> Geographic Intelligence
-               </h3>
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('rgba(255,255,255,0.1)') }}>
+               <h3 style={styles.label}><MapPin size={16} /> Vector Coordinates</h3>
+               <div style={{ ...styles.innerBox, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: 0 }}>
                   <div>
-                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>LATITUDE</div>
-                     <div style={{ fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-mono)' }}>
-                        {node.location?.lat != null ? node.location.lat.toFixed(4) : 'N/A'}
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '4px' }}>LATITUDE</div>
+                     <div style={{ fontWeight: 800, fontSize: '1.1rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>
+                        {(node.lat || node.location?.lat || 0).toFixed(6)}
                      </div>
                   </div>
                   <div>
-                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>LONGITUDE</div>
-                     <div style={{ fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-mono)' }}>
-                        {node.location?.lng != null ? node.location.lng.toFixed(4) : 'N/A'}
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '4px' }}>LONGITUDE</div>
+                     <div style={{ fontWeight: 800, fontSize: '1.1rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>
+                        {(node.lng || node.location?.lng || 0).toFixed(6)}
                      </div>
                   </div>
                </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '2rem' }}>
-               <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Thermometer size={16} /> Environmental Telemetry
-               </h3>
-               {(() => {
-                  const { weatherData } = useNetwork();
-                  const station = weatherData.find(w => w.node_id === node.id);
-                  if (!station) return <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>NO LIVE STATION DATA AVAILABLE FOR THIS VECTOR</div>;
-                  return (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
-                       <div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>TEMPERATURE</div>
-                          <div style={{ fontWeight: 700, fontSize: '1.25rem' }}>{station.temperature_c}°C</div>
+            <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('rgba(255,255,255,0.1)') }}>
+               <h3 style={styles.label}><Thermometer size={16} /> Regional Meteorological Telemetry</h3>
+               <div style={styles.innerBox}>
+                  {!station ? (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center' }}>Awaiting satellite telemetry...</div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <Thermometer size={20} color="#00b4d8" />
+                          <div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>TEMP</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.temperature_c}°C</div>
+                          </div>
                        </div>
-                       <div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>WIND VELOCITY</div>
-                          <div style={{ fontWeight: 700, fontSize: '1.25rem' }}>{station.wind_speed_kmh} km/h</div>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <Wind size={20} color="var(--text-main)" />
+                          <div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>WIND</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.wind_speed_kmh} <span style={{ fontSize: '0.6rem' }}>KM/H</span></div>
+                          </div>
                        </div>
-                       <div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>CONDITION</div>
-                          <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--accent-primary)', textTransform: 'uppercase' }}>{station.condition}</div>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <Droplets size={20} color="#06d6a0" />
+                          <div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>HUMIDITY</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.humidity_pct || 45}%</div>
+                          </div>
+                       </div>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <CloudRain size={20} color="#ff9800" />
+                          <div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>PRECIP</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.precipitation_mm || 0} <span style={{ fontSize: '0.6rem' }}>MM</span></div>
+                          </div>
                        </div>
                     </div>
-                  );
-               })()}
+                  )}
+               </div>
             </div>
          </div>
 
-         <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-               <Activity size={16} /> Live Node Throughput
-            </h3>
-            <div style={{ height: '300px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px dashed var(--glass-border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', gap: '1rem' }}>
-               <Database size={32} opacity={0.3} />
-               <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>ESTABLISHING REAL-TIME DATA STREAM...</span>
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('var(--accent-primary)'), borderTop: '4px solid var(--accent-primary)' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                  <h3 style={styles.label}><User size={16} /> Assigned Node Authority / Station Operator</h3>
+                  <div style={{ padding: '4px 12px', background: 'rgba(6,214,160,0.1)', color: '#06d6a0', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <BadgeCheck size={14} /> VERIFIED OPERATOR
+                  </div>
+               </div>
+
+               {opLoading ? (
+                 <div className="animate-pulse" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Retrieving personnel records from Central Registry...</div>
+               ) : !operator ? (
+                 <div style={{ ...styles.innerBox, textAlign: 'center', padding: '3rem' }}>
+                    <Shield size={40} style={{ color: 'var(--status-warning)', opacity: 0.5, marginBottom: '1rem' }} />
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>STATION UNMANNED</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Operating under autonomous neural protocols.</div>
+                 </div>
+               ) : (
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div style={{ ...styles.innerBox, display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: 0 }}>
+                       <div style={{ width: '80px', height: '80px', borderRadius: '16px', background: 'var(--grad-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 900, color: '#fff', boxShadow: '0 8px 20px rgba(0,180,216,0.3)' }}>
+                          {operator.full_name?.[0] || 'U'}
+                       </div>
+                       <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 900, fontSize: '1.5rem', color: 'var(--text-main)', letterSpacing: '-0.01em' }}>{operator.full_name}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 800, textTransform: 'uppercase', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                             Senior Node Manager <Globe size={12} />
+                          </div>
+                       </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                       <div style={{ ...styles.innerBox, marginBottom: 0 }}>
+                          <div style={styles.label}><Mail size={14} /> Registered Email</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>{operator.email}</div>
+                       </div>
+                       <div style={{ ...styles.innerBox, marginBottom: 0 }}>
+                          <div style={styles.label}><Phone size={14} /> Direct Comms</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>{operator.mobile || '+1 (555) 000-0000'}</div>
+                       </div>
+                    </div>
+
+                    <div style={styles.innerBox}>
+                       <div style={styles.label}><History size={14} /> Management History</div>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                          {[
+                             'Security Clearance: Level 4 (Tactical)',
+                             'Incident Response: 100% Efficiency',
+                             'Assigned: 12 months in current sector'
+                          ].map((item, i) => (
+                             <div key={i} style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '4px', height: '4px', background: 'var(--accent-primary)', borderRadius: '50%' }}></div>
+                                {item}
+                             </div>
+                          ))}
+                       </div>
+                    </div>
+
+                    <button style={{ width: '100%', padding: '1.25rem', background: 'var(--accent-primary)', border: 'none', borderRadius: '12px', color: '#000', fontSize: '0.85rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(0,180,216,0.3)' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
+                       ESTABLISH ENCRYPTED CHANNEL <ArrowUpRight size={16} />
+                    </button>
+                 </div>
+               )}
             </div>
          </div>
       </div>

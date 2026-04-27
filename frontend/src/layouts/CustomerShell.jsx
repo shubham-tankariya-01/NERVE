@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  LogOut, Package, CheckSquare, AlertTriangle, 
-  MapPin, Cloud, LayoutDashboard, Settings, Menu, X, ChevronRight, User
+  LogOut, Package, MapPin, Bell, LayoutDashboard, 
+  Settings, HelpCircle, User, ChevronRight, Menu, X 
 } from 'lucide-react';
 
-export default function OperatorShell() {
+export default function CustomerShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,7 +17,7 @@ export default function OperatorShell() {
     navigate('/login');
   };
 
-  const nodeName = user?.assigned_node_ids?.[0] || 'Global Network';
+  const displayName = user?.full_name || user?.email || 'Customer';
 
   const styles = {
     layout: {
@@ -51,7 +51,7 @@ export default function OperatorShell() {
     logoIcon: {
       width: '32px',
       height: '32px',
-      backgroundColor: 'var(--info)', // Using info blue for operator
+      backgroundColor: 'var(--brand)',
       borderRadius: '6px',
       display: 'flex',
       alignItems: 'center',
@@ -62,11 +62,11 @@ export default function OperatorShell() {
       fontFamily: "'Space Grotesk', sans-serif",
     },
     logoText: {
-      fontSize: '16px',
+      fontSize: '18px',
       fontWeight: '800',
       letterSpacing: '1px',
       fontFamily: "'Space Grotesk', sans-serif",
-      color: 'var(--text-primary)',
+      color: 'var(--brand)',
     },
     navSection: {
       padding: '24px 12px',
@@ -82,8 +82,8 @@ export default function OperatorShell() {
       padding: '12px 16px',
       borderRadius: '8px',
       textDecoration: 'none',
-      color: isActive ? 'var(--info)' : 'var(--text-secondary)',
-      backgroundColor: isActive ? 'var(--info-dim)' : 'transparent',
+      color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
+      backgroundColor: isActive ? 'var(--brand-dim)' : 'transparent',
       fontSize: '14px',
       fontWeight: '600',
       transition: 'all 0.2s',
@@ -105,11 +105,11 @@ export default function OperatorShell() {
       width: '32px',
       height: '32px',
       borderRadius: '16px',
-      backgroundColor: 'var(--info-dim)',
+      backgroundColor: 'var(--brand-dim)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: 'var(--info)',
+      color: 'var(--brand)',
     },
     logoutBtn: {
       width: '100%',
@@ -169,12 +169,10 @@ export default function OperatorShell() {
   };
 
   const getPageTitle = () => {
-    if (location.pathname === '/operator') return 'Expected Shipments';
-    if (location.pathname === '/operator/today') return 'Daily Check-ins';
-    if (location.pathname === '/operator/flag') return 'Issue Reporting';
-    if (location.pathname === '/operator/nodes') return 'Node Management';
-    if (location.pathname === '/operator/weather') return 'Node Weather';
-    return 'Operator Portal';
+    if (location.pathname === '/customer') return 'My Shipments';
+    if (location.pathname.includes('/track/')) return 'Shipment Tracking';
+    if (location.pathname === '/customer/alerts') return 'Disruption Alerts';
+    return 'Customer Portal';
   };
 
   return (
@@ -183,35 +181,30 @@ export default function OperatorShell() {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logoIcon}>N</div>
-          <div style={styles.logoText}>OPERATOR</div>
+          <div style={styles.logoText}>NERVE</div>
         </div>
 
         <nav style={styles.navSection}>
-          <NavLink to="/operator" end style={({ isActive }) => styles.navItem(isActive)}>
+          <NavLink to="/customer" end style={({ isActive }) => styles.navItem(isActive)}>
             <LayoutDashboard size={18} />
             <span>Dashboard</span>
           </NavLink>
-          <NavLink to="/operator/today" style={({ isActive }) => styles.navItem(isActive)}>
-            <CheckSquare size={18} />
-            <span>Daily Check-ins</span>
+          <NavLink to="/customer" style={({ isActive }) => styles.navItem(isActive && location.pathname === '/customer')}>
+            <Package size={18} />
+            <span>My Shipments</span>
           </NavLink>
-          <NavLink to="/operator/nodes" style={({ isActive }) => styles.navItem(isActive)}>
-            <MapPin size={18} />
-            <span>Node Manager</span>
+          <NavLink to="/customer/alerts" style={({ isActive }) => styles.navItem(isActive)}>
+            <Bell size={18} />
+            <span>Active Alerts</span>
           </NavLink>
-          <NavLink to="/operator/weather" style={({ isActive }) => styles.navItem(isActive)}>
-            <Cloud size={18} />
-            <span>Weather Monitoring</span>
-          </NavLink>
-          <NavLink to="/operator/flag" style={({ isActive }) => styles.navItem(isActive)}>
-            <AlertTriangle size={18} />
-            <span>Report Issue</span>
-          </NavLink>
-          
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <NavLink to="#" style={styles.navItem(false)}>
               <Settings size={18} />
               <span>Settings</span>
+            </NavLink>
+            <NavLink to="#" style={styles.navItem(false)}>
+              <HelpCircle size={18} />
+              <span>Support</span>
             </NavLink>
           </div>
         </nav>
@@ -223,10 +216,10 @@ export default function OperatorShell() {
             </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <div style={{ fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user?.full_name || 'Operator'}
+                {displayName}
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {nodeName}
+                {user?.role?.replace('_', ' ')}
               </div>
             </div>
           </div>
@@ -250,7 +243,7 @@ export default function OperatorShell() {
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <div style={styles.breadcrumb}>
-              <span>Operations</span>
+              <span>Customer Portal</span>
               <ChevronRight size={14} />
               <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{getPageTitle()}</span>
             </div>
@@ -258,15 +251,15 @@ export default function OperatorShell() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
              <div style={{ 
-               backgroundColor: 'var(--info-dim)', 
-               color: 'var(--info)', 
+               backgroundColor: 'var(--brand-dim)', 
+               color: 'var(--brand)', 
                padding: '6px 12px', 
                borderRadius: '6px', 
                fontSize: '12px', 
                fontWeight: '700',
-               border: '1px solid rgba(59, 130, 246, 0.2)'
+               border: '1px solid rgba(0, 229, 160, 0.2)'
              }}>
-               STATION: {nodeName}
+               {user?.company_id || 'DEMO_CORP'}
              </div>
           </div>
         </header>

@@ -4,7 +4,7 @@
  * All functions now support optional authentication headers.
  */
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = 'http://127.0.0.1:8000/api';
 
 // ← NEW: Utility to get auth headers from localStorage
 const getStoredAuthHeaders = () => {
@@ -143,6 +143,37 @@ export const fetchDecisionLogs = async (headers = {}) => {
   if (!response.ok) throw new Error('Failed to fetch decision logs');
   return response.json();
 };
+// --- Node Management ---
+export const fetchOperatorNodes = async (headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch nodes');
+  return r.json();
+};
+
+export const createNode = async (payload, headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes`, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error('Failed to create node');
+  return r.json();
+};
+
+export const deleteNode = async (nodeId, headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes/${nodeId}`, {
+    method: 'DELETE',
+    headers
+  });
+  if (!r.ok) throw new Error('Failed to delete node');
+  return r.json();
+};
+
+export const fetchNodeOperator = async (nodeId, headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes/${nodeId}/operator`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch node operator');
+  return r.json();
+};
 
 export const manualReroute = async (data, headers = {}) => {
   const response = await fetch(`${API_BASE}/admin/shipments/reroute`, {
@@ -220,11 +251,22 @@ export const searchShipments = async (query, headers = {}) => {
 };
 
 // ── Platform Admin Endpoints ──
-
 export const fetchCompanies = async (headers = {}) => {
-  const response = await fetch(`${API_BASE}/companies`, { headers });
-  if (!response.ok) throw new Error('Failed to fetch companies');
-  return response.json();
+  const r = await fetch(`${API_BASE}/companies`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch companies');
+  return r.json();
+};
+
+export const fetchCompanyDetails = async (companyId, headers = {}) => {
+  const r = await fetch(`${API_BASE}/companies/${companyId}/details`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch company details');
+  return r.json();
+};
+
+export const deleteCompany = async (companyId, headers = {}) => {
+  const r = await fetch(`${API_BASE}/companies/${companyId}`, { method: 'DELETE', headers });
+  if (!r.ok) throw new Error('Failed to delete company');
+  return r.json();
 };
 
 export const createCompany = async (data, headers = {}) => {
@@ -266,5 +308,22 @@ export const createCompanyUser = async (companyId, data, headers = {}) => {
 export const fetchSystemHealth = async (headers = {}) => {
   const response = await fetch(`${API_BASE}/health`, { headers });
   if (!response.ok) throw new Error('Failed to fetch system health');
+  return response.json();
+};
+
+// ── Customer Endpoints ──
+
+export const fetchCustomerShipments = async (status, headers = {}) => {
+  const url = status
+    ? `${API_BASE}/customer/shipments?status=${status}`
+    : `${API_BASE}/customer/shipments`;
+  const response = await fetch(url, { headers });
+  if (!response.ok) throw new Error('Failed to fetch customer shipments');
+  return response.json();
+};
+
+export const fetchCustomerShipmentDetail = async (id, headers = {}) => {
+  const response = await fetch(`${API_BASE}/customer/shipments/${id}`, { headers });
+  if (!response.ok) throw new Error('Failed to fetch shipment detail');
   return response.json();
 };

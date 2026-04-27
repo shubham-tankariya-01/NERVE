@@ -4,15 +4,15 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'rec
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export function CascadeDebtPanel({ onSelectNode }) {
+export function RiskyNodesPanel({ onSelectNode }) {
   const { cascadeDebt } = useNetwork();
   
   return (
     <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: '300px', flex: 1 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>System Cascade Debt</h2>
-        <Link to="/analytics" style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          ANALYTICS <ChevronRight size={12} />
+        <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: 'var(--status-critical)', fontWeight: 800 }}>Risky Network Nodes</h2>
+        <Link to="/nodes" style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          VIEW NODES <ChevronRight size={12} />
         </Link>
       </div>
       

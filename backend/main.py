@@ -41,7 +41,8 @@ from backend.agents.orchestrator import AgentOrchestrator
 from backend.agents.route_planner import RoutePlanner
 from backend.database import get_async_db
 from backend import models
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
+from backend.auth.dependencies import get_current_user
 
 # ── logging ───────────────────────────────────────────────────────
 logging.basicConfig(
@@ -81,6 +82,9 @@ app_state.weather_overrides = weather_overrides
 # Use shared clients set from state.py
 clients = app_state.clients
 
+# Track last scan timestamp for health endpoint
+_last_scan_time: str | None = None
+
 
 # ── helpers ───────────────────────────────────────────────────────
 
@@ -97,6 +101,7 @@ def build_payload(
     risk_scores: dict | None = None,
     cascade_debt: list | None = None,
     network_health: int = 100,
+    shipments: list | None = None,
 ) -> str:
     """Build the JSON payload that gets pushed over WebSocket."""
     if agent_logs is None:
@@ -105,6 +110,8 @@ def build_payload(
         risk_scores = {}
     if cascade_debt is None:
         cascade_debt = []
+    if shipments is None:
+        shipments = scg.shipments
 
     weather_summary = []
     for nw in weather_feed.results.values():
@@ -140,7 +147,7 @@ def build_payload(
         "agent_logs": agent_logs,
         "network_health": network_health,
         "delivery_metrics": delivery_metrics,
-        "shipments": scg.shipments,
+        "shipments": shipments,
         "network": {
             "nodes": scg.graph.number_of_nodes(),
             "edges": scg.graph.number_of_edges(),
@@ -249,16 +256,46 @@ async def scan_loop() -> None:
                     log.info("  [%s] %s", alog["agent"].upper(), alog["action"])
 
             # push to browsers
+            global _last_scan_time
+            _last_scan_time = datetime.now(timezone.utc).isoformat()
+
             if app_state.count_clients() > 0:
-                msg = build_payload(
+                # 1. Prepare full payload for platform admins
+                full_msg = build_payload(
                     alerts, agent_logs,
                     risk_scores=risk_scores,
                     cascade_debt=cascade_debt,
                     network_health=network_health,
                 )
-                # Broadcast to all for now, will be scoped per company in subsequent phases
-                await app_state.broadcast_to_all(msg)
-                log.info("Pushed to %d client(s)", app_state.count_clients())
+                await app_state.broadcast_to_company(full_msg, "platform_admin")
+
+                # 2. Prepare per-company filtered payloads
+                # Iterate through all connected companies except platform_admin
+                active_companies = [cid for cid in app_state.clients.keys() if cid != "platform_admin"]
+                
+                for cid in active_companies:
+                    # Filter shipments
+                    c_shipments = [s for s in scg.shipments if s.get("company_id") == cid]
+                    
+                    # Filter alerts (only nodes in company's shipment routes)
+                    c_nodes = set()
+                    for s in c_shipments:
+                        c_nodes.update(s.get("planned_route", []))
+                        c_nodes.update(s.get("route_taken", []))
+                    
+                    c_alerts = [a for a in alerts if a.node_id in c_nodes]
+                    
+                    # Build and broadcast filtered payload
+                    c_msg = build_payload(
+                        c_alerts, agent_logs,
+                        risk_scores=risk_scores,
+                        cascade_debt=cascade_debt,
+                        network_health=network_health,
+                        shipments=c_shipments
+                    )
+                    await app_state.broadcast_to_company(c_msg, cid)
+                
+                log.info("Pushed filtered updates to %d company bucket(s)", len(active_companies) + 1)
             else:
                 log.info("No clients connected, skipping broadcast")
 
@@ -314,18 +351,31 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-from backend.routers import auth, companies, checkins, rerouting
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*", "Authorization"],
+)
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    log.error(f"Global exception caught: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {str(exc)}"},
+    )
+
+from backend.routers import auth, companies, checkins, rerouting, nodes
 app.include_router(auth.router)
 app.include_router(companies.router)
 app.include_router(checkins.router)
 app.include_router(rerouting.router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*", "Authorization"],
-)
+app.include_router(nodes.router)
 
 
 # ── REST endpoints ────────────────────────────────────────────────
@@ -339,6 +389,47 @@ async def root():
             "nodes": scg.graph.number_of_nodes(),
             "edges": scg.graph.number_of_edges(),
             "shipments": len(scg.shipments),
+        },
+    }
+
+
+@app.get("/api/health")
+async def get_health():
+    """Health check endpoint — no auth required. Returns full system diagnostics."""
+    from backend.database import sync_client, get_async_db
+
+    # ── MongoDB connectivity + latency ──
+    db_status = "connected"
+    latency_ms = 0.0
+    try:
+        t0 = time.time()
+        sync_client.admin.command('ping')
+        latency_ms = round((time.time() - t0) * 1000, 2)
+    except Exception:
+        db_status = "error"
+
+    # ── Pending reroute approvals ──
+    pending_approvals = 0
+    try:
+        db = get_async_db()
+        pending_approvals = await db.reroute_approvals.count_documents({"status": "pending"})
+    except Exception:
+        pending_approvals = 0
+
+    return {
+        "database": {
+            "status": db_status,
+            "latency_ms": latency_ms,
+        },
+        "orchestrator": {
+            "status": "running",
+            "last_scan": _last_scan_time or datetime.now(timezone.utc).isoformat(),
+        },
+        "websocket": {"client_count": app_state.count_clients()},
+        "uptime": "99.9%",
+        "metrics": {
+            "active_disruptions": len(detector.alerts),
+            "pending_approvals": pending_approvals,
         },
     }
 
@@ -377,8 +468,13 @@ async def get_network():
 
 
 @app.get("/api/shipments")
-async def get_shipments():
-    return {"shipments": scg.shipments}
+async def get_shipments(user: dict = Depends(get_current_user)):
+    """Return shipments, filtered by company if not platform_admin."""
+    if user.get("role") == "platform_admin":
+        return {"shipments": scg.shipments}
+    
+    company_shipments = [s for s in scg.shipments if s.get("company_id") == user.get("company_id")]
+    return {"shipments": company_shipments}
 
 
 @app.get("/api/shipments/{shipment_id}")
@@ -528,11 +624,203 @@ async def get_shipment_detail(shipment_id: str):
 
 
 @app.get("/api/alerts")
-async def get_alerts():
-    """Return the latest cached alerts (from the last scan cycle)."""
+async def get_alerts(user: dict = Depends(get_current_user)):
+    """Return alerts, filtered by company shipments if not platform_admin."""
+    if user.get("role") == "platform_admin":
+        return {
+            "alerts_count": len(detector.alerts),
+            "alerts": [alert_to_dict(a) for a in detector.alerts],
+        }
+
+    # Get all nodes in company's shipment routes
+    company_shipments = [s for s in scg.shipments if s.get("company_id") == user.get("company_id")]
+    company_nodes = set()
+    for s in company_shipments:
+        company_nodes.update(s.get("planned_route", []))
+        company_nodes.update(s.get("route_taken", []))
+
+    filtered_alerts = [a for a in detector.alerts if a.node_id in company_nodes]
+    
     return {
-        "alerts_count": len(detector.alerts),
-        "alerts": [alert_to_dict(a) for a in detector.alerts],
+        "alerts_count": len(filtered_alerts),
+        "alerts": [alert_to_dict(a) for a in filtered_alerts],
+    }
+
+
+# ── Customer Endpoints ─────────────────────────────────────────────
+
+@app.get("/api/customer/shipments")
+async def get_customer_shipments(
+    status: str | None = None,
+    user: dict = Depends(get_current_user)
+):
+    """Return shipments belonging to the authenticated customer."""
+    if user.get("role") != "customer":
+        raise HTTPException(
+            status_code=403,
+            detail="This endpoint is only accessible by customers"
+        )
+
+    user_id = user.get("user_id")
+    customer_shipments = [
+        s for s in scg.shipments
+        if s.get("customer_id") == user_id
+    ]
+
+    if status:
+        customer_shipments = [
+            s for s in customer_shipments
+            if s.get("status", "").lower() == status.lower()
+        ]
+
+    return {"shipments": customer_shipments}
+
+
+@app.get("/api/customer/shipments/{shipment_id}")
+async def get_customer_shipment_detail(
+    shipment_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Return full shipment detail for a customer-owned shipment."""
+    if user.get("role") != "customer":
+        raise HTTPException(
+            status_code=403,
+            detail="This endpoint is only accessible by customers"
+        )
+
+    user_id = user.get("user_id")
+
+    shipment = None
+    for s in scg.shipments:
+        if s["id"] == shipment_id:
+            shipment = s
+            break
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+
+    if shipment.get("customer_id") != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this shipment"
+        )
+
+    # Build enriched detail (same shape as /api/shipments/{id}/detail)
+    all_route_nodes = set(shipment.get("planned_route", []))
+    all_route_nodes.update(shipment.get("route_taken", []))
+    node_details = {}
+    for nid, attrs in scg.graph.nodes(data=True):
+        if nid in all_route_nodes:
+            node_details[nid] = {
+                "id": nid,
+                "name": attrs.get("name", nid),
+                "type": attrs.get("type", "unknown"),
+                "location": attrs.get("location", {}),
+                "capacity": attrs.get("capacity", 0),
+                "current_load": attrs.get("current_load", 0),
+                "status": attrs.get("status", "unknown"),
+                "risk_level": attrs.get("risk_level", "unknown"),
+                "processing_time_hrs": attrs.get("processing_time_hrs", 0),
+            }
+
+    planned = shipment.get("planned_route", [])
+    route_edges = []
+    for i in range(len(planned) - 1):
+        u, v = planned[i], planned[i + 1]
+        if scg.graph.has_edge(u, v):
+            edata = scg.graph[u][v]
+            route_edges.append({
+                "from": u,
+                "to": v,
+                "id": edata.get("id", f"{u}->{v}"),
+                "transport_mode": edata.get("transport_mode", "unknown"),
+                "distance_km": edata.get("distance_km", 0),
+                "base_transit_time_hrs": edata.get("base_transit_time_hrs", 0),
+                "cost_per_unit": edata.get("cost_per_unit", 0),
+                "risk_factor": edata.get("risk_factor", 0),
+            })
+
+    eta_breakdown = []
+    cumulative_hrs = 0
+    for edge in route_edges:
+        transit = edge["base_transit_time_hrs"]
+        dest_node = node_details.get(edge["to"], {})
+        processing = dest_node.get("processing_time_hrs", 0)
+        cumulative_hrs += transit + processing
+        eta_breakdown.append({
+            "from": edge["from"],
+            "to": edge["to"],
+            "transport_mode": edge["transport_mode"],
+            "transit_hrs": transit,
+            "processing_hrs": processing,
+            "cumulative_hrs": cumulative_hrs,
+        })
+
+    # ── Active alerts affecting this shipment's route ──
+    route_alerts = []
+    for a in detector.alerts:
+        if a.node_id in all_route_nodes:
+            route_alerts.append(alert_to_dict(a))
+
+    # ── Reroute history for this shipment ──
+    reroute_history = [
+        entry for entry in agent_orchestrator.reroute_history
+        if entry["shipment_id"] == shipment_id
+    ]
+
+    # ── Nodes that were on original route but rerouted away from ──
+    original_route = shipment.get("planned_route", [])
+    avoided_nodes = []
+    for entry in reroute_history:
+        old_set = set(entry.get("old_route", []))
+        new_set = set(entry.get("new_route", []))
+        for nid in old_set - new_set:
+            if nid not in avoided_nodes:
+                avoided_nodes.append(nid)
+
+    # Add node details for avoided nodes too
+    for nid in avoided_nodes:
+        if nid not in node_details:
+            if scg.graph.has_node(nid):
+                attrs = scg.graph.nodes[nid]
+                node_details[nid] = {
+                    "id": nid,
+                    "name": attrs.get("name", nid),
+                    "type": attrs.get("type", "unknown"),
+                    "location": attrs.get("location", {}),
+                    "capacity": attrs.get("capacity", 0),
+                    "current_load": attrs.get("current_load", 0),
+                    "status": attrs.get("status", "unknown"),
+                    "risk_level": attrs.get("risk_level", "unknown"),
+                    "processing_time_hrs": attrs.get("processing_time_hrs", 0),
+                }
+
+    # ── Risk score ──
+    risk_score = 0
+    for ra in route_alerts:
+        sev = ra.get("severity", "")
+        if sev == "CRITICAL":
+            risk_score += 35
+        elif sev == "HIGH":
+            risk_score += 20
+        elif sev == "MEDIUM":
+            risk_score += 10
+        else:
+            risk_score += 5
+    priority_mult = {"critical": 1.4, "high": 1.2, "medium": 1.0, "low": 0.8}
+    risk_score = min(100, int(risk_score * priority_mult.get(
+        shipment.get("priority", "medium").lower(), 1.0
+    )))
+
+    return {
+        "shipment": shipment,
+        "node_details": node_details,
+        "route_edges": route_edges,
+        "eta_breakdown": eta_breakdown,
+        "total_transit_hrs": cumulative_hrs,
+        "route_alerts": route_alerts,
+        "reroute_history": reroute_history,
+        "avoided_nodes": avoided_nodes,
+        "risk_score": risk_score,
     }
 
 

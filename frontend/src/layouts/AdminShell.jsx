@@ -41,7 +41,7 @@ export default function AdminShell() {
       fontSize: '20px',
       fontWeight: '900',
       letterSpacing: '1px',
-      color: 'var(--status-critical)', // Use red for admin
+      color: '#ef476f', // Nerve Red
     },
     nav: {
       flex: 1,
@@ -58,11 +58,12 @@ export default function AdminShell() {
       borderRadius: '8px',
       textDecoration: 'none',
       color: isActive ? '#fff' : 'var(--text-muted)',
-      backgroundColor: isActive ? 'rgba(239, 71, 111, 0.15)' : 'transparent',
-      borderLeft: isActive ? '3px solid var(--status-critical)' : '3px solid transparent',
+      backgroundColor: isActive ? 'rgba(239, 71, 111, 0.2)' : 'transparent',
+      borderLeft: isActive ? '3px solid #ef476f' : '3px solid transparent',
       fontSize: '14px',
       fontWeight: '600',
       transition: 'all 0.2s',
+      cursor: 'pointer',
     }),
     footer: {
       padding: '24px',
@@ -80,8 +81,8 @@ export default function AdminShell() {
       width: '32px',
       height: '32px',
       borderRadius: '8px',
-      backgroundColor: 'var(--status-critical)',
-      color: '#000',
+      backgroundColor: '#ef476f',
+      color: '#fff',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -99,6 +100,7 @@ export default function AdminShell() {
       fontWeight: '600',
       cursor: 'pointer',
       padding: '4px 0',
+      transition: 'color 0.2s',
     },
     main: {
       flex: 1,
@@ -118,15 +120,15 @@ export default function AdminShell() {
         <nav style={styles.nav}>
           <NavLink to="/admin" end style={({ isActive }) => styles.navItem(isActive)}>
             <Building2 size={18} />
-            <span>COMPANIES</span>
+            <span>ORGANIZATIONS</span>
           </NavLink>
-          <NavLink to="/admin/system" style={({ isActive }) => styles.navItem(isActive)}>
-            <Activity size={18} />
-            <span>SYSTEM STATUS</span>
+          <NavLink to="/admin/mission-control" style={({ isActive }) => styles.navItem(isActive)}>
+            <Shield size={18} />
+            <span>MISSION CONTROL</span>
           </NavLink>
           <NavLink to="/" style={() => styles.navItem(false)}>
             <ArrowLeft size={18} />
-            <span>BACK TO APP</span>
+            <span>BACK TO PLATFORM</span>
           </NavLink>
         </nav>
 

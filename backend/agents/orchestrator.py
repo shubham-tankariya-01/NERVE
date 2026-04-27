@@ -287,7 +287,7 @@ class AgentOrchestrator:
             "pending_count": pending_count,
             "company_id": company_id
         }
-        await broadcast_to_company(company_id, notification)
+        await broadcast_to_company(notification, company_id)
 
     def _fallback_process(
         self,

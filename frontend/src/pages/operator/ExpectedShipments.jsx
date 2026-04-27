@@ -1,383 +1,284 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { fetchPendingCheckins, createCheckin } from '../../services/api';
-import { Search, RefreshCw, Package, CheckCircle, ChevronUp, X, Info, AlertTriangle } from 'lucide-react';
-
-const CheckinSheet = ({ shipment, onClose, onComplete }) => {
-  const { user, getAuthHeaders } = useAuth();
-  const [condition, setCondition] = useState('GOOD');
-  const [weight, setWeight] = useState(shipment?.weight_kg || 0);
-  const [notes, setNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      const headers = getAuthHeaders();
-      await createCheckin({
-        shipment_id: shipment.id,
-        node_id: user.assigned_node_ids[0],
-        event_type: 'arrived',
-        condition,
-        weight_verified: parseFloat(weight),
-        notes
-      }, headers);
-      onComplete(shipment.id);
-    } catch (err) {
-      console.error('Checkin failed:', err);
-      alert('Failed to process arrival: ' + err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const styles = {
-    overlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      zIndex: 1000,
-      display: 'flex',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
-    },
-    sheet: {
-      width: '100%',
-      maxWidth: '480px',
-      backgroundColor: 'var(--bg-secondary)',
-      borderTopLeftRadius: '20px',
-      borderTopRightRadius: '20px',
-      padding: '24px',
-      animation: 'slideUp 0.3s ease-out',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '24px',
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    shipmentId: {
-      fontSize: '20px',
-      fontWeight: '800',
-      fontFamily: 'var(--font-mono)',
-    },
-    section: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-    },
-    label: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: 'var(--text-muted)',
-      textTransform: 'uppercase',
-    },
-    conditionGrid: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr 1fr',
-      gap: '10px',
-    },
-    condBtn: (active, color) => ({
-      padding: '16px 8px',
-      borderRadius: '12px',
-      border: active ? `2px solid ${color}` : '2px solid transparent',
-      backgroundColor: active ? `${color}22` : 'var(--bg-glass)',
-      color: active ? color : 'var(--text-muted)',
-      fontSize: '12px',
-      fontWeight: '700',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-    }),
-    input: {
-      width: '100%',
-      padding: '16px',
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      border: '1px solid var(--glass-border)',
-      borderRadius: '12px',
-      color: 'var(--text-main)',
-      fontSize: '16px',
-      outline: 'none',
-    },
-    footer: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 2fr',
-      gap: '12px',
-      marginTop: '8px',
-    },
-    btnCancel: {
-      padding: '16px',
-      borderRadius: '12px',
-      border: '1px solid var(--glass-border)',
-      background: 'none',
-      color: 'var(--text-muted)',
-      fontWeight: '700',
-    },
-    btnConfirm: {
-      padding: '16px',
-      borderRadius: '12px',
-      border: 'none',
-      backgroundColor: 'var(--status-live)',
-      color: '#000',
-      fontWeight: '800',
-      fontSize: '14px',
-      textTransform: 'uppercase',
-    }
-  };
-
-  return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.sheet} onClick={e => e.stopPropagation()}>
-        <div style={styles.header}>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>CHECK-IN ARRIVAL</div>
-            <div style={styles.shipmentId}>{shipment.id}</div>
-          </div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }} onClick={onClose}>
-            <X size={24} />
-          </button>
-        </div>
-
-        <div style={styles.section}>
-          <label style={styles.label}>Cargo Condition</label>
-          <div style={styles.conditionGrid}>
-            <div style={styles.condBtn(condition === 'GOOD', 'var(--status-live)')} onClick={() => setCondition('GOOD')}>
-              <CheckCircle size={20} />
-              GOOD
-            </div>
-            <div style={styles.condBtn(condition === 'PARTIAL', 'var(--status-warning)')} onClick={() => setCondition('PARTIAL')}>
-              <Info size={20} />
-              PARTIAL
-            </div>
-            <div style={styles.condBtn(condition === 'DAMAGED', 'var(--status-critical)')} onClick={() => setCondition('DAMAGED')}>
-              <XCircle size={20} />
-              DAMAGED
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.section}>
-          <label style={styles.label}>Verified Weight (kg)</label>
-          <input 
-            type="number" 
-            style={styles.input} 
-            value={weight} 
-            onChange={e => setWeight(e.target.value)}
-          />
-        </div>
-
-        <div style={styles.section}>
-          <label style={styles.label}>Notes (optional)</label>
-          <textarea 
-            style={{...styles.input, height: '80px', resize: 'none'}} 
-            placeholder="e.g. Seal intact, slightly late"
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-          />
-        </div>
-
-        <div style={styles.footer}>
-          <button style={styles.btnCancel} onClick={onClose}>CANCEL</button>
-          <button style={styles.btnConfirm} onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'PROCESSING...' : 'CONFIRM ARRIVAL'}
-          </button>
-        </div>
-      </div>
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-const XCircle = ({ size }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-);
+import { fetchShipments, createCheckin } from '../../services/api';
+import { 
+  Package, MapPin, Clock, ArrowRight, CheckCircle, 
+  Search, Filter, Loader, AlertCircle, TrendingUp, Inbox 
+} from 'lucide-react';
 
 export default function ExpectedShipments() {
   const { user, getAuthHeaders } = useAuth();
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [selectedShipment, setSelectedShipment] = useState(null);
-  const [successId, setSuccessId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [processing, setProcessing] = useState(null);
 
-  const nodeId = user?.assigned_node_ids?.[0];
-
-  const loadData = useCallback(async () => {
-    if (!nodeId) return;
-    try {
-      const headers = getAuthHeaders();
-      const data = await fetchPendingCheckins(nodeId, headers);
-      setShipments(data);
-    } catch (err) {
-      console.error('Load failed:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [nodeId, getAuthHeaders]);
+  const assignedNodes = user?.assigned_node_ids || [];
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    (async () => {
+      try {
+        const data = await fetchShipments(getAuthHeaders());
+        // Filter shipments where the next planned node is one of our assigned nodes
+        // OR current_node is one of our nodes
+        const relevant = (data.shipments || []).filter(s => {
+          const nextIdx = s.route_taken?.length || 0;
+          const nextNode = s.planned_route?.[nextIdx];
+          return assignedNodes.includes(nextNode) || assignedNodes.includes(s.current_node);
+        });
+        setShipments(relevant);
+      } catch (err) {
+        console.error('Failed to fetch shipments:', err);
+      } finally { setLoading(false); }
+    })();
+  }, [getAuthHeaders, assignedNodes]);
 
-  const onComplete = (id) => {
-    setSelectedShipment(null);
-    setSuccessId(id);
-    setTimeout(() => {
-      setShipments(prev => prev.filter(s => s.id !== id));
-      setSuccessId(null);
-    }, 1000);
+  const filteredShipments = useMemo(() => {
+    return shipments.filter(s => 
+      s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.cargo_type?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [shipments, searchQuery]);
+
+  const stats = useMemo(() => {
+    return {
+      expected: shipments.filter(s => s.status !== 'delivered').length,
+      delayed: shipments.filter(s => s.status === 'delayed').length,
+      arrivedToday: shipments.filter(s => {
+         const lastCheckin = s.route_taken?.[s.route_taken.length - 1];
+         return assignedNodes.includes(lastCheckin) && s.status !== 'delivered';
+      }).length
+    };
+  }, [shipments, assignedNodes]);
+
+  const handleCheckin = async (shipmentId) => {
+    setProcessing(shipmentId);
+    try {
+      const node = assignedNodes[0]; // Assume first node for simplicity
+      await createCheckin({
+        shipment_id: shipmentId,
+        node_id: node,
+        event_type: 'arrival',
+        condition: 'good',
+        notes: 'Operator confirmed arrival via dashboard'
+      }, getAuthHeaders());
+      
+      // Update local state
+      setShipments(prev => prev.map(s => {
+        if (s.id === shipmentId) {
+          return { ...s, route_taken: [...(s.route_taken || []), node], current_node: node };
+        }
+        return s;
+      }));
+    } catch (err) {
+      alert('Check-in failed: ' + err.message);
+    } finally {
+      setProcessing(null);
+    }
   };
 
-  const filtered = shipments.filter(s => 
-    s.id.toLowerCase().includes(search.toLowerCase()) ||
-    s.cargo_type.toLowerCase().includes(search.toLowerCase())
-  );
-
   const styles = {
-    header: {
+    header: { marginBottom: '32px' },
+    title: { fontSize: '24px', fontWeight: '800', fontFamily: "'Space Grotesk', sans-serif" },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+      gap: '20px',
+      marginBottom: '32px',
+    },
+    statCard: {
+      backgroundColor: 'var(--bg-surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '12px',
+      padding: '24px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '20px',
+    },
+    statIcon: (color) => ({
+      width: '48px',
+      height: '48px',
+      borderRadius: '10px',
+      backgroundColor: `${color}11`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: color,
+    }),
+    toolbar: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '20px',
-    },
-    title: {
-      fontSize: '18px',
-      fontWeight: '800',
-    },
-    search: {
-      position: 'relative',
       marginBottom: '24px',
+      gap: '20px',
     },
-    searchInput: {
+    searchBox: {
+      position: 'relative',
+      flex: 1,
+      maxWidth: '400px',
+    },
+    input: {
       width: '100%',
-      padding: '14px 14px 14px 44px',
-      backgroundColor: 'var(--bg-secondary)',
-      border: '1px solid var(--glass-border)',
-      borderRadius: '12px',
-      color: 'var(--text-main)',
+      backgroundColor: 'var(--bg-surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '10px',
+      padding: '12px 16px 12px 44px',
+      color: 'var(--text-primary)',
       fontSize: '14px',
       outline: 'none',
     },
-    searchIcon: {
-      position: 'absolute',
-      left: '14px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: 'var(--text-muted)',
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+      gap: '20px',
     },
-    list: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-    },
-    card: (isSuccess) => ({
-      backgroundColor: isSuccess ? 'rgba(6, 214, 160, 0.1)' : 'var(--bg-surface)',
-      border: isSuccess ? '1px solid var(--status-live)' : '1px solid var(--glass-border)',
-      borderRadius: '16px',
+    card: {
+      backgroundColor: 'var(--bg-surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '14px',
       padding: '20px',
       display: 'flex',
       flexDirection: 'column',
-      gap: '12px',
-      transition: 'all 0.3s',
-      transform: isSuccess ? 'scale(0.95)' : 'scale(1)',
-      opacity: isSuccess ? 0.5 : 1,
-    }),
-    cardHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    priority: (p) => ({
-      fontSize: '10px',
-      fontWeight: '900',
-      padding: '2px 8px',
-      borderRadius: '4px',
-      backgroundColor: p === 'critical' ? 'rgba(239, 71, 111, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-      color: p === 'critical' ? 'var(--status-critical)' : 'var(--text-muted)',
-      textTransform: 'uppercase',
-    }),
-    cardAction: {
-      width: '100%',
-      padding: '14px',
-      backgroundColor: 'rgba(0, 229, 160, 0.1)',
-      color: 'var(--status-live)',
-      border: '1px solid rgba(0, 229, 160, 0.2)',
-      borderRadius: '10px',
-      fontWeight: '700',
-      fontSize: '12px',
-      cursor: 'pointer',
-      marginTop: '4px',
+      gap: '16px',
+      transition: 'border-color 0.2s',
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '40px' }}>Loading shipments...</div>;
+  if (loading) {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-muted)', gap:'16px' }}>
+        <Loader size={32} style={{ animation:'spin 1s linear infinite' }} />
+        <div style={{ fontSize: '14px', fontWeight: '700', letterSpacing: '1px' }}>LOADING MANIFESTS...</div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div style={styles.header}>
-        <div style={styles.title}>EXPECTED SHIPMENTS</div>
-        <button 
-          onClick={loadData}
-          style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '700' }}
-        >
-          <RefreshCw size={14} /> REFRESH
-        </button>
+        <h1 style={styles.title}>INBOUND LOGISTICS</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Monitor and process shipments arriving at your station</p>
       </div>
 
-      <div style={styles.search}>
-        <Search size={18} style={styles.searchIcon} />
-        <input 
-          style={styles.searchInput} 
-          placeholder="Filter by ID or cargo..." 
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon('var(--info)')}><Inbox size={24} /></div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Inbound Units</div>
+            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.expected}</div>
+          </div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon('var(--warning)')}><Clock size={24} /></div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>At Risk / Delayed</div>
+            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.delayed}</div>
+          </div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon('var(--brand)')}><CheckCircle size={24} /></div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Processed Today</div>
+            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.arrivedToday}</div>
+          </div>
+        </div>
       </div>
 
-      <div style={styles.list}>
-        {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>No expected shipments found</div>
-        ) : (
-          filtered.map(s => (
-            <div key={s.id} style={styles.card(successId === s.id)}>
-              <div style={styles.cardHeader}>
-                <span style={{ fontWeight: '800', fontFamily: 'var(--font-mono)' }}>{s.id}</span>
-                <span style={styles.priority(s.priority)}>{s.priority}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600' }}>{s.cargo_type}</span>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{s.weight_kg} kg</span>
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                From: {s.origin}
-              </div>
-              <button style={styles.cardAction} onClick={() => setSelectedShipment(s)}>
-                MARK ARRIVED
-              </button>
-            </div>
-          ))
-        )}
+      <div style={styles.toolbar}>
+        <div style={styles.searchBox}>
+          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input 
+            style={styles.input} 
+            placeholder="Search manifests..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
+          Showing {filteredShipments.length} of {shipments.length} relevant units
+        </div>
       </div>
 
-      {selectedShipment && (
-        <CheckinSheet 
-          shipment={selectedShipment} 
-          onClose={() => setSelectedShipment(null)}
-          onComplete={onComplete}
-        />
+      {filteredShipments.length === 0 ? (
+        <div style={{ padding: '80px', textAlign: 'center', backgroundColor: 'var(--bg-surface)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
+          <Package size={48} style={{ opacity: 0.1, marginBottom: '16px' }} />
+          <div style={{ fontSize: '16px', fontWeight: '700' }}>Clear Manifest</div>
+          <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>No inbound shipments detected for the current query.</div>
+        </div>
+      ) : (
+        <div style={styles.grid}>
+          {filteredShipments.map(s => {
+            const isDelayed = s.status === 'delayed';
+            return (
+              <div key={s.id} style={styles.card} onMouseOver={e => e.currentTarget.style.borderColor = 'var(--info)'} onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>ID: {s.id}</div>
+                    <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)' }}>{s.cargo_type}</div>
+                  </div>
+                  <div style={{ 
+                    padding: '4px 10px', 
+                    borderRadius: '6px', 
+                    fontSize: '10px', 
+                    fontWeight: '800', 
+                    textTransform: 'uppercase',
+                    backgroundColor: isDelayed ? 'var(--danger-dim)' : 'var(--bg-elevated)',
+                    color: isDelayed ? 'var(--danger)' : 'var(--text-secondary)',
+                    border: `1px solid ${isDelayed ? 'rgba(239, 68, 68, 0.2)' : 'transparent'}`
+                  }}>
+                    {s.status?.replace('_', ' ')}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', backgroundColor: 'var(--bg-canvas)', borderRadius: '10px' }}>
+                   <div style={{ flex: 1 }}>
+                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>ORIGIN</div>
+                     <div style={{ fontSize: '12px', fontWeight: '700' }}>{s.origin}</div>
+                   </div>
+                   <ArrowRight size={14} color="var(--text-muted)" />
+                   <div style={{ flex: 1 }}>
+                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>DESTINATION</div>
+                     <div style={{ fontSize: '12px', fontWeight: '700' }}>{s.destination}</div>
+                   </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock size={14} color="var(--text-muted)" />
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>
+                        {s.estimated_arrival ? new Date(s.estimated_arrival).toLocaleDateString() : 'ETA TBD'}
+                      </span>
+                   </div>
+                   <button 
+                    onClick={() => handleCheckin(s.id)}
+                    disabled={processing === s.id}
+                    style={{ 
+                      padding: '8px 16px', 
+                      backgroundColor: 'var(--info)', 
+                      color: '#000', 
+                      border: 'none', 
+                      borderRadius: '8px', 
+                      fontSize: '12px', 
+                      fontWeight: '800', 
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                   >
+                     {processing === s.id ? 'PROCESSING...' : (
+                       <>
+                        <CheckCircle size={14} />
+                        CONFIRM ARRIVAL
+                       </>
+                     )}
+                   </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

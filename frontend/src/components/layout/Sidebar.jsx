@@ -2,10 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAgent } from '../../context/AgentContext';
 import { useAppWebSocket } from '../../context/WebSocketContext';
-import { useAuth } from '../../context/AuthContext'; // ← NEW
+import { useAuth } from '../../context/AuthContext';
 import { 
-  LayoutDashboard, Map, Package, Box, GitBranch, // ← MODIFIED: GitBranch replaces RouteIcon
-  AlertTriangle, Bot, BarChart2, CloudRain, PlusCircle, Settings, ChevronLeft, ChevronRight, Shield
+  LayoutDashboard, Map, Package, Box, GitBranch,
+  AlertTriangle, Bot, BarChart2, CloudRain, PlusCircle, Settings, ChevronLeft, ChevronRight, Shield, ArrowLeft
 } from 'lucide-react';
 
 const NavItem = React.memo(({ item, collapsed }) => (
@@ -82,20 +82,48 @@ export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const { unreadCount } = useAgent();
   const { pendingRerouteCount } = useAppWebSocket();
+  const { user } = useAuth();
   const collapsed = !isHovered;
 
-  const navItems = useMemo(() => [
-    { to: '/', icon: <Map size={20} />, label: 'Command Center' },
-    { to: '/dashboard', icon: <LayoutDashboard size={20} />, label: 'Executive Dashboard' },
-    { to: '/shipments', icon: <Package size={20} />, label: 'Shipments' },
-    { to: '/nodes', icon: <Box size={20} />, label: 'Nodes', color: 'var(--info)' },
-    { to: '/disruptions', icon: <AlertTriangle size={20} />, label: 'Disruptions', color: 'var(--status-critical)' },
-    { to: '/manager/rerouting', icon: <GitBranch size={20} />, label: 'Rerouting Queue', badge: pendingRerouteCount || null, color: 'var(--status-critical)' }, // ← MODIFIED: GitBranch + red badge
-    { to: '/agents', icon: <Bot size={20} />, label: 'Agent Control', badge: unreadCount || null, color: 'var(--status-warning)' },
-    { to: '/weather', icon: <CloudRain size={20} />, label: 'Weather' },
-    { to: '/book', icon: <PlusCircle size={20} />, label: 'Book Shipment' },
-    { to: '/mission-control', icon: <Shield size={20} />, label: 'Admin Mission Control', color: 'var(--accent-primary)' }, // ← MODIFIED: path changed to avoid /admin conflict
-  ], [unreadCount, pendingRerouteCount]); // ← MODIFIED: added pendingRerouteCount dep
+  const navItems = useMemo(() => {
+    const role = user?.role;
+
+    if (role === 'logistics_manager') {
+      return [
+        { to: '/',                  icon: <Map size={20} />,          label: 'Command Center' },
+        { to: '/dashboard',         icon: <LayoutDashboard size={20} />, label: 'Executive Dashboard' },
+        { to: '/shipments',         icon: <Package size={20} />,      label: 'Shipments' },
+        { to: '/nodes',             icon: <Box size={20} />,          label: 'Nodes' },
+        { to: '/disruptions',       icon: <AlertTriangle size={20} />, label: 'Disruptions' },
+        {
+          to: '/manager/rerouting',
+          icon: <GitBranch size={20} />,
+          label: 'Rerouting Queue',
+          badge: pendingRerouteCount > 0 ? pendingRerouteCount : null,
+          color: 'var(--danger)',
+        },
+        {
+          to: '/agents',
+          icon: <Bot size={20} />,
+          label: 'Agent Control',
+          badge: unreadCount > 0 ? unreadCount : null,
+          color: 'var(--warning)',
+        },
+        { to: '/weather',           icon: <CloudRain size={20} />,    label: 'Weather' },
+        { to: '/book',              icon: <PlusCircle size={20} />,   label: 'Book Shipment' },
+        { to: '/mission-control',   icon: <Shield size={20} />,       label: 'Mission Control' },
+      ];
+    }
+
+    if (role === 'platform_admin') {
+      return [
+        { to: '/', icon: <ArrowLeft size={20} />, label: 'Back to App' },
+      ];
+    }
+
+    // node_operator and customer use their own shells — nothing to show here
+    return [];
+  }, [user?.role, unreadCount, pendingRerouteCount]);
 
   return (
     <aside 
@@ -134,9 +162,17 @@ export default function Sidebar() {
       </div>
 
       <nav style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '1rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        {navItems.map((item, i) => (
-          <NavItem key={i} item={item} collapsed={collapsed} />
-        ))}
+        {navItems.length > 0 ? (
+          navItems.map((item, i) => (
+            <NavItem key={i} item={item} collapsed={collapsed} />
+          ))
+        ) : (
+          !collapsed && (
+            <div style={{ padding: '1rem 0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
+              Use the dedicated app for your role.
+            </div>
+          )
+        )}
       </nav>
 
       <div style={{ padding: '1rem 0.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

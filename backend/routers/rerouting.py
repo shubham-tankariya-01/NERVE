@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
+import asyncio
 import uuid
 from backend.database import get_async_db
 from backend.auth.dependencies import get_current_user, require_role, get_company_filter
@@ -140,8 +141,9 @@ async def approve_reroute(
     }
     await db.decision_logs.insert_one(log_entry)
 
-    # 4. Sync memory graph
-    app_state.scg.refresh_from_db()
+    # 4. Sync memory graph (non-blocking)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, app_state.scg.refresh_from_db)
     
     return {"status": "success", "message": "Reroute applied successfully"}
 

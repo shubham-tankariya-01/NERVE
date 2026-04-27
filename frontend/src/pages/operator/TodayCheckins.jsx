@@ -1,171 +1,151 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { fetchNodeCheckins } from '../../services/api';
-import { Clock, RefreshCw, FileText } from 'lucide-react';
+import { fetchShipments } from '../../services/api';
+import { 
+  CheckCircle, Clock, Package, MapPin, 
+  Search, Loader, Calendar, ArrowRight, User 
+} from 'lucide-react';
 
 export default function TodayCheckins() {
   const { user, getAuthHeaders } = useAuth();
-  const [checkins, setCheckins] = useState([]);
+  const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const nodeId = user?.assigned_node_ids?.[0];
-
-  const loadData = useCallback(async () => {
-    if (!nodeId) return;
-    try {
-      const headers = getAuthHeaders();
-      const data = await fetchNodeCheckins(nodeId, headers);
-      setCheckins(data);
-    } catch (err) {
-      console.error('Load failed:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [nodeId, getAuthHeaders]);
+  const assignedNodes = user?.assigned_node_ids || [];
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    (async () => {
+      try {
+        const data = await fetchShipments(getAuthHeaders());
+        // Filter shipments that have visited our nodes today (simulated)
+        const relevant = (data.shipments || []).filter(s => {
+          const lastCheckin = s.route_taken?.[s.route_taken.length - 1];
+          return assignedNodes.includes(lastCheckin);
+        });
+        setShipments(relevant);
+      } catch (err) {
+        console.error('Failed to fetch check-ins:', err);
+      } finally { setLoading(false); }
+    })();
+  }, [getAuthHeaders, assignedNodes]);
+
+  const filtered = shipments.filter(s => 
+    s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.cargo_type?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const styles = {
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '24px',
-    },
-    title: {
-      fontSize: '18px',
-      fontWeight: '800',
-    },
-    badge: {
-      padding: '2px 8px',
-      borderRadius: '4px',
-      fontSize: '11px',
-      fontWeight: '800',
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      color: 'var(--text-muted)',
-    },
-    list: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-    },
-    entry: {
+    header: { marginBottom: '32px' },
+    title: { fontSize: '24px', fontWeight: '800', fontFamily: "'Space Grotesk', sans-serif" },
+    tableContainer: {
       backgroundColor: 'var(--bg-surface)',
-      border: '1px solid var(--glass-border)',
-      borderRadius: '12px',
-      padding: '16px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px',
+      border: '1px solid var(--border)',
+      borderRadius: '16px',
+      overflow: 'hidden',
     },
-    entryHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    shipmentId: {
-      fontWeight: '800',
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
       fontSize: '14px',
-      fontFamily: 'var(--font-mono)',
     },
-    time: {
+    th: {
+      textAlign: 'left',
+      padding: '16px 24px',
+      backgroundColor: 'var(--bg-elevated)',
+      color: 'var(--text-muted)',
       fontSize: '11px',
-      color: 'var(--text-muted)',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-    },
-    eventType: (type) => ({
-      fontSize: '10px',
-      fontWeight: '800',
-      padding: '2px 6px',
-      borderRadius: '4px',
-      backgroundColor: type === 'arrived' ? 'rgba(6, 214, 160, 0.15)' : 
-                       type === 'departed' ? 'rgba(17, 138, 178, 0.15)' : 
-                       'rgba(239, 71, 111, 0.15)',
-      color: type === 'arrived' ? 'var(--status-live)' : 
-             type === 'departed' ? 'var(--status-info)' : 
-             'var(--status-critical)',
+      fontWeight: '700',
       textTransform: 'uppercase',
-    }),
-    details: {
-      fontSize: '13px',
-      color: 'var(--text-muted)',
+      letterSpacing: '1px',
+      borderBottom: '1px solid var(--border)',
     },
-    notes: {
-      fontSize: '12px',
-      fontStyle: 'italic',
-      color: 'var(--text-muted)',
-      padding: '8px',
-      backgroundColor: 'rgba(0,0,0,0.1)',
-      borderRadius: '4px',
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'flex-start',
+    td: {
+      padding: '16px 24px',
+      borderBottom: '1px solid var(--border)',
+      color: 'var(--text-primary)',
+    },
+    statusPill: {
+      padding: '4px 12px',
+      borderRadius: '6px',
+      fontSize: '11px',
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      backgroundColor: 'var(--brand-dim)',
+      color: 'var(--brand)',
+      display: 'inline-block',
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '40px' }}>Loading log...</div>;
+  if (loading) {
+    return (
+      <div style={{ padding: '100px', textAlign: 'center' }}>
+        <Loader size={32} style={{ animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div style={styles.header}>
-        <div style={styles.title}>
-          TODAY'S LOG 
-          <span style={{ marginLeft: '8px', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
-            {new Date().toLocaleDateString([], { month: 'short', day: 'numeric' })}
-          </span>
-        </div>
-        <button 
-          onClick={loadData}
-          style={{ background: 'none', border: 'none', color: 'var(--accent-primary)' }}
-        >
-          <RefreshCw size={18} />
-        </button>
+        <h1 style={styles.title}>DAILY LOGBOOK</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Historical record of units processed during the current shift</p>
       </div>
 
-      <div style={styles.list}>
-        {checkins.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-            <FileText size={40} style={{ opacity: 0.3 }} />
-            <span>No check-ins recorded for today yet.</span>
-          </div>
-        ) : (
-          checkins.map(c => (
-            <div key={c.id} style={styles.entry}>
-              <div style={styles.entryHeader}>
-                <span style={styles.shipmentId}>{c.shipment_id}</span>
-                <span style={styles.time}>
-                  <Clock size={12} />
-                  {new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={styles.eventType(c.event_type)}>{c.event_type}</span>
-                <span style={{ fontSize: '12px', fontWeight: '600' }}>{c.condition}</span>
-              </div>
+      <div style={{ marginBottom: '24px', position: 'relative', maxWidth: '400px' }}>
+        <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <input 
+          style={{ width: '100%', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 16px 12px 44px', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }} 
+          placeholder="Search logbook..." 
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+      </div>
 
-              {c.notes && (
-                <div style={styles.notes}>
-                  <Info size={14} style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span>{c.notes}</span>
-                </div>
-              )}
-              
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right' }}>
-                Op: {c.operator_name || 'System'}
-              </div>
-            </div>
-          ))
-        )}
+      <div style={styles.tableContainer}>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Manifest ID</th>
+              <th style={styles.th}>Cargo Type</th>
+              <th style={styles.th}>Origin / Destination</th>
+              <th style={styles.th}>Timestamp</th>
+              <th style={styles.th}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan="5" style={{ ...styles.td, textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+                  <Calendar size={32} style={{ opacity: 0.2, marginBottom: '12px' }} />
+                  <div>No entries found for the current shift.</div>
+                </td>
+              </tr>
+            ) : (
+              filtered.map(s => (
+                <tr key={s.id} style={{ transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--bg-canvas)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ ...styles.td, fontWeight: '700', fontFamily: "'JetBrains Mono', monospace" }}>{s.id}</td>
+                  <td style={styles.td}>{s.cargo_type}</td>
+                  <td style={styles.td}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                      <span style={{ fontWeight: '600' }}>{s.origin}</span>
+                      <ArrowRight size={12} color="var(--text-muted)" />
+                      <span style={{ fontWeight: '600' }}>{s.destination}</span>
+                    </div>
+                  </td>
+                  <td style={{ ...styles.td, fontSize: '13px', color: 'var(--text-muted)' }}>
+                    {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                  <td style={styles.td}>
+                    <div style={styles.statusPill}>CLEARED</div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
-
-const Info = ({ size, style }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-);

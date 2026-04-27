@@ -106,3 +106,27 @@ async def create_company_user(company_id: str, payload: UserCreate, db = Depends
     new_user.pop("_id", None)
     new_user.pop("hashed_password", None)
     return new_user
+
+@router.get("/{company_id}/details", dependencies=[Depends(require_role("platform_admin"))])
+async def get_company_full_details(company_id: str, db = Depends(get_async_db)):
+    """Returns nodes, shipments, and users for a company."""
+    company = await db.companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    company.pop("_id", None)
+    
+    nodes = await db.nodes.find({"company_id": company_id}).to_list(length=None)
+    shipments = await db.shipments.find({"company_id": company_id}).to_list(length=None)
+    users = await db.users.find({"company_id": company_id}).to_list(length=None)
+    
+    for item in nodes + shipments + users:
+        item.pop("_id", None)
+        item.pop("hashed_password", None)
+        
+    return {
+        "company": company,
+        "nodes": nodes,
+        "shipments": shipments,
+        "users": users
+    }

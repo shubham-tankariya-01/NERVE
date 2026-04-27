@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NetworkMap from '../components/map/NetworkMap';
-import { CascadeDebtPanel, RiskHorizonPanel } from '../components/panels/LeftPanels';
+import { RiskyNodesPanel, RiskHorizonPanel } from '../components/panels/LeftPanels';
 import { ShipmentTrackerPanel, DisruptionAlertsPanel, WeatherOverviewPanel } from '../components/panels/RightPanels';
 import AgentLogBar from '../components/layout/AgentLogBar';
 import { ChevronRight, ChevronLeft, PanelRight } from 'lucide-react';
@@ -13,7 +13,7 @@ export default function CommandCenter() {
     <div style={{ height: 'calc(100vh - 64px)', position: 'relative', display: 'flex', overflow: 'hidden', background: 'var(--bg-canvas)' }}>
       {/* Left Panels */}
       <div style={{ width: '320px', padding: '1rem', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', background: 'rgba(10, 17, 40, 0.4)', backdropFilter: 'blur(10px)', zIndex: 10 }}>
-        <CascadeDebtPanel onSelectNode={setSelectedNode} />
+        <RiskyNodesPanel onSelectNode={setSelectedNode} />
         <RiskHorizonPanel selectedNode={selectedNode} />
       </div>
 
@@ -59,7 +59,7 @@ export default function CommandCenter() {
         display: 'flex', 
         flexDirection: 'column', 
         gap: '1rem',
-        overflow: 'hidden', 
+        overflowY: 'auto', 
         background: 'rgba(10, 17, 40, 0.4)', 
         backdropFilter: 'blur(10px)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

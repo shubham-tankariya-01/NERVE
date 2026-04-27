@@ -12,12 +12,12 @@ export default function Dashboard() {
   const { data: wsData } = useAppWebSocket();
   
   // Derived KPI values based on real data
-  const totalVolume = shipments.reduce((acc, s) => acc + (s.weight_kg || 0), 0);
-  const formattedVolume = (totalVolume / 1000).toFixed(1) + " tons";
+  const totalWeight = shipments.reduce((acc, s) => acc + (s.weight_kg || 0), 0);
+  const formattedWeight = (totalWeight / 1000).toFixed(1) + "t";
   const activeNodes = nodes.length;
   const totalShipments = shipments.length;
+  const activeDisruptions = alerts.length;
   const healthScore = networkHealth;
-  const lateRisk = ((alerts.length / (nodes.length || 1)) * 100).toFixed(1);
 
   // Map backend data to charts
   const backendMetrics = wsData?.delivery_metrics || {};
@@ -55,11 +55,11 @@ export default function Dashboard() {
       {/* Top KPIs */}
       <div className="col-span-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.5rem', marginBottom: '1.5rem' }}>
         {[
-          { title: 'Global Volume', value: formattedVolume, icon: <Package size={24} />, color: 'var(--accent-primary)', grad: 'var(--grad-blue)' },
+          { title: 'Global Throughput', value: formattedWeight, icon: <Package size={24} />, color: 'var(--accent-primary)', grad: 'var(--grad-blue)' },
           { title: 'Active Network', value: activeNodes, icon: <CheckSquare size={24} />, color: 'var(--accent-purple)', grad: 'var(--grad-purple)' },
           { title: 'Live Operations', value: totalShipments, icon: <ClipboardList size={24} />, color: 'var(--accent-pink)', grad: 'var(--grad-pink)' },
-          { title: 'Integrity Index', value: `${healthScore}%`, icon: <DollarSign size={24} />, color: 'var(--status-live)', grad: 'var(--grad-teal)' },
-          { title: 'System Risk', value: `${lateRisk}%`, icon: <AlertTriangle size={24} />, color: 'var(--status-warning)', grad: 'var(--grad-orange)' }
+          { title: 'Disruption Protocols', value: activeDisruptions, icon: <AlertTriangle size={24} />, color: 'var(--status-critical)', grad: 'var(--grad-orange)' },
+          { title: 'Network Efficiency', value: `${healthScore}%`, icon: <DollarSign size={24} />, color: 'var(--status-live)', grad: 'var(--grad-teal)' }
         ].map((kpi, i) => (
           <div key={i} className="kpi-card" style={{ background: kpi.grad, height: '120px', borderRadius: '16px' }}>
             <div className="kpi-info">
@@ -128,12 +128,12 @@ export default function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1 }}>{networkHealth}%</div>
-            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginTop: '0.25rem', letterSpacing: '0.05em' }}>Network Health</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1 }}>{totalShipments.toString().padStart(2, '0')}</div>
+            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginTop: '0.25rem', letterSpacing: '0.05em' }}>Active Units</div>
           </div>
         </div>
         
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', background: 'rgba(10, 17, 40, 0.4)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', marginBottom: '0.25rem' }}>
             <span>STATUS</span>
             <span>UNITS</span>

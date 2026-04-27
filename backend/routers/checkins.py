@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
 from datetime import datetime, timezone, date
+import asyncio
 import uuid
 from backend.database import get_async_db
 from backend.auth.dependencies import get_current_user, require_role, get_company_filter
@@ -85,8 +86,9 @@ async def create_checkin(
             {"$set": {"status": "in_transit"}}
         )
 
-    # 7. Sync memory graph
-    app_state.scg.refresh_from_db()
+    # 7. Sync memory graph (non-blocking)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, app_state.scg.refresh_from_db)
     
     checkin.pop("_id", None)
     return checkin

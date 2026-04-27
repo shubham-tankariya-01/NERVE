@@ -41,6 +41,8 @@ export default function Login() {
         navigate('/operator');
       } else if (userRole === 'platform_admin') {
         navigate('/admin');
+      } else if (userRole === 'customer') {
+        navigate('/customer');
       } else {
         navigate('/');
       }
@@ -65,6 +67,8 @@ export default function Login() {
         navigate('/operator');
       } else if (userRole === 'platform_admin') {
         navigate('/admin');
+      } else if (userRole === 'customer') {
+        navigate('/customer');
       } else {
         navigate('/');
       }

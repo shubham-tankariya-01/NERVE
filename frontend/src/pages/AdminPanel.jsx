@@ -53,20 +53,40 @@ export default function AdminPanel() {
     }
   };
 
+  const styles = {
+    title: { fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.75rem', letterSpacing: '-0.02em', color: 'var(--text-main)' },
+    btnNoGlow: {
+      background: '#ef476f',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '10px',
+      padding: '1rem',
+      fontSize: '0.85rem',
+      fontWeight: 800,
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.5rem',
+      boxShadow: 'none',
+      transition: 'background 0.2s'
+    }
+  };
+
   return (
     <div className="admin-container animate-fade-in" style={{ padding: '2rem', background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)' }}>
       <header style={{ marginBottom: '3rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.75rem', letterSpacing: '-0.02em' }}>
-            <Shield className="text-accent-primary" size={32} />
-            ADMIN MISSION CONTROL
+          <h1 style={styles.title}>
+            <Shield style={{ color: '#ef476f' }} size={32} />
+            MISSION CONTROL
           </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Override, Audit, and Orchestrate Global Logistics</p>
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>High-level override and institutional audit trail</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <div className="glass-panel" style={{ padding: '0.75rem 1.25rem', textAlign: 'center' }}>
-             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Security Level</div>
-             <div style={{ color: 'var(--status-live)', fontWeight: 700, fontSize: '1rem' }}>ENCRYPTED</div>
+          <div className="glass-panel" style={{ padding: '0.75rem 1.25rem', textAlign: 'center', borderBottom: '2px solid #ef476f' }}>
+             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Command Authority</div>
+             <div style={{ color: '#ef476f', fontWeight: 700, fontSize: '1rem' }}>ACTIVE</div>
           </div>
         </div>
       </header>
@@ -75,7 +95,7 @@ export default function AdminPanel() {
         {/* Left Column: Manual Intervention */}
         <section className="glass-panel" style={{ padding: '2rem', height: 'fit-content' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Settings size={20} className="text-accent-primary" />
+            <Settings size={20} style={{ color: '#ef476f' }} />
             MANUAL OVERRIDE
           </h2>
           
@@ -85,7 +105,7 @@ export default function AdminPanel() {
               <select 
                 value={selectedShipment}
                 onChange={(e) => setSelectedShipment(e.target.value)}
-                style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
               >
                 <option value="">Choose a shipment...</option>
                 {shipments.map(s => (
@@ -101,7 +121,7 @@ export default function AdminPanel() {
                 placeholder="e.g. N01, N04, N07"
                 value={newRoute}
                 onChange={(e) => setNewRoute(e.target.value)}
-                style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
               />
             </div>
 
@@ -112,14 +132,15 @@ export default function AdminPanel() {
                 placeholder="Enter reasoning for manual override..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.9rem', resize: 'none' }}
+                style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.9rem', resize: 'none', outline: 'none' }}
               />
             </div>
 
             <button 
               type="submit"
-              className="btn-primary"
-              style={{ padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 800 }}
+              style={styles.btnNoGlow}
+              onMouseOver={e => e.currentTarget.style.background = '#d93d5f'}
+              onMouseOut={e => e.currentTarget.style.background = '#ef476f'}
             >
               <Save size={18} />
               APPLY OVERRIDE
@@ -147,7 +168,7 @@ export default function AdminPanel() {
         {/* Right Column: Audit Logs */}
         <section className="glass-panel" style={{ padding: '2rem' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <History size={20} className="text-accent-secondary" />
+            <History size={20} style={{ color: '#ef476f' }} />
             DECISION AUDIT TRAIL
           </h2>
 
@@ -165,7 +186,7 @@ export default function AdminPanel() {
                   borderRadius: '12px', 
                   border: '1px solid var(--glass-border)', 
                   marginBottom: '1rem',
-                  borderLeft: `4px solid ${log.action_type?.includes('MANUAL') ? 'var(--accent-primary)' : 'var(--accent-secondary)'}`
+                  borderLeft: `4px solid ${log.action_type?.includes('MANUAL') ? '#ef476f' : 'var(--accent-secondary)'}`
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                     <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{log.action_type}</div>
@@ -173,7 +194,7 @@ export default function AdminPanel() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>SHIPMENT:</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{log.shipment_id}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#ef476f', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{log.shipment_id}</span>
                   </div>
                   <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <MessageSquare size={14} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle', opacity: 0.5 }} />
@@ -198,7 +219,7 @@ export default function AdminPanel() {
            { label: 'Pending Audits', value: '0', icon: <MessageSquare size={20} /> }
          ].map((stat, i) => (
            <div key={i} className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ color: 'var(--accent-primary)', opacity: 0.8 }}>{stat.icon}</div>
+              <div style={{ color: '#ef476f', opacity: 0.8 }}>{stat.icon}</div>
               <div>
                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{stat.label}</div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 900 }}>{stat.value}</div>

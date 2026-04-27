@@ -51,6 +51,7 @@ const StatusCard = ({ title, value, status, icon: Icon, color }) => (
 export default function SystemStatus() {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const { getAuthHeaders } = useAuth();
 
   const loadData = useCallback(async () => {
@@ -58,8 +59,11 @@ export default function SystemStatus() {
       const headers = getAuthHeaders();
       const data = await fetchSystemHealth(headers);
       setHealth(data);
+      setFetchError(false);
     } catch (err) {
       console.error('Health fetch failed:', err);
+      setFetchError(true);
+      // Don't clear existing health data — keep showing last successful snapshot
     } finally {
       setLoading(false);
     }
@@ -116,6 +120,26 @@ export default function SystemStatus() {
         </button>
       </div>
 
+      {/* Error Banner */}
+      {fetchError && (
+        <div style={{
+          backgroundColor: 'rgba(255,77,77,0.1)',
+          border: '1px solid rgba(255,77,77,0.4)',
+          borderRadius: '10px',
+          padding: '12px 16px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '13px',
+          fontWeight: '700',
+          color: 'var(--status-critical, #FF4D4D)',
+        }}>
+          <AlertTriangle size={16} />
+          Unable to reach /api/health — backend may be starting up.
+          {health && <span style={{ fontWeight: '400', color: 'rgba(255,77,77,0.7)', marginLeft: '8px' }}>Showing last known data.</span>}
+        </div>
+      )}
       <div style={styles.grid}>
         <StatusCard 
           title="MongoDB Cluster" 
