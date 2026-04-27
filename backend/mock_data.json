@@ -1,0 +1,2480 @@
+{
+  "nodes": [
+    {
+      "id": "N01",
+      "name": "Shanghai Manufacturing Hub",
+      "type": "factory",
+      "location": {
+        "lat": 31.2304,
+        "lng": 121.4737
+      },
+      "capacity": 500,
+      "processing_time_hrs": 24,
+      "current_load": 320,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N02",
+      "name": "Shenzhen Electronics Plant",
+      "type": "factory",
+      "location": {
+        "lat": 22.5431,
+        "lng": 114.0579
+      },
+      "capacity": 400,
+      "processing_time_hrs": 18,
+      "current_load": 280,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N03",
+      "name": "Mumbai Textile Factory",
+      "type": "factory",
+      "location": {
+        "lat": 19.076,
+        "lng": 72.8777
+      },
+      "capacity": 350,
+      "processing_time_hrs": 20,
+      "current_load": 200,
+      "status": "operational",
+      "risk_level": "medium"
+    },
+    {
+      "id": "N04",
+      "name": "Shanghai Port",
+      "type": "port",
+      "location": {
+        "lat": 31.3622,
+        "lng": 121.5838
+      },
+      "capacity": 1000,
+      "processing_time_hrs": 12,
+      "current_load": 780,
+      "status": "congested",
+      "risk_level": "high"
+    },
+    {
+      "id": "N05",
+      "name": "Singapore Port",
+      "type": "port",
+      "location": {
+        "lat": 1.2644,
+        "lng": 103.822
+      },
+      "capacity": 1200,
+      "processing_time_hrs": 8,
+      "current_load": 600,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N06",
+      "name": "Mumbai Port (JNPT)",
+      "type": "port",
+      "location": {
+        "lat": 18.9489,
+        "lng": 72.9518
+      },
+      "capacity": 800,
+      "processing_time_hrs": 14,
+      "current_load": 550,
+      "status": "operational",
+      "risk_level": "medium"
+    },
+    {
+      "id": "N07",
+      "name": "Rotterdam Port",
+      "type": "port",
+      "location": {
+        "lat": 51.9054,
+        "lng": 4.4661
+      },
+      "capacity": 1500,
+      "processing_time_hrs": 10,
+      "current_load": 900,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N08",
+      "name": "Los Angeles Port",
+      "type": "port",
+      "location": {
+        "lat": 33.7405,
+        "lng": -118.2728
+      },
+      "capacity": 1100,
+      "processing_time_hrs": 16,
+      "current_load": 950,
+      "status": "congested",
+      "risk_level": "high"
+    },
+    {
+      "id": "N09",
+      "name": "Dubai Port (Jebel Ali)",
+      "type": "port",
+      "location": {
+        "lat": 25.0156,
+        "lng": 55.0801
+      },
+      "capacity": 1000,
+      "processing_time_hrs": 8,
+      "current_load": 450,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N10",
+      "name": "Hamburg Port",
+      "type": "port",
+      "location": {
+        "lat": 53.5353,
+        "lng": 9.9631
+      },
+      "capacity": 900,
+      "processing_time_hrs": 10,
+      "current_load": 520,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N11",
+      "name": "Frankfurt Distribution Center",
+      "type": "warehouse",
+      "location": {
+        "lat": 50.1109,
+        "lng": 8.6821
+      },
+      "capacity": 600,
+      "processing_time_hrs": 6,
+      "current_load": 340,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N12",
+      "name": "Chicago Warehouse",
+      "type": "warehouse",
+      "location": {
+        "lat": 41.8781,
+        "lng": -87.6298
+      },
+      "capacity": 700,
+      "processing_time_hrs": 8,
+      "current_load": 500,
+      "status": "operational",
+      "risk_level": "medium"
+    },
+    {
+      "id": "N13",
+      "name": "Dubai Logistics Hub",
+      "type": "warehouse",
+      "location": {
+        "lat": 25.2532,
+        "lng": 55.3657
+      },
+      "capacity": 500,
+      "processing_time_hrs": 6,
+      "current_load": 280,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N14",
+      "name": "London Distribution Center",
+      "type": "distribution_center",
+      "location": {
+        "lat": 51.5074,
+        "lng": -0.1278
+      },
+      "capacity": 450,
+      "processing_time_hrs": 5,
+      "current_load": 310,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N15",
+      "name": "New York Distribution Center",
+      "type": "distribution_center",
+      "location": {
+        "lat": 40.7128,
+        "lng": -74.006
+      },
+      "capacity": 550,
+      "processing_time_hrs": 6,
+      "current_load": 420,
+      "status": "operational",
+      "risk_level": "medium"
+    },
+    {
+      "id": "N16",
+      "name": "Tokyo Retail Hub",
+      "type": "retail_hub",
+      "location": {
+        "lat": 35.6762,
+        "lng": 139.6503
+      },
+      "capacity": 300,
+      "processing_time_hrs": 4,
+      "current_load": 190,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N17",
+      "name": "Sydney Warehouse",
+      "type": "warehouse",
+      "location": {
+        "lat": -33.8688,
+        "lng": 151.2093
+      },
+      "capacity": 400,
+      "processing_time_hrs": 7,
+      "current_load": 220,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N18",
+      "name": "S\u00c3\u00a3o Paulo Distribution Center",
+      "type": "distribution_center",
+      "location": {
+        "lat": -23.5505,
+        "lng": -46.6333
+      },
+      "capacity": 350,
+      "processing_time_hrs": 8,
+      "current_load": 180,
+      "status": "operational",
+      "risk_level": "medium"
+    },
+    {
+      "id": "N19",
+      "name": "Nairobi Regional Hub",
+      "type": "warehouse",
+      "location": {
+        "lat": -1.2921,
+        "lng": 36.8219
+      },
+      "capacity": 250,
+      "processing_time_hrs": 10,
+      "current_load": 100,
+      "status": "operational",
+      "risk_level": "high"
+    },
+    {
+      "id": "N20",
+      "name": "Busan Port",
+      "type": "port",
+      "location": {
+        "lat": 35.1796,
+        "lng": 129.0756
+      },
+      "capacity": 950,
+      "processing_time_hrs": 9,
+      "current_load": 610,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N21",
+      "name": "Ningbo Port",
+      "type": "port",
+      "location": {
+        "lat": 29.8683,
+        "lng": 121.5439
+      },
+      "capacity": 1000,
+      "processing_time_hrs": 12,
+      "current_load": 600,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N22",
+      "name": "Long Beach Port",
+      "type": "port",
+      "location": {
+        "lat": 33.7541,
+        "lng": -118.1928
+      },
+      "capacity": 1050,
+      "processing_time_hrs": 14,
+      "current_load": 800,
+      "status": "operational",
+      "risk_level": "medium"
+    },
+    {
+      "id": "N23",
+      "name": "Antwerp Port",
+      "type": "port",
+      "location": {
+        "lat": 51.2194,
+        "lng": 4.4025
+      },
+      "capacity": 1200,
+      "processing_time_hrs": 10,
+      "current_load": 750,
+      "status": "operational",
+      "risk_level": "low"
+    },
+    {
+      "id": "N24",
+      "name": "Hong Kong Port",
+      "type": "port",
+      "location": {
+        "lat": 22.3193,
+        "lng": 114.1694
+      },
+      "capacity": 1100,
+      "processing_time_hrs": 11,
+      "current_load": 650,
+      "status": "operational",
+      "risk_level": "low"
+    }
+  ],
+  "routes": [
+    {
+      "id": "R01",
+      "from_node": "N01",
+      "to_node": "N04",
+      "transport_mode": "truck",
+      "distance_km": 35,
+      "base_transit_time_hrs": 2,
+      "cost_per_unit": 15,
+      "risk_factor": 0.05,
+      "status": "active"
+    },
+    {
+      "id": "R02",
+      "from_node": "N02",
+      "to_node": "N04",
+      "transport_mode": "truck",
+      "distance_km": 1270,
+      "base_transit_time_hrs": 18,
+      "cost_per_unit": 55,
+      "risk_factor": 0.1,
+      "status": "active"
+    },
+    {
+      "id": "R03",
+      "from_node": "N03",
+      "to_node": "N06",
+      "transport_mode": "truck",
+      "distance_km": 25,
+      "base_transit_time_hrs": 2,
+      "cost_per_unit": 12,
+      "risk_factor": 0.08,
+      "status": "active"
+    },
+    {
+      "id": "R04",
+      "from_node": "N04",
+      "to_node": "N05",
+      "transport_mode": "sea",
+      "distance_km": 3800,
+      "base_transit_time_hrs": 120,
+      "cost_per_unit": 80,
+      "risk_factor": 0.12,
+      "status": "active"
+    },
+    {
+      "id": "R05",
+      "from_node": "N04",
+      "to_node": "N08",
+      "transport_mode": "sea",
+      "distance_km": 10500,
+      "base_transit_time_hrs": 336,
+      "cost_per_unit": 200,
+      "risk_factor": 0.15,
+      "status": "active"
+    },
+    {
+      "id": "R06",
+      "from_node": "N04",
+      "to_node": "N20",
+      "transport_mode": "sea",
+      "distance_km": 950,
+      "base_transit_time_hrs": 36,
+      "cost_per_unit": 45,
+      "risk_factor": 0.05,
+      "status": "active"
+    },
+    {
+      "id": "R07",
+      "from_node": "N05",
+      "to_node": "N07",
+      "transport_mode": "sea",
+      "distance_km": 15000,
+      "base_transit_time_hrs": 480,
+      "cost_per_unit": 250,
+      "risk_factor": 0.1,
+      "status": "active"
+    },
+    {
+      "id": "R08",
+      "from_node": "N05",
+      "to_node": "N09",
+      "transport_mode": "sea",
+      "distance_km": 5800,
+      "base_transit_time_hrs": 168,
+      "cost_per_unit": 120,
+      "risk_factor": 0.08,
+      "status": "active"
+    },
+    {
+      "id": "R09",
+      "from_node": "N05",
+      "to_node": "N17",
+      "transport_mode": "sea",
+      "distance_km": 6300,
+      "base_transit_time_hrs": 192,
+      "cost_per_unit": 140,
+      "risk_factor": 0.07,
+      "status": "active"
+    },
+    {
+      "id": "R10",
+      "from_node": "N06",
+      "to_node": "N09",
+      "transport_mode": "sea",
+      "distance_km": 1900,
+      "base_transit_time_hrs": 72,
+      "cost_per_unit": 65,
+      "risk_factor": 0.06,
+      "status": "active"
+    },
+    {
+      "id": "R11",
+      "from_node": "N06",
+      "to_node": "N05",
+      "transport_mode": "sea",
+      "distance_km": 3500,
+      "base_transit_time_hrs": 108,
+      "cost_per_unit": 75,
+      "risk_factor": 0.09,
+      "status": "active"
+    },
+    {
+      "id": "R12",
+      "from_node": "N07",
+      "to_node": "N11",
+      "transport_mode": "truck",
+      "distance_km": 450,
+      "base_transit_time_hrs": 6,
+      "cost_per_unit": 30,
+      "risk_factor": 0.03,
+      "status": "active"
+    },
+    {
+      "id": "R13",
+      "from_node": "N07",
+      "to_node": "N14",
+      "transport_mode": "sea",
+      "distance_km": 360,
+      "base_transit_time_hrs": 18,
+      "cost_per_unit": 35,
+      "risk_factor": 0.04,
+      "status": "active"
+    },
+    {
+      "id": "R14",
+      "from_node": "N07",
+      "to_node": "N10",
+      "transport_mode": "rail",
+      "distance_km": 480,
+      "base_transit_time_hrs": 8,
+      "cost_per_unit": 25,
+      "risk_factor": 0.03,
+      "status": "active"
+    },
+    {
+      "id": "R15",
+      "from_node": "N08",
+      "to_node": "N12",
+      "transport_mode": "rail",
+      "distance_km": 2800,
+      "base_transit_time_hrs": 48,
+      "cost_per_unit": 90,
+      "risk_factor": 0.08,
+      "status": "active"
+    },
+    {
+      "id": "R16",
+      "from_node": "N08",
+      "to_node": "N15",
+      "transport_mode": "rail",
+      "distance_km": 4500,
+      "base_transit_time_hrs": 72,
+      "cost_per_unit": 130,
+      "risk_factor": 0.1,
+      "status": "active"
+    },
+    {
+      "id": "R17",
+      "from_node": "N09",
+      "to_node": "N13",
+      "transport_mode": "truck",
+      "distance_km": 40,
+      "base_transit_time_hrs": 1,
+      "cost_per_unit": 10,
+      "risk_factor": 0.02,
+      "status": "active"
+    },
+    {
+      "id": "R18",
+      "from_node": "N09",
+      "to_node": "N19",
+      "transport_mode": "sea",
+      "distance_km": 4200,
+      "base_transit_time_hrs": 144,
+      "cost_per_unit": 110,
+      "risk_factor": 0.15,
+      "status": "active"
+    },
+    {
+      "id": "R19",
+      "from_node": "N10",
+      "to_node": "N14",
+      "transport_mode": "truck",
+      "distance_km": 900,
+      "base_transit_time_hrs": 12,
+      "cost_per_unit": 40,
+      "risk_factor": 0.04,
+      "status": "active"
+    },
+    {
+      "id": "R20",
+      "from_node": "N11",
+      "to_node": "N14",
+      "transport_mode": "truck",
+      "distance_km": 650,
+      "base_transit_time_hrs": 8,
+      "cost_per_unit": 35,
+      "risk_factor": 0.03,
+      "status": "active"
+    },
+    {
+      "id": "R21",
+      "from_node": "N12",
+      "to_node": "N15",
+      "transport_mode": "truck",
+      "distance_km": 1300,
+      "base_transit_time_hrs": 16,
+      "cost_per_unit": 50,
+      "risk_factor": 0.06,
+      "status": "active"
+    },
+    {
+      "id": "R22",
+      "from_node": "N20",
+      "to_node": "N16",
+      "transport_mode": "sea",
+      "distance_km": 1100,
+      "base_transit_time_hrs": 42,
+      "cost_per_unit": 55,
+      "risk_factor": 0.05,
+      "status": "active"
+    },
+    {
+      "id": "R23",
+      "from_node": "N20",
+      "to_node": "N08",
+      "transport_mode": "sea",
+      "distance_km": 9500,
+      "base_transit_time_hrs": 312,
+      "cost_per_unit": 190,
+      "risk_factor": 0.12,
+      "status": "active"
+    },
+    {
+      "id": "R24",
+      "from_node": "N04",
+      "to_node": "N07",
+      "transport_mode": "sea",
+      "distance_km": 19500,
+      "base_transit_time_hrs": 624,
+      "cost_per_unit": 300,
+      "risk_factor": 0.18,
+      "status": "active"
+    },
+    {
+      "id": "R25",
+      "from_node": "N13",
+      "to_node": "N19",
+      "transport_mode": "air",
+      "distance_km": 3400,
+      "base_transit_time_hrs": 6,
+      "cost_per_unit": 350,
+      "risk_factor": 0.04,
+      "status": "active"
+    },
+    {
+      "id": "R26",
+      "from_node": "N05",
+      "to_node": "N08",
+      "transport_mode": "sea",
+      "distance_km": 14500,
+      "base_transit_time_hrs": 456,
+      "cost_per_unit": 240,
+      "risk_factor": 0.14,
+      "status": "active"
+    },
+    {
+      "id": "R27",
+      "from_node": "N06",
+      "to_node": "N07",
+      "transport_mode": "sea",
+      "distance_km": 11200,
+      "base_transit_time_hrs": 360,
+      "cost_per_unit": 220,
+      "risk_factor": 0.13,
+      "status": "active"
+    },
+    {
+      "id": "R28",
+      "from_node": "N14",
+      "to_node": "N18",
+      "transport_mode": "air",
+      "distance_km": 9500,
+      "base_transit_time_hrs": 14,
+      "cost_per_unit": 500,
+      "risk_factor": 0.06,
+      "status": "active"
+    },
+    {
+      "id": "R29",
+      "from_node": "N02",
+      "to_node": "N05",
+      "transport_mode": "sea",
+      "distance_km": 2600,
+      "base_transit_time_hrs": 84,
+      "cost_per_unit": 70,
+      "risk_factor": 0.07,
+      "status": "active"
+    },
+    {
+      "id": "R30",
+      "from_node": "N15",
+      "to_node": "N18",
+      "transport_mode": "air",
+      "distance_km": 7700,
+      "base_transit_time_hrs": 12,
+      "cost_per_unit": 450,
+      "risk_factor": 0.05,
+      "status": "active"
+    },
+    {
+      "id": "R31",
+      "from_node": "N01",
+      "to_node": "N21",
+      "transport_mode": "truck",
+      "distance_km": 210,
+      "base_transit_time_hrs": 4,
+      "cost_per_unit": 20,
+      "risk_factor": 0.05,
+      "status": "active"
+    },
+    {
+      "id": "R32",
+      "from_node": "N02",
+      "to_node": "N24",
+      "transport_mode": "truck",
+      "distance_km": 40,
+      "base_transit_time_hrs": 1,
+      "cost_per_unit": 10,
+      "risk_factor": 0.05,
+      "status": "active"
+    },
+    {
+      "id": "R33",
+      "from_node": "N21",
+      "to_node": "N08",
+      "transport_mode": "sea",
+      "distance_km": 10400,
+      "base_transit_time_hrs": 330,
+      "cost_per_unit": 195,
+      "risk_factor": 0.12,
+      "status": "active"
+    },
+    {
+      "id": "R34",
+      "from_node": "N21",
+      "to_node": "N22",
+      "transport_mode": "sea",
+      "distance_km": 10450,
+      "base_transit_time_hrs": 332,
+      "cost_per_unit": 190,
+      "risk_factor": 0.1,
+      "status": "active"
+    },
+    {
+      "id": "R35",
+      "from_node": "N04",
+      "to_node": "N22",
+      "transport_mode": "sea",
+      "distance_km": 10550,
+      "base_transit_time_hrs": 338,
+      "cost_per_unit": 195,
+      "risk_factor": 0.11,
+      "status": "active"
+    },
+    {
+      "id": "R36",
+      "from_node": "N24",
+      "to_node": "N08",
+      "transport_mode": "sea",
+      "distance_km": 11000,
+      "base_transit_time_hrs": 350,
+      "cost_per_unit": 210,
+      "risk_factor": 0.13,
+      "status": "active"
+    },
+    {
+      "id": "R37",
+      "from_node": "N24",
+      "to_node": "N05",
+      "transport_mode": "sea",
+      "distance_km": 2500,
+      "base_transit_time_hrs": 80,
+      "cost_per_unit": 65,
+      "risk_factor": 0.06,
+      "status": "active"
+    },
+    {
+      "id": "R38",
+      "from_node": "N22",
+      "to_node": "N12",
+      "transport_mode": "rail",
+      "distance_km": 2800,
+      "base_transit_time_hrs": 48,
+      "cost_per_unit": 85,
+      "risk_factor": 0.08,
+      "status": "active"
+    },
+    {
+      "id": "R39",
+      "from_node": "N05",
+      "to_node": "N23",
+      "transport_mode": "sea",
+      "distance_km": 15000,
+      "base_transit_time_hrs": 480,
+      "cost_per_unit": 240,
+      "risk_factor": 0.1,
+      "status": "active"
+    },
+    {
+      "id": "R40",
+      "from_node": "N23",
+      "to_node": "N11",
+      "transport_mode": "truck",
+      "distance_km": 400,
+      "base_transit_time_hrs": 5,
+      "cost_per_unit": 28,
+      "risk_factor": 0.03,
+      "status": "active"
+    },
+    {
+      "id": "R41",
+      "from_node": "N23",
+      "to_node": "N14",
+      "transport_mode": "truck",
+      "distance_km": 350,
+      "base_transit_time_hrs": 8,
+      "cost_per_unit": 35,
+      "risk_factor": 0.04,
+      "status": "active"
+    },
+    {
+      "id": "R42",
+      "from_node": "N21",
+      "to_node": "N05",
+      "transport_mode": "sea",
+      "distance_km": 3700,
+      "base_transit_time_hrs": 118,
+      "cost_per_unit": 78,
+      "risk_factor": 0.11,
+      "status": "active"
+    },
+    {
+      "id": "R43",
+      "from_node": "N21",
+      "to_node": "N07",
+      "transport_mode": "sea",
+      "distance_km": 19400,
+      "base_transit_time_hrs": 620,
+      "cost_per_unit": 290,
+      "risk_factor": 0.17,
+      "status": "active"
+    },
+    {
+      "id": "R44",
+      "from_node": "N21",
+      "to_node": "N23",
+      "transport_mode": "sea",
+      "distance_km": 19450,
+      "base_transit_time_hrs": 622,
+      "cost_per_unit": 295,
+      "risk_factor": 0.16,
+      "status": "active"
+    }
+  ],
+  "shipments": [
+    {
+      "id": "S001",
+      "origin": "N01",
+      "destination": "N14",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 12000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N07",
+        "N14"
+      ],
+      "departure_time": "2026-04-20T08:00:00Z",
+      "estimated_arrival": "2026-05-12T18:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S002",
+      "origin": "N02",
+      "destination": "N12",
+      "current_node": "N04",
+      "status": "delayed",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 8500,
+      "route_taken": [
+        "N02",
+        "N04"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-18T10:00:00Z",
+      "estimated_arrival": "2026-05-06T14:00:00Z",
+      "disruptions": [
+        {
+          "type": "port_congestion",
+          "node": "N04",
+          "delay_hrs": 36,
+          "description": "Heavy vessel traffic at Shanghai Port"
+        }
+      ]
+    },
+    {
+      "id": "S003",
+      "origin": "N03",
+      "destination": "N13",
+      "current_node": "N06",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "textiles",
+      "weight_kg": 15000,
+      "route_taken": [
+        "N03",
+        "N06"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-19T06:00:00Z",
+      "estimated_arrival": "2026-04-26T12:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S004",
+      "origin": "N01",
+      "destination": "N16",
+      "current_node": "N20",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 9200,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N20"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N20",
+        "N16"
+      ],
+      "departure_time": "2026-04-17T12:00:00Z",
+      "estimated_arrival": "2026-04-28T08:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S005",
+      "origin": "N02",
+      "destination": "N15",
+      "current_node": "N08",
+      "status": "delayed",
+      "priority": "critical",
+      "cargo_type": "medical_supplies",
+      "weight_kg": 3200,
+      "route_taken": [
+        "N02",
+        "N04",
+        "N08"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N08",
+        "N15"
+      ],
+      "departure_time": "2026-04-10T14:00:00Z",
+      "estimated_arrival": "2026-05-02T10:00:00Z",
+      "disruptions": [
+        {
+          "type": "port_congestion",
+          "node": "N08",
+          "delay_hrs": 48,
+          "description": "LA port congestion \u00e2\u20ac\u201d labor shortage"
+        }
+      ]
+    },
+    {
+      "id": "S006",
+      "origin": "N03",
+      "destination": "N14",
+      "current_node": "N07",
+      "status": "in_transit",
+      "priority": "low",
+      "cargo_type": "textiles",
+      "weight_kg": 18000,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N07"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N07",
+        "N14"
+      ],
+      "departure_time": "2026-04-05T08:00:00Z",
+      "estimated_arrival": "2026-04-26T20:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S007",
+      "origin": "N01",
+      "destination": "N11",
+      "current_node": "N04",
+      "status": "delayed",
+      "priority": "high",
+      "cargo_type": "machinery",
+      "weight_kg": 25000,
+      "route_taken": [
+        "N01",
+        "N04"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N07",
+        "N11"
+      ],
+      "departure_time": "2026-04-22T06:00:00Z",
+      "estimated_arrival": "2026-05-20T12:00:00Z",
+      "disruptions": [
+        {
+          "type": "weather",
+          "node": "N04",
+          "delay_hrs": 24,
+          "description": "Typhoon warning in East China Sea"
+        }
+      ]
+    },
+    {
+      "id": "S008",
+      "origin": "N02",
+      "destination": "N17",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "electronics",
+      "weight_kg": 6100,
+      "route_taken": [
+        "N02",
+        "N05"
+      ],
+      "planned_route": [
+        "N02",
+        "N05",
+        "N17"
+      ],
+      "departure_time": "2026-04-15T10:00:00Z",
+      "estimated_arrival": "2026-05-01T16:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S009",
+      "origin": "N03",
+      "destination": "N19",
+      "current_node": "N09",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 2800,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N09"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09",
+        "N19"
+      ],
+      "departure_time": "2026-04-14T08:00:00Z",
+      "estimated_arrival": "2026-05-05T20:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S010",
+      "origin": "N01",
+      "destination": "N15",
+      "current_node": "N01",
+      "status": "processing",
+      "priority": "medium",
+      "cargo_type": "automotive_parts",
+      "weight_kg": 14000,
+      "route_taken": [
+        "N01"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N08",
+        "N15"
+      ],
+      "departure_time": "2026-04-24T08:00:00Z",
+      "estimated_arrival": "2026-05-15T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S011",
+      "origin": "N02",
+      "destination": "N14",
+      "current_node": "N14",
+      "status": "delivered",
+      "priority": "low",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 7500,
+      "route_taken": [
+        "N02",
+        "N04",
+        "N05",
+        "N07",
+        "N14"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N05",
+        "N07",
+        "N14"
+      ],
+      "departure_time": "2026-03-28T10:00:00Z",
+      "estimated_arrival": "2026-04-22T18:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S012",
+      "origin": "N03",
+      "destination": "N11",
+      "current_node": "N11",
+      "status": "delivered",
+      "priority": "medium",
+      "cargo_type": "textiles",
+      "weight_kg": 11000,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N07",
+        "N11"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N07",
+        "N11"
+      ],
+      "departure_time": "2026-03-25T06:00:00Z",
+      "estimated_arrival": "2026-04-20T10:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S013",
+      "origin": "N01",
+      "destination": "N12",
+      "current_node": "N08",
+      "status": "delayed",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 5800,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N08"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-08T12:00:00Z",
+      "estimated_arrival": "2026-05-03T20:00:00Z",
+      "disruptions": [
+        {
+          "type": "port_congestion",
+          "node": "N08",
+          "delay_hrs": 30,
+          "description": "Extended customs inspection at LA Port"
+        }
+      ]
+    },
+    {
+      "id": "S014",
+      "origin": "N01",
+      "destination": "N18",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "machinery",
+      "weight_kg": 22000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N07",
+        "N14",
+        "N18"
+      ],
+      "departure_time": "2026-04-12T08:00:00Z",
+      "estimated_arrival": "2026-05-18T12:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S015",
+      "origin": "N03",
+      "destination": "N16",
+      "current_node": "N06",
+      "status": "delayed",
+      "priority": "low",
+      "cargo_type": "raw_materials",
+      "weight_kg": 30000,
+      "route_taken": [
+        "N03",
+        "N06"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N04",
+        "N20",
+        "N16"
+      ],
+      "departure_time": "2026-04-20T10:00:00Z",
+      "estimated_arrival": "2026-05-22T08:00:00Z",
+      "disruptions": [
+        {
+          "type": "operational",
+          "node": "N06",
+          "delay_hrs": 18,
+          "description": "Crane malfunction at JNPT port"
+        }
+      ]
+    },
+    {
+      "id": "S016",
+      "origin": "N02",
+      "destination": "N11",
+      "current_node": "N07",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 4800,
+      "route_taken": [
+        "N02",
+        "N04",
+        "N05",
+        "N07"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N05",
+        "N07",
+        "N11"
+      ],
+      "departure_time": "2026-04-02T14:00:00Z",
+      "estimated_arrival": "2026-04-28T10:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S017",
+      "origin": "N01",
+      "destination": "N13",
+      "current_node": "N09",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 7000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05",
+        "N09"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-06T08:00:00Z",
+      "estimated_arrival": "2026-04-28T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S018",
+      "origin": "N03",
+      "destination": "N15",
+      "current_node": "N03",
+      "status": "processing",
+      "priority": "critical",
+      "cargo_type": "medical_supplies",
+      "weight_kg": 1500,
+      "route_taken": [
+        "N03"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09",
+        "N13",
+        "N19"
+      ],
+      "departure_time": "2026-04-24T14:00:00Z",
+      "estimated_arrival": "2026-05-20T08:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S019",
+      "origin": "N02",
+      "destination": "N16",
+      "current_node": "N20",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "electronics",
+      "weight_kg": 5500,
+      "route_taken": [
+        "N02",
+        "N04",
+        "N20"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N20",
+        "N16"
+      ],
+      "departure_time": "2026-04-16T12:00:00Z",
+      "estimated_arrival": "2026-04-30T06:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S020",
+      "origin": "N01",
+      "destination": "N17",
+      "current_node": "N05",
+      "status": "delayed",
+      "priority": "low",
+      "cargo_type": "furniture",
+      "weight_kg": 20000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N17"
+      ],
+      "departure_time": "2026-04-11T06:00:00Z",
+      "estimated_arrival": "2026-05-04T16:00:00Z",
+      "disruptions": [
+        {
+          "type": "weather",
+          "node": "N05",
+          "delay_hrs": 20,
+          "description": "Monsoon delays near Strait of Malacca"
+        }
+      ]
+    },
+    {
+      "id": "S021",
+      "origin": "N03",
+      "destination": "N17",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "textiles",
+      "weight_kg": 13000,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N05"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N17"
+      ],
+      "departure_time": "2026-04-13T08:00:00Z",
+      "estimated_arrival": "2026-05-06T12:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S022",
+      "origin": "N01",
+      "destination": "N19",
+      "current_node": "N09",
+      "status": "delayed",
+      "priority": "high",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 2200,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05",
+        "N09"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N09",
+        "N19"
+      ],
+      "departure_time": "2026-04-07T10:00:00Z",
+      "estimated_arrival": "2026-05-08T18:00:00Z",
+      "disruptions": [
+        {
+          "type": "security",
+          "node": "N19",
+          "delay_hrs": 72,
+          "description": "Security checkpoint delays at Nairobi hub"
+        }
+      ]
+    },
+    {
+      "id": "S023",
+      "origin": "N02",
+      "destination": "N18",
+      "current_node": "N15",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "electronics",
+      "weight_kg": 4200,
+      "route_taken": [
+        "N02",
+        "N04",
+        "N08",
+        "N15"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N08",
+        "N15",
+        "N18"
+      ],
+      "departure_time": "2026-03-30T12:00:00Z",
+      "estimated_arrival": "2026-04-30T20:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S024",
+      "origin": "N01",
+      "destination": "N14",
+      "current_node": "N14",
+      "status": "delivered",
+      "priority": "high",
+      "cargo_type": "automotive_parts",
+      "weight_kg": 16000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05",
+        "N07",
+        "N14"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N07",
+        "N14"
+      ],
+      "departure_time": "2026-03-20T08:00:00Z",
+      "estimated_arrival": "2026-04-18T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S025",
+      "origin": "N03",
+      "destination": "N12",
+      "current_node": "N08",
+      "status": "in_transit",
+      "priority": "low",
+      "cargo_type": "raw_materials",
+      "weight_kg": 28000,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N05",
+        "N08"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-01T06:00:00Z",
+      "estimated_arrival": "2026-05-10T10:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S026",
+      "origin": "N01",
+      "destination": "N16",
+      "current_node": "N16",
+      "status": "delivered",
+      "priority": "medium",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 6800,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N20",
+        "N16"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N20",
+        "N16"
+      ],
+      "departure_time": "2026-03-22T10:00:00Z",
+      "estimated_arrival": "2026-04-10T08:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S027",
+      "origin": "N02",
+      "destination": "N13",
+      "current_node": "N05",
+      "status": "delayed",
+      "priority": "medium",
+      "cargo_type": "electronics",
+      "weight_kg": 3900,
+      "route_taken": [
+        "N02",
+        "N05"
+      ],
+      "planned_route": [
+        "N02",
+        "N05",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-18T14:00:00Z",
+      "estimated_arrival": "2026-05-07T12:00:00Z",
+      "disruptions": [
+        {
+          "type": "weather",
+          "node": "N05",
+          "delay_hrs": 16,
+          "description": "Tropical storm in South China Sea affecting Singapore routes"
+        }
+      ]
+    },
+    {
+      "id": "S028",
+      "origin": "N03",
+      "destination": "N14",
+      "current_node": "N06",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 1800,
+      "route_taken": [
+        "N03",
+        "N06"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N07",
+        "N14"
+      ],
+      "departure_time": "2026-04-22T08:00:00Z",
+      "estimated_arrival": "2026-05-10T16:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S029",
+      "origin": "N01",
+      "destination": "N12",
+      "current_node": "N04",
+      "status": "delayed",
+      "priority": "critical",
+      "cargo_type": "medical_supplies",
+      "weight_kg": 2500,
+      "route_taken": [
+        "N01",
+        "N04"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-21T16:00:00Z",
+      "estimated_arrival": "2026-05-08T12:00:00Z",
+      "disruptions": [
+        {
+          "type": "port_congestion",
+          "node": "N04",
+          "delay_hrs": 40,
+          "description": "Shanghai Port berth shortage and vessel queue"
+        }
+      ]
+    },
+    {
+      "id": "S030",
+      "origin": "N02",
+      "destination": "N19",
+      "current_node": "N13",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 3100,
+      "route_taken": [
+        "N02",
+        "N05",
+        "N09",
+        "N13"
+      ],
+      "planned_route": [
+        "N02",
+        "N05",
+        "N09",
+        "N13",
+        "N19"
+      ],
+      "departure_time": "2026-04-04T10:00:00Z",
+      "estimated_arrival": "2026-05-02T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S031",
+      "origin": "N01",
+      "destination": "N11",
+      "current_node": "N11",
+      "status": "delivered",
+      "priority": "medium",
+      "cargo_type": "machinery",
+      "weight_kg": 19000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N07",
+        "N11"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N07",
+        "N11"
+      ],
+      "departure_time": "2026-03-15T08:00:00Z",
+      "estimated_arrival": "2026-04-16T10:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S032",
+      "origin": "N03",
+      "destination": "N18",
+      "current_node": "N07",
+      "status": "in_transit",
+      "priority": "low",
+      "cargo_type": "textiles",
+      "weight_kg": 10500,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N07"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N07",
+        "N14",
+        "N18"
+      ],
+      "departure_time": "2026-04-03T06:00:00Z",
+      "estimated_arrival": "2026-05-12T08:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S033",
+      "origin": "N02",
+      "destination": "N12",
+      "current_node": "N12",
+      "status": "delivered",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 7200,
+      "route_taken": [
+        "N02",
+        "N04",
+        "N08",
+        "N12"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-03-18T14:00:00Z",
+      "estimated_arrival": "2026-04-15T16:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S034",
+      "origin": "N01",
+      "destination": "N17",
+      "current_node": "N04",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 8800,
+      "route_taken": [
+        "N01",
+        "N04"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N17"
+      ],
+      "departure_time": "2026-04-23T08:00:00Z",
+      "estimated_arrival": "2026-05-14T12:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S035",
+      "origin": "N03",
+      "destination": "N15",
+      "current_node": "N08",
+      "status": "delayed",
+      "priority": "medium",
+      "cargo_type": "raw_materials",
+      "weight_kg": 24000,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N05",
+        "N08"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N08",
+        "N15"
+      ],
+      "departure_time": "2026-04-03T12:00:00Z",
+      "estimated_arrival": "2026-05-12T18:00:00Z",
+      "disruptions": [
+        {
+          "type": "port_congestion",
+          "node": "N08",
+          "delay_hrs": 24,
+          "description": "Rail yard bottleneck at LA Port intermodal facility"
+        }
+      ]
+    },
+    {
+      "id": "S036",
+      "origin": "N01",
+      "destination": "N13",
+      "current_node": "N13",
+      "status": "delivered",
+      "priority": "low",
+      "cargo_type": "furniture",
+      "weight_kg": 16000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05",
+        "N09",
+        "N13"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-03-10T06:00:00Z",
+      "estimated_arrival": "2026-04-12T08:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S037",
+      "origin": "N02",
+      "destination": "N14",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 4500,
+      "route_taken": [
+        "N02",
+        "N05"
+      ],
+      "planned_route": [
+        "N02",
+        "N05",
+        "N07",
+        "N14"
+      ],
+      "departure_time": "2026-04-19T10:00:00Z",
+      "estimated_arrival": "2026-05-14T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S038",
+      "origin": "N03",
+      "destination": "N12",
+      "current_node": "N06",
+      "status": "delayed",
+      "priority": "medium",
+      "cargo_type": "textiles",
+      "weight_kg": 12500,
+      "route_taken": [
+        "N03",
+        "N06"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-21T08:00:00Z",
+      "estimated_arrival": "2026-05-20T10:00:00Z",
+      "disruptions": [
+        {
+          "type": "operational",
+          "node": "N06",
+          "delay_hrs": 12,
+          "description": "Documentation processing delays at JNPT"
+        }
+      ]
+    },
+    {
+      "id": "S039",
+      "origin": "N01",
+      "destination": "N15",
+      "current_node": "N08",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "automotive_parts",
+      "weight_kg": 17500,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N08"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N08",
+        "N15"
+      ],
+      "departure_time": "2026-04-05T14:00:00Z",
+      "estimated_arrival": "2026-05-01T08:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S040",
+      "origin": "N02",
+      "destination": "N17",
+      "current_node": "N17",
+      "status": "delivered",
+      "priority": "medium",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 6300,
+      "route_taken": [
+        "N02",
+        "N05",
+        "N17"
+      ],
+      "planned_route": [
+        "N02",
+        "N05",
+        "N17"
+      ],
+      "departure_time": "2026-03-25T10:00:00Z",
+      "estimated_arrival": "2026-04-17T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S041",
+      "origin": "N03",
+      "destination": "N11",
+      "current_node": "N09",
+      "status": "in_transit",
+      "priority": "low",
+      "cargo_type": "raw_materials",
+      "weight_kg": 26000,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N09"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09",
+        "N13",
+        "N19"
+      ],
+      "departure_time": "2026-04-10T06:00:00Z",
+      "estimated_arrival": "2026-05-08T12:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S042",
+      "origin": "N01",
+      "destination": "N18",
+      "current_node": "N07",
+      "status": "delayed",
+      "priority": "medium",
+      "cargo_type": "machinery",
+      "weight_kg": 21000,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05",
+        "N07"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N07",
+        "N14",
+        "N18"
+      ],
+      "departure_time": "2026-04-01T08:00:00Z",
+      "estimated_arrival": "2026-05-15T10:00:00Z",
+      "disruptions": [
+        {
+          "type": "weather",
+          "node": "N07",
+          "delay_hrs": 14,
+          "description": "North Sea storm affecting Rotterdam port operations"
+        }
+      ]
+    },
+    {
+      "id": "S043",
+      "origin": "N02",
+      "destination": "N15",
+      "current_node": "N02",
+      "status": "processing",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 5200,
+      "route_taken": [
+        "N02"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N08",
+        "N15"
+      ],
+      "departure_time": "2026-04-24T12:00:00Z",
+      "estimated_arrival": "2026-05-16T18:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S044",
+      "origin": "N03",
+      "destination": "N16",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "textiles",
+      "weight_kg": 9800,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N05"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N04",
+        "N20",
+        "N16"
+      ],
+      "departure_time": "2026-04-09T08:00:00Z",
+      "estimated_arrival": "2026-05-08T06:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S045",
+      "origin": "N01",
+      "destination": "N14",
+      "current_node": "N10",
+      "status": "in_transit",
+      "priority": "critical",
+      "cargo_type": "medical_supplies",
+      "weight_kg": 1200,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N07",
+        "N10"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N07",
+        "N10",
+        "N14"
+      ],
+      "departure_time": "2026-03-28T06:00:00Z",
+      "estimated_arrival": "2026-04-26T14:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S046",
+      "origin": "N02",
+      "destination": "N11",
+      "current_node": "N04",
+      "status": "delayed",
+      "priority": "medium",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 8100,
+      "route_taken": [
+        "N02",
+        "N04"
+      ],
+      "planned_route": [
+        "N02",
+        "N04",
+        "N07",
+        "N11"
+      ],
+      "departure_time": "2026-04-20T14:00:00Z",
+      "estimated_arrival": "2026-05-18T08:00:00Z",
+      "disruptions": [
+        {
+          "type": "port_congestion",
+          "node": "N04",
+          "delay_hrs": 28,
+          "description": "Container yard overflow at Shanghai Port"
+        }
+      ]
+    },
+    {
+      "id": "S047",
+      "origin": "N03",
+      "destination": "N13",
+      "current_node": "N13",
+      "status": "delivered",
+      "priority": "high",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 1600,
+      "route_taken": [
+        "N03",
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-03-20T10:00:00Z",
+      "estimated_arrival": "2026-04-08T12:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S048",
+      "origin": "N01",
+      "destination": "N12",
+      "current_node": "N20",
+      "status": "in_transit",
+      "priority": "low",
+      "cargo_type": "furniture",
+      "weight_kg": 18500,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N20"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N20",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-15T06:00:00Z",
+      "estimated_arrival": "2026-05-18T16:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S049",
+      "origin": "N02",
+      "destination": "N19",
+      "current_node": "N09",
+      "status": "delayed",
+      "priority": "critical",
+      "cargo_type": "medical_supplies",
+      "weight_kg": 900,
+      "route_taken": [
+        "N02",
+        "N05",
+        "N09"
+      ],
+      "planned_route": [
+        "N02",
+        "N05",
+        "N09",
+        "N19"
+      ],
+      "departure_time": "2026-04-14T14:00:00Z",
+      "estimated_arrival": "2026-05-06T10:00:00Z",
+      "disruptions": [
+        {
+          "type": "security",
+          "node": "N19",
+          "delay_hrs": 48,
+          "description": "Political unrest causing border checkpoint delays near Nairobi"
+        }
+      ]
+    },
+    {
+      "id": "S050",
+      "origin": "N01",
+      "destination": "N15",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 6500,
+      "route_taken": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N05",
+        "N08",
+        "N15"
+      ],
+      "departure_time": "2026-04-17T08:00:00Z",
+      "estimated_arrival": "2026-05-14T20:00:00Z",
+      "disruptions": []
+    },
+    {
+      "id": "S051",
+      "origin": "N04",
+      "destination": "N12",
+      "current_node": "N08",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "machinery",
+      "weight_kg": 18535,
+      "route_taken": [
+        "N04",
+        "N08"
+      ],
+      "planned_route": [
+        "N04",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S052",
+      "origin": "N01",
+      "destination": "N20",
+      "current_node": "N04",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 18188,
+      "route_taken": [
+        "N01",
+        "N04"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N20"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S053",
+      "origin": "N03",
+      "destination": "N13",
+      "current_node": "N03",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 4061,
+      "route_taken": [
+        "N03"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S054",
+      "origin": "N06",
+      "destination": "N13",
+      "current_node": "N09",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "electronics",
+      "weight_kg": 24741,
+      "route_taken": [
+        "N06",
+        "N09"
+      ],
+      "planned_route": [
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S055",
+      "origin": "N21",
+      "destination": "N10",
+      "current_node": "N21",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 17784,
+      "route_taken": [
+        "N21"
+      ],
+      "planned_route": [
+        "N21",
+        "N07",
+        "N10"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S056",
+      "origin": "N03",
+      "destination": "N23",
+      "current_node": "N03",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 13064,
+      "route_taken": [
+        "N03"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N23"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S057",
+      "origin": "N01",
+      "destination": "N20",
+      "current_node": "N01",
+      "status": "in_transit",
+      "priority": "critical",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 12678,
+      "route_taken": [
+        "N01"
+      ],
+      "planned_route": [
+        "N01",
+        "N04",
+        "N20"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S058",
+      "origin": "N06",
+      "destination": "N10",
+      "current_node": "N07",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "machinery",
+      "weight_kg": 6378,
+      "route_taken": [
+        "N06",
+        "N07"
+      ],
+      "planned_route": [
+        "N06",
+        "N07",
+        "N10"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S059",
+      "origin": "N06",
+      "destination": "N13",
+      "current_node": "N09",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "machinery",
+      "weight_kg": 2416,
+      "route_taken": [
+        "N06",
+        "N09"
+      ],
+      "planned_route": [
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S060",
+      "origin": "N05",
+      "destination": "N12",
+      "current_node": "N08",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 22614,
+      "route_taken": [
+        "N05",
+        "N08"
+      ],
+      "planned_route": [
+        "N05",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S061",
+      "origin": "N03",
+      "destination": "N08",
+      "current_node": "N03",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "electronics",
+      "weight_kg": 17462,
+      "route_taken": [
+        "N03"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N08"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S062",
+      "origin": "N06",
+      "destination": "N13",
+      "current_node": "N09",
+      "status": "in_transit",
+      "priority": "medium",
+      "cargo_type": "electronics",
+      "weight_kg": 11763,
+      "route_taken": [
+        "N06",
+        "N09"
+      ],
+      "planned_route": [
+        "N06",
+        "N09",
+        "N13"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S063",
+      "origin": "N03",
+      "destination": "N12",
+      "current_node": "N03",
+      "status": "in_transit",
+      "priority": "critical",
+      "cargo_type": "consumer_goods",
+      "weight_kg": 6005,
+      "route_taken": [
+        "N03"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N05",
+        "N08",
+        "N12"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S064",
+      "origin": "N05",
+      "destination": "N10",
+      "current_node": "N05",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "pharmaceuticals",
+      "weight_kg": 15757,
+      "route_taken": [
+        "N05"
+      ],
+      "planned_route": [
+        "N05",
+        "N07",
+        "N10"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    },
+    {
+      "id": "S065",
+      "origin": "N03",
+      "destination": "N09",
+      "current_node": "N06",
+      "status": "in_transit",
+      "priority": "high",
+      "cargo_type": "machinery",
+      "weight_kg": 8531,
+      "route_taken": [
+        "N03",
+        "N06"
+      ],
+      "planned_route": [
+        "N03",
+        "N06",
+        "N09"
+      ],
+      "departure_time": "2026-04-23T06:31:41Z",
+      "estimated_arrival": "2026-04-30T06:31:41Z",
+      "disruptions": []
+    }
+  ]
+}
