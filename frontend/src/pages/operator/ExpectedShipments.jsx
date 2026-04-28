@@ -146,7 +146,7 @@ export default function ExpectedShipments() {
 
   if (loading) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-muted)', gap:'16px' }}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-secondary)', gap:'16px' }}>
         <Loader size={32} style={{ animation:'spin 1s linear infinite' }} />
         <div style={{ fontSize: '14px', fontWeight: '700', letterSpacing: '1px' }}>LOADING MANIFESTS...</div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -158,28 +158,28 @@ export default function ExpectedShipments() {
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>INBOUND LOGISTICS</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Monitor and process shipments arriving at your station</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Monitor and process shipments arriving at your station</p>
       </div>
 
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--info)')}><Inbox size={24} /></div>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Inbound Units</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Inbound Units</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.expected}</div>
           </div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--warning)')}><Clock size={24} /></div>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>At Risk / Delayed</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>At Risk / Delayed</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.delayed}</div>
           </div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--brand)')}><CheckCircle size={24} /></div>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Processed Today</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Processed Today</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.arrivedToday}</div>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function ExpectedShipments() {
 
       <div style={styles.toolbar}>
         <div style={styles.searchBox}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
           <input 
             style={styles.input} 
             placeholder="Search manifests..." 
@@ -195,7 +195,7 @@ export default function ExpectedShipments() {
             onChange={e => setSearchQuery(e.target.value)}
           />
         </div>
-        <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
+        <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
           Showing {filteredShipments.length} of {shipments.length} relevant units
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function ExpectedShipments() {
         <div style={{ padding: '80px', textAlign: 'center', backgroundColor: 'var(--bg-surface)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
           <Package size={48} style={{ opacity: 0.1, marginBottom: '16px' }} />
           <div style={{ fontSize: '16px', fontWeight: '700' }}>Clear Manifest</div>
-          <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>No inbound shipments detected for the current query.</div>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>No inbound shipments detected for the current query.</div>
         </div>
       ) : (
         <div style={styles.grid}>
@@ -214,7 +214,7 @@ export default function ExpectedShipments() {
               <div key={s.id} style={styles.card} onMouseOver={e => e.currentTarget.style.borderColor = 'var(--info)'} onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>ID: {s.id}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>ID: {s.id}</div>
                     <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)' }}>{s.cargo_type}</div>
                   </div>
                   <div style={{ 
@@ -233,20 +233,20 @@ export default function ExpectedShipments() {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', backgroundColor: 'var(--bg-canvas)', borderRadius: '10px' }}>
                    <div style={{ flex: 1 }}>
-                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>ORIGIN</div>
+                     <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '700' }}>ORIGIN</div>
                      <div style={{ fontSize: '12px', fontWeight: '700' }}>{s.origin}</div>
                    </div>
-                   <ArrowRight size={14} color="var(--text-muted)" />
+                   <ArrowRight size={14} color="var(--text-secondary)" />
                    <div style={{ flex: 1 }}>
-                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>DESTINATION</div>
+                     <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '700' }}>DESTINATION</div>
                      <div style={{ fontSize: '12px', fontWeight: '700' }}>{s.destination}</div>
                    </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Clock size={14} color="var(--text-muted)" />
-                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>
+                      <Clock size={14} color="var(--text-secondary)" />
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
                         {s.estimated_arrival ? new Date(s.estimated_arrival).toLocaleDateString() : 'ETA TBD'}
                       </span>
                    </div>

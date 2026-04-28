@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../context/AuthContext';
 import { fetchOperatorNodes, createNode, deleteNode } from '../../services/api';
+import { useTheme } from '../../hooks/useTheme';
 import { 
   Plus, Trash2, MapPin, Navigation, Info, 
   Search, Loader, Save, X, ChevronRight, Globe 
@@ -49,6 +50,7 @@ export default function NodeManager() {
   const [newNode, setNewNode] = useState({ name: '', type: 'warehouse', lat: 20.0, lng: 77.0 });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const { getAuthHeaders } = useAuth();
+  const { theme } = useTheme();
 
   const loadNodes = useCallback(async () => {
     setLoading(true);
@@ -152,7 +154,7 @@ export default function NodeManager() {
     },
     label: {
       fontSize: '11px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       fontWeight: '700',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
@@ -164,13 +166,14 @@ export default function NodeManager() {
       top: '20px',
       left: '20px',
       zIndex: 1000,
-      backgroundColor: 'rgba(15, 23, 42, 0.9)',
+      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.9)',
       backdropFilter: 'blur(8px)',
       padding: '12px 20px',
       borderRadius: '10px',
       border: '1px solid var(--border)',
-      color: 'white',
+      color: theme === 'light' ? 'var(--text-primary)' : 'white',
       pointerEvents: 'none',
+      boxShadow: 'var(--shadow-card)',
     }
   };
 
@@ -185,7 +188,7 @@ export default function NodeManager() {
                CLICK ON MAP TO SET NODE COORDINATES
             </div>
             {selectedLocation && (
-              <div style={{ fontSize:'11px', color:'var(--text-muted)', marginTop:'4px' }}>
+              <div style={{ fontSize:'11px', color:'var(--text-secondary)', marginTop:'4px' }}>
                 Selected: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
               </div>
             )}
@@ -194,8 +197,13 @@ export default function NodeManager() {
         <MapContainer 
           center={[20.0, 78.0]} 
           zoom={5} 
-          style={{ height: '100%', width: '100%', filter: 'grayscale(0.8) invert(1) contrast(0.9)' }}
+          style={{ 
+            height: '100%', 
+            width: '100%', 
+            filter: theme === 'light' ? 'none' : 'grayscale(0.8) invert(1) contrast(0.9)' 
+          }}
           zoomControl={false}
+          key={theme}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {nodes.map(n => (
@@ -287,12 +295,12 @@ export default function NodeManager() {
         ) : (
           <div style={styles.nodeList}>
             {loading ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 <Loader size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
                 <div style={{ fontSize: '12px' }}>Updating network graph...</div>
               </div>
             ) : nodes.length === 0 ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 <Globe size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
                 <div style={{ fontSize: '13px' }}>No nodes registered yet.</div>
               </div>
@@ -302,7 +310,7 @@ export default function NodeManager() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: '700' }}>{n.name}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '2px' }}>{n.type} • {n.id}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '2px' }}>{n.type} • {n.id}</div>
                     </div>
                     <button 
                       onClick={() => handleDelete(n.id)}

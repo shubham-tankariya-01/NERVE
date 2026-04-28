@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Building2, Users, Activity, LogOut, ArrowLeft } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function AdminShell() {
   const { user, logout } = useAuth();
@@ -17,14 +18,14 @@ export default function AdminShell() {
       display: 'flex',
       height: '100vh',
       width: '100vw',
-      backgroundColor: 'var(--bg-main)',
-      color: 'var(--text-main)',
+      backgroundColor: 'var(--bg-canvas)',
+      color: 'var(--text-primary)',
       fontFamily: 'var(--font-sans)',
     },
     sidebar: {
       width: '280px',
-      backgroundColor: 'var(--bg-secondary)',
-      borderRight: '1px solid var(--glass-border)',
+      backgroundColor: 'var(--bg-surface)',
+      borderRight: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',
       padding: '24px 0',
@@ -34,14 +35,14 @@ export default function AdminShell() {
       padding: '0 24px',
       marginBottom: '32px',
       display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
+      flexDirection: 'column',
+      gap: '20px',
     },
     title: {
       fontSize: '20px',
       fontWeight: '900',
       letterSpacing: '1px',
-      color: '#ef476f', // Nerve Red
+      color: '#22E6A3',
     },
     nav: {
       flex: 1,
@@ -57,9 +58,8 @@ export default function AdminShell() {
       padding: '12px 16px',
       borderRadius: '8px',
       textDecoration: 'none',
-      color: isActive ? '#fff' : 'var(--text-muted)',
-      backgroundColor: isActive ? 'rgba(239, 71, 111, 0.2)' : 'transparent',
-      borderLeft: isActive ? '3px solid #ef476f' : '3px solid transparent',
+      color: isActive ? '#000' : 'var(--text-secondary)',
+      backgroundColor: isActive ? '#22E6A3' : 'transparent',
       fontSize: '14px',
       fontWeight: '600',
       transition: 'all 0.2s',
@@ -67,7 +67,7 @@ export default function AdminShell() {
     }),
     footer: {
       padding: '24px',
-      borderTop: '1px solid var(--glass-border)',
+      borderTop: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '16px',
@@ -81,8 +81,8 @@ export default function AdminShell() {
       width: '32px',
       height: '32px',
       borderRadius: '8px',
-      backgroundColor: '#ef476f',
-      color: '#fff',
+      backgroundColor: '#22E6A3',
+      color: '#000',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -95,7 +95,7 @@ export default function AdminShell() {
       gap: '8px',
       background: 'none',
       border: 'none',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       fontSize: '13px',
       fontWeight: '600',
       cursor: 'pointer',
@@ -106,6 +106,7 @@ export default function AdminShell() {
       flex: 1,
       overflowY: 'auto',
       position: 'relative',
+      backgroundColor: 'var(--bg-canvas)'
     }
   };
 
@@ -113,8 +114,10 @@ export default function AdminShell() {
     <div style={styles.layout}>
       <aside style={styles.sidebar}>
         <div style={styles.header}>
-          <Shield size={28} color="var(--status-critical)" />
-          <div style={styles.title}>NERVE ADMIN</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '28px', height: '28px', backgroundColor: '#22E6A3', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: '900' }}>N</div>
+            <div style={styles.title}>NERVE ADMIN</div>
+          </div>
         </div>
 
         <nav style={styles.nav}>
@@ -137,7 +140,7 @@ export default function AdminShell() {
             <div style={styles.avatar}>AD</div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '13px', fontWeight: '700' }}>{user?.full_name || 'Admin'}</span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Platform Admin</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Platform Admin</span>
             </div>
           </div>
           <button style={styles.logoutBtn} onClick={handleLogout}>
@@ -148,7 +151,12 @@ export default function AdminShell() {
       </aside>
 
       <main style={styles.main}>
-        <Outlet />
+        <div style={{ position: 'absolute', top: '24px', right: '32px', zIndex: 100 }}>
+          <ThemeToggle />
+        </div>
+        <div style={{ padding: '32px' }}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );

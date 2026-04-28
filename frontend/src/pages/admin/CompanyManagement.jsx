@@ -36,9 +36,9 @@ export default function CompanyManagement() {
   });
 
   const styles = {
-    container: { padding: '2.5rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100%' },
+    container: { padding: '2.5rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-primary)', minHeight: '100%' },
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' },
-    title: { fontSize: '2rem', fontWeight: '900', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)' },
+    title: { fontSize: '2rem', fontWeight: '900', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)' },
     grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' },
     card: {
       background: 'var(--bg-surface)',
@@ -59,12 +59,12 @@ export default function CompanyManagement() {
       color: plan === 'enterprise' ? '#a855f7' : '#00b4d8',
       textTransform: 'uppercase'
     }),
-    stat: { display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' },
+    stat: { display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' },
     filterBar: { marginBottom: '2.5rem', display: 'flex', gap: '1rem', alignItems: 'center' },
     statsRow: { marginBottom: '2.5rem', display: 'flex', gap: '1.5rem' },
     btnNoGlow: {
-      background: '#ef476f', // Red for admin
-      color: '#fff',
+      background: '#22E6A3', // Brand green for admin
+      color: '#000',
       border: 'none',
       borderRadius: '10px',
       padding: '0.75rem 1.5rem',
@@ -82,7 +82,7 @@ export default function CompanyManagement() {
   if (loading) {
     return (
       <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader className="animate-spin" size={32} color="#ef476f" />
+        <Loader className="animate-spin" size={32} color="#22E6A3" />
       </div>
     );
   }
@@ -91,13 +91,13 @@ export default function CompanyManagement() {
     <div style={styles.container}>
       <header style={styles.header}>
         <div>
-          <h1 style={styles.title}><Building2 size={32} style={{ color: '#ef476f' }} /> ORGANIZATION REGISTRY</h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontWeight: 600 }}>Institutional oversight and multi-tenant management</p>
+          <h1 style={styles.title}><Building2 size={32} style={{ color: '#22E6A3' }} /> ORGANIZATION REGISTRY</h1>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>Institutional oversight and multi-tenant management</p>
         </div>
         <button 
           style={styles.btnNoGlow}
-          onMouseOver={e => e.currentTarget.style.background = '#d93d5f'}
-          onMouseOut={e => e.currentTarget.style.background = '#ef476f'}
+          onMouseOver={e => e.currentTarget.style.background = '#1cc088'}
+          onMouseOut={e => e.currentTarget.style.background = '#22E6A3'}
         >
           <Plus size={18} /> REGISTER NEW ENTITY
         </button>
@@ -105,9 +105,9 @@ export default function CompanyManagement() {
 
       <div style={styles.filterBar}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '500px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
           <input 
-            style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px 12px 48px', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
+            style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px 12px 48px', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none' }}
             placeholder="Search organizations..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -116,7 +116,7 @@ export default function CompanyManagement() {
         <select 
           value={planFilter}
           onChange={e => setPlanFilter(e.target.value)}
-          style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0 1rem', height: '48px', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 700, outline: 'none' }}
+          style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0 1rem', height: '48px', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, outline: 'none' }}
         >
           <option value="all">ALL PLANS</option>
           <option value="starter">STARTER</option>
@@ -127,12 +127,12 @@ export default function CompanyManagement() {
 
       <div style={styles.statsRow}>
          <div className="glass-panel" style={{ padding: '1rem 1.5rem', minWidth: '180px' }}>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800 }}>TOTAL ENTITIES</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)' }}>{companies.length}</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 800 }}>TOTAL ENTITIES</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)' }}>{companies.length}</div>
          </div>
          <div className="glass-panel" style={{ padding: '1rem 1.5rem', minWidth: '180px' }}>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800 }}>FILTERED RESULTS</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ef476f' }}>{filtered.length}</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 800 }}>FILTERED RESULTS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#22E6A3' }}>{filtered.length}</div>
          </div>
       </div>
 
@@ -141,28 +141,28 @@ export default function CompanyManagement() {
           <div 
             key={company.id} 
             style={styles.card}
-            onMouseOver={e => { e.currentTarget.style.borderColor = '#ef476f'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = '#22E6A3'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
             onClick={() => navigate(`/admin/companies/${company.id}`)}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div style={{ width: '48px', height: '48px', background: 'rgba(239, 71, 111, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef476f' }}>
+              <div style={{ width: '48px', height: '48px', background: 'rgba(34, 230, 163, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22E6A3' }}>
                 <Building2 size={24} />
               </div>
               <div style={styles.planBadge(company.plan)}>{company.plan}</div>
             </div>
 
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.25rem', color: 'var(--text-main)' }}>{company.name}</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{company.owner_email}</p>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>{company.name}</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{company.owner_email}</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
                <div style={styles.stat}><Users size={14} /> ID: {company.id.slice(0, 8)}...</div>
                <div style={styles.stat}><Package size={14} /> View Details</div>
             </div>
 
             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>ACTIVE SINCE {new Date(company.created_at).getFullYear()}</span>
-               <ChevronRight size={18} color="#ef476f" />
+               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700 }}>ACTIVE SINCE {new Date(company.created_at).getFullYear()}</span>
+               <ChevronRight size={18} color="#22E6A3" />
             </div>
           </div>
         ))}

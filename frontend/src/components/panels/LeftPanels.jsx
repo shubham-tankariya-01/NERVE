@@ -10,7 +10,7 @@ export function RiskyNodesPanel({ onSelectNode }) {
   return (
     <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: '300px', flex: 1 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: 'var(--status-critical)', fontWeight: 800 }}>Risky Network Nodes</h2>
+        <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: 'var(--status-danger)', fontWeight: 800 }}>Risky Network Nodes</h2>
         <Link to="/nodes" style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
           VIEW NODES <ChevronRight size={12} />
         </Link>
@@ -18,12 +18,12 @@ export function RiskyNodesPanel({ onSelectNode }) {
       
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem', overflowY: 'auto' }}>
         {cascadeDebt.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Awaiting simulation data...</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Awaiting simulation data...</div>
         ) : (
           cascadeDebt.slice(0, 10).map((item, idx) => {
             const key = item.node_id || `debt-${idx}`;
             const score = item.cascade_debt || 0;
-            const color = score > 60 ? 'var(--status-critical)' : score > 40 ? 'var(--status-warning)' : 'var(--accent-primary)';
+            const color = score > 60 ? 'var(--status-danger)' : score > 40 ? 'var(--status-warning)' : 'var(--accent-primary)';
             return (
               <div 
                 key={key} 
@@ -38,9 +38,9 @@ export function RiskyNodesPanel({ onSelectNode }) {
                   padding: '4px 0'
                 }}
               >
-                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{idx + 1}</span>
+                <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{idx + 1}</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', fontWeight: 500 }}>{item.node_name}</span>
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-primary)', fontWeight: 500 }}>{item.node_name}</span>
                   <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.05)', borderRadius: '1.5px', overflow: 'hidden' }}>
                     <div style={{ width: `${Math.min(100, score)}%`, height: '100%', background: color, boxShadow: `0 0 8px ${color}44` }}></div>
                   </div>
@@ -104,9 +104,9 @@ export function RiskHorizonPanel({ selectedNode }) {
   return (
     <div className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', minHeight: '280px', flex: 1 }}>
       <div style={{ marginBottom: '1.25rem' }}>
-        <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: '0 0 0.25rem 0', textTransform: 'uppercase', color: 'var(--status-critical)', fontWeight: 800 }}>Risk Horizon Forecast</h2>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-critical)' }}></div>
+        <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: '0 0 0.25rem 0', textTransform: 'uppercase', color: 'var(--status-danger)', fontWeight: 800 }}>Risk Horizon Forecast</h2>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-danger)' }}></div>
           {targetNode ? (targetNode.node_name || targetNode.name) : 'Network Baseline'}
         </div>
       </div>
@@ -114,19 +114,19 @@ export function RiskHorizonPanel({ selectedNode }) {
       <div style={{ height: '200px', width: '100%', position: 'relative', marginTop: '0.5rem' }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={displayData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-            <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} />
-            <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} domain={[0, 100]} />
+            <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)', fontSize: 10}} />
+            <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)', fontSize: 10}} domain={[0, 100]} />
             <Tooltip 
-              contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '6px' }}
-              itemStyle={{ fontSize: '11px', color: 'var(--status-critical)' }}
+              contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '6px' }}
+              itemStyle={{ fontSize: '11px', color: 'var(--status-danger)' }}
             />
             <Line 
               type="monotone" 
               dataKey="probability" 
-              stroke="var(--status-critical)" 
+              stroke="var(--status-danger)" 
               strokeWidth={3} 
-              dot={{r: 3, fill: 'var(--status-critical)', strokeWidth: 0}} 
-              activeDot={{r: 5, fill: '#fff', stroke: 'var(--status-critical)', strokeWidth: 2}} 
+              dot={{r: 3, fill: 'var(--status-danger)', strokeWidth: 0}} 
+              activeDot={{r: 5, fill: '#fff', stroke: 'var(--status-danger)', strokeWidth: 2}} 
               animationDuration={1000}
             />
           </LineChart>
@@ -134,7 +134,7 @@ export function RiskHorizonPanel({ selectedNode }) {
       </div>
       
       <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(239, 67, 111, 0.05)', borderRadius: '6px', border: '1px solid rgba(239, 67, 111, 0.1)' }}>
-        <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+        <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
           Probability of secondary disruption cascade based on current {selectedNode ? 'node' : 'network'} pressure.
         </p>
       </div>

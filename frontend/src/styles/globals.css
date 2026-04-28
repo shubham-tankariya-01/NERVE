@@ -13,7 +13,7 @@
   --text-secondary: #7A8BA8;
   --text-muted:     #3F5070;
 
-  --brand:          #00E5A0;   /* green — operational/healthy */
+  --brand:          #22E6A3;   /* green — operational/healthy */
   --brand-dim:      rgba(0, 229, 160, 0.15);
   --danger:         #FF4D4D;   /* red — critical/alert */
   --danger-dim:     rgba(255, 77, 77, 0.15);
@@ -50,7 +50,7 @@
   --text-secondary: #4A6080;
   --text-muted:     #9EB0C8;
 
-  --brand:          #00A870;
+  --brand:          #22E6A3;
   --brand-dim:      rgba(0, 168, 112, 0.10);
   --danger:         #DC2626;
   --danger-dim:     rgba(220, 38, 38, 0.08);

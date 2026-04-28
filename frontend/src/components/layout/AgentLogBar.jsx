@@ -35,7 +35,7 @@ export default function AgentLogBar() {
         zIndex: 100
       }}
     >
-      <span style={{ color: 'var(--text-muted)', marginRight: '0.75rem' }}>[{lastLog.ts}]</span>
+      <span style={{ color: 'var(--text-secondary)', marginRight: '0.75rem' }}>[{lastLog.ts}]</span>
       <span style={{ color: lastLog.level === 'BLOCKED' ? 'var(--danger)' : lastLog.level === 'REROUTE' ? 'var(--brand)' : 'var(--info)', marginRight: '0.5rem' }}>
         &lt;{lastLog.tag}&gt;
       </span>

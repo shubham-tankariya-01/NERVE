@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
-import { useTheme } from '../../hooks/useTheme';
 import { useNetwork } from '../../context/NetworkContext';
+import ThemeToggle from '../ThemeToggle';
 import { useAgent } from '../../context/AgentContext';
 import { useAuth } from '../../context/AuthContext'; // ← NEW
 import AgentStatusPill from './AgentStatusPill';
@@ -31,7 +31,7 @@ const UserInfoChip = () => {
         onClick={() => setIsOpen(!isOpen)}
         style={{ 
           display: 'flex', alignItems: 'center', gap: '0.5rem', 
-          background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)',
           borderRadius: '8px', padding: '0.35rem 0.75rem', cursor: 'pointer',
           transition: 'all 0.2s'
         }}
@@ -43,27 +43,27 @@ const UserInfoChip = () => {
           fontSize: '0.65rem', fontWeight: 800
         }}>{initials}</div>
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{user.full_name || user.username}</span>
-          <span style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{roleLabel}</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{user.full_name || user.username}</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{roleLabel}</span>
         </div>
       </div>
 
       {isOpen && (
         <div style={{ 
           position: 'absolute', top: '100%', right: 0, marginTop: '6px',
-          background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)',
+          background: 'var(--bg-card)', border: '1px solid var(--border-color)',
           borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
           minWidth: '160px', zIndex: 9999, overflow: 'hidden'
         }}>
           <div 
             onClick={() => { setIsOpen(false); }}
-            style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--glass-border)' }}
+            style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)' }}
           >
             <User size={14} /> My Profile
           </div>
           <div 
             onClick={() => { logout(); window.location.href = '/login'; }}
-            style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--status-critical)' }}
+            style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--status-danger)' }}
           >
             <LogOut size={14} /> Sign Out
           </div>
@@ -74,23 +74,22 @@ const UserInfoChip = () => {
 };
 
 export default function Topbar() {
-  const { theme, toggleTheme } = useTheme();
   const { networkHealth, nodes, routes, shipments, alerts } = useNetwork();
   
   const healthColor = networkHealth >= 80 ? 'green' : networkHealth >= 50 ? 'amber' : 'red';
 
   return (
-    <header style={{ height: '64px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'var(--bg-surface)', position: 'relative', zIndex: 1000 }}>
+    <header style={{ height: '64px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'var(--bg-surface)', position: 'relative', zIndex: 1100 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontFamily: 'Space Grotesk', fontSize: '1.25rem', letterSpacing: '-0.02em', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
-          <div style={{ background: 'var(--brand)', color: '#000', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '14px' }}>N</div>
+          <div style={{ background: '#22E6A3', color: '#000', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '14px' }}>N</div>
           Nerve
         </div>
         
         <div style={{ height: '24px', width: '1px', background: 'var(--border)' }}></div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--status-live)', background: 'rgba(6, 214, 160, 0.08)', padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid rgba(6, 214, 160, 0.15)' }}>
-          <div style={{ width: '8px', height: '8px', background: 'var(--status-live)', borderRadius: '50%' }}></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--status-success)', background: 'rgba(6, 214, 160, 0.08)', padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid rgba(6, 214, 160, 0.15)' }}>
+          <div style={{ width: '8px', height: '8px', background: 'var(--status-success)', borderRadius: '50%' }}></div>
           LIVE
         </div>
         
@@ -109,10 +108,7 @@ export default function Topbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {/* ← NEW: User info chip */}
         <UserInfoChip />
-
-        <button onClick={toggleTheme} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', color: 'inherit' }}>
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        <ThemeToggle />
         
         <button 
           onClick={() => window.location.href = '/book'}

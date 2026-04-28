@@ -41,7 +41,7 @@
 }
 
 .custom-popup a.leaflet-popup-close-button {
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 .custom-popup a.leaflet-popup-close-button:hover {
   color: var(--text-primary);

@@ -53,7 +53,7 @@ export default function TodayCheckins() {
       textAlign: 'left',
       padding: '16px 24px',
       backgroundColor: 'var(--bg-elevated)',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       fontSize: '11px',
       fontWeight: '700',
       textTransform: 'uppercase',
@@ -90,11 +90,11 @@ export default function TodayCheckins() {
     <div>
       <div style={styles.header}>
         <h1 style={styles.title}>DAILY LOGBOOK</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Historical record of units processed during the current shift</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Historical record of units processed during the current shift</p>
       </div>
 
       <div style={{ marginBottom: '24px', position: 'relative', maxWidth: '400px' }}>
-        <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
         <input 
           style={{ width: '100%', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 16px 12px 44px', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }} 
           placeholder="Search logbook..." 
@@ -117,7 +117,7 @@ export default function TodayCheckins() {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ ...styles.td, textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+                <td colSpan="5" style={{ ...styles.td, textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
                   <Calendar size={32} style={{ opacity: 0.2, marginBottom: '12px' }} />
                   <div>No entries found for the current shift.</div>
                 </td>
@@ -130,11 +130,11 @@ export default function TodayCheckins() {
                   <td style={styles.td}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
                       <span style={{ fontWeight: '600' }}>{s.origin}</span>
-                      <ArrowRight size={12} color="var(--text-muted)" />
+                      <ArrowRight size={12} color="var(--text-secondary)" />
                       <span style={{ fontWeight: '600' }}>{s.destination}</span>
                     </div>
                   </td>
-                  <td style={{ ...styles.td, fontSize: '13px', color: 'var(--text-muted)' }}>
+                  <td style={{ ...styles.td, fontSize: '13px', color: 'var(--text-secondary)' }}>
                     {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td style={styles.td}>

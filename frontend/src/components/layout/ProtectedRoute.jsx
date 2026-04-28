@@ -38,6 +38,13 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role) && user?.role !== 'platform_admin') {
+    // Auto-redirect to their primary dashboard instead of 403
+    if (user?.role === 'node_operator') return <Navigate to="/operator" replace />;
+    if (user?.role === 'customer') return <Navigate to="/customer" replace />;
+    if (user?.role === 'platform_admin' && location.pathname.startsWith('/operator')) return <Navigate to="/admin" replace />;
+    if (user?.role === 'logistics_manager' && location.pathname.startsWith('/operator')) return <Navigate to="/" replace />;
+    
+    // Fallback 403 for other cases
     return (
       <div
         style={{
@@ -73,8 +80,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
           Your account ({user?.role}) does not have permission to access this
           area.
         </div>
-        <button
-          onClick={() => window.history.back()}
+        <button 
+          onClick={() => window.location.href = user?.role === 'node_operator' ? '/operator' : '/'}
           style={{
             padding: "12px 24px",
             backgroundColor: "var(--bg-surface)",
@@ -85,7 +92,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
             fontWeight: "600",
           }}
         >
-          GO BACK
+          GO TO MY DASHBOARD
         </button>
       </div>
     );

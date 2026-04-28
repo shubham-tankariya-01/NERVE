@@ -15,9 +15,9 @@ export default function ShipmentDetail() {
 
   if (!shipment) {
     return (
-      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
         <AlertTriangle size={48} style={{ marginBottom: '1rem', color: 'var(--status-warning)' }} />
-        <h2 style={{ color: 'var(--text-main)' }}>Shipment Data Link Terminated</h2>
+        <h2 style={{ color: 'var(--text-primary)' }}>Shipment Data Link Terminated</h2>
         <p>The requested shipment ID ({id}) could not be located in the current telemetry stream.</p>
         <Link to="/shipments" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 600 }}>Return to Logistics Hub</Link>
       </div>
@@ -40,10 +40,10 @@ export default function ShipmentDetail() {
     : 0;
 
   return (
-    <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', background: 'var(--bg-main)' }}>
+    <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', background: 'var(--bg-primary)' }}>
       <header style={{ 
         padding: '1rem 2rem', 
-        borderBottom: '1px solid var(--glass-border)', 
+        borderBottom: '1px solid var(--border-color)', 
         background: 'rgba(255,255,255,0.02)', 
         display: 'flex', 
         alignItems: 'center', 
@@ -52,14 +52,14 @@ export default function ShipmentDetail() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <button 
             onClick={() => navigate('/shipments')} 
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
           >
             <ChevronLeft size={20} />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, fontFamily: 'var(--font-mono)' }}>{shipment.id}</h1>
-            <div style={{ width: '1px', height: '20px', background: 'var(--glass-border)' }}></div>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{shipment.cargo_type}</span>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, fontFamily: 'var(--font-mono)' }}>{shipment.id}</h1>
+            <div style={{ width: '1px', height: '20px', background: 'var(--border-color)' }}></div>
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{shipment.cargo_type}</span>
           </div>
         </div>
         
@@ -81,7 +81,7 @@ export default function ShipmentDetail() {
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Left Map Section */}
-        <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--glass-border)' }}>
+        <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-color)' }}>
           <div style={{ flex: 1, background: '#111' }}>
             <MapContainer 
               center={originNode?.location ? [originNode.location.lat, originNode.location.lng] : [20, 85]} 
@@ -105,9 +105,9 @@ export default function ShipmentDetail() {
           </div>
           
           {/* Timeline Strip */}
-          <div style={{ height: '180px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--glass-border)', padding: '2rem 3rem' }}>
+          <div style={{ height: '180px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--border-color)', padding: '2rem 3rem' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Transit Vector Progress</h3>
+                <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Transit Vector Progress</h3>
                 <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)' }}>{progressPercent}% COMPLETE</span>
              </div>
              
@@ -129,8 +129,8 @@ export default function ShipmentDetail() {
                            transition: 'all 0.3s'
                          }}></div>
                          <div style={{ position: 'absolute', top: '24px', textAlign: 'center', minWidth: '80px' }}>
-                           <div style={{ fontSize: '0.65rem', fontWeight: 800, color: isCurrent ? 'var(--text-main)' : 'var(--text-muted)' }}>{n?.id}</div>
-                           <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', opacity: 0.7, whiteSpace: 'nowrap' }}>{n?.name.split(' ')[0]}</div>
+                           <div style={{ fontSize: '0.65rem', fontWeight: 800, color: isCurrent ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{n?.id}</div>
+                           <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', opacity: 0.7, whiteSpace: 'nowrap' }}>{n?.name.split(' ')[0]}</div>
                          </div>
                        </div>
                      );
@@ -145,26 +145,26 @@ export default function ShipmentDetail() {
           
           {/* Core Telemetry */}
           <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-             <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Package size={14} /> Unit Specifications
              </h3>
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <div>
-                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Weight Metrics</div>
-                   <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-main)' }}>{shipment.weight_kg?.toLocaleString()} KG</div>
+                   <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Weight Metrics</div>
+                   <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{shipment.weight_kg?.toLocaleString()} KG</div>
                 </div>
                 <div>
-                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Priority Class</div>
-                   <div style={{ fontWeight: 700, fontSize: '1rem', color: shipment.priority === 'critical' ? 'var(--status-critical)' : 'var(--text-main)' }}>
+                   <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Priority Class</div>
+                   <div style={{ fontWeight: 700, fontSize: '1rem', color: shipment.priority === 'critical' ? 'var(--status-danger)' : 'var(--text-primary)' }}>
                       {shipment.priority?.toUpperCase()}
                    </div>
                 </div>
                 <div>
-                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Departure Ref</div>
-                   <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{new Date(shipment.departure_time).toLocaleDateString()}</div>
+                   <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Departure Ref</div>
+                   <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{new Date(shipment.departure_time).toLocaleDateString()}</div>
                 </div>
                 <div>
-                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Target Arrival</div>
+                   <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Target Arrival</div>
                    <div style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>{new Date(shipment.estimated_arrival).toLocaleDateString()}</div>
                 </div>
              </div>
@@ -172,22 +172,22 @@ export default function ShipmentDetail() {
 
           {/* Node Vectors */}
           <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-             <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <MapPin size={14} /> Deployment Path
              </h3>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-live)' }}></div>
+                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-success)' }}></div>
                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>ORIGIN NODE</div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>ORIGIN NODE</div>
                       <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{originNode?.name || shipment.origin}</div>
                    </div>
                 </div>
-                <div style={{ height: '20px', width: '2px', background: 'var(--glass-border)', marginLeft: '3px' }}></div>
+                <div style={{ height: '20px', width: '2px', background: 'var(--border-color)', marginLeft: '3px' }}></div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-critical)' }}></div>
+                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-danger)' }}></div>
                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>DESTINATION NODE</div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>DESTINATION NODE</div>
                       <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{destNode?.name || shipment.destination}</div>
                    </div>
                 </div>
@@ -195,21 +195,21 @@ export default function ShipmentDetail() {
           </div>
 
           {/* Active Disruption Log */}
-          <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: shipment.disruptions?.length ? '4px solid var(--status-critical)' : '1px solid var(--glass-border)' }}>
-             <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: shipment.disruptions?.length ? '4px solid var(--status-danger)' : '1px solid var(--border-color)' }}>
+             <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <AlertTriangle size={14} /> Active Disruptions
              </h3>
              {shipment.disruptions?.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                    {shipment.disruptions.map((d, i) => (
                       <div key={i} style={{ padding: '0.75rem', background: 'rgba(255,20,50,0.05)', borderRadius: '4px', border: '1px solid rgba(255,20,50,0.1)' }}>
-                         <div style={{ fontWeight: 700, color: 'var(--status-critical)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>{d.type.toUpperCase()} · +{d.delay_hrs}H DELAY</div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--text-main)' }}>{d.description}</div>
+                         <div style={{ fontWeight: 700, color: 'var(--status-danger)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>{d.type.toUpperCase()} · +{d.delay_hrs}H DELAY</div>
+                         <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>{d.description}</div>
                       </div>
                    ))}
                 </div>
              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--status-live)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--status-success)' }}>
                    <Info size={16} />
                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Transit route stable. No active impediments.</span>
                 </div>

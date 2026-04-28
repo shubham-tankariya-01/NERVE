@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { loginStep1, loginStep2 } from '../services/api';
 import { Eye, EyeOff, ChevronDown, Lock } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 const ROLES = [
   { value: 'platform_admin', label: 'Platform Admin' },
@@ -101,7 +102,7 @@ export default function Login() {
       fontSize: '24px', fontWeight: '700', letterSpacing: '2px',
       fontFamily: 'Space Grotesk, sans-serif', color: 'var(--text-primary)',
     },
-    tagline: { fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' },
+    tagline: { fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' },
     form: { display: 'flex', flexDirection: 'column', gap: '20px' },
     inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
     label: { fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' },
@@ -118,10 +119,10 @@ export default function Login() {
     },
     toggleButton: {
       position: 'absolute', right: '12px', background: 'none', border: 'none',
-      color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center'
+      color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center'
     },
     button: {
-      width: '100%', padding: '14px', backgroundColor: 'var(--brand)', color: '#000',
+      width: '100%', padding: '14px', backgroundColor: '#22E6A3', color: '#000',
       border: 'none', borderRadius: '4px', fontSize: '14px', fontWeight: '700',
       textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center',
       justifyContent: 'center', gap: '8px', marginTop: '8px',
@@ -141,7 +142,7 @@ export default function Login() {
       border: '1px solid var(--brand)', borderRadius: '4px', color: 'var(--brand)',
       fontSize: '13px', textAlign: 'center',
     },
-    footer: { fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' },
+    footer: { fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center' },
     spinner: {
       width: '16px', height: '16px', border: '2px solid rgba(0,0,0,0.1)',
       borderTop: '2px solid #000', borderRadius: '50%', animation: 'spin 1s linear infinite',
@@ -150,6 +151,9 @@ export default function Login() {
 
   return (
     <div style={styles.container}>
+      <div style={{ position: 'absolute', top: '2rem', right: '2rem' }}>
+        <ThemeToggle />
+      </div>
       <div style={styles.card}>
         <div style={styles.header}>
           <div style={styles.logoRow}>
@@ -167,7 +171,7 @@ export default function Login() {
                 <select style={styles.select} value={role} onChange={(e) => setRole(e.target.value)} required>
                   {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
-                <ChevronDown size={16} style={{ position: 'absolute', right: '12px', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                <ChevronDown size={16} style={{ position: 'absolute', right: '12px', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
               </div>
             </div>
 
@@ -199,13 +203,13 @@ export default function Login() {
             <div style={styles.inputGroup}>
               <label style={styles.label}>Enter OTP</label>
               <div style={styles.inputWrapper}>
-                <Lock size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                <Lock size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-secondary)' }} />
                 <input 
                   type="text" style={{...styles.input, paddingLeft: '36px', letterSpacing: '4px', fontSize: '18px', textAlign: 'center'}} 
                   placeholder="000000" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} required 
                 />
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '4px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '4px' }}>
                 A 6-digit code was sent to {email}
               </div>
             </div>

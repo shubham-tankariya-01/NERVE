@@ -64,7 +64,7 @@ export default function FlagIssue() {
       padding: '32px',
     },
     group: { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' },
-    label: { fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' },
+    label: { fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' },
     input: {
       width: '100%',
       backgroundColor: 'var(--bg-canvas)',
@@ -82,7 +82,7 @@ export default function FlagIssue() {
       borderRadius: '10px',
       border: active ? `2px solid ${color}` : '1px solid var(--border)',
       backgroundColor: active ? `${color}11` : 'transparent',
-      color: active ? color : 'var(--text-muted)',
+      color: active ? color : 'var(--text-secondary)',
       fontSize: '12px',
       fontWeight: '800',
       textAlign: 'center',
@@ -114,7 +114,7 @@ export default function FlagIssue() {
           <CheckCircle size={40} />
         </div>
         <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '12px' }}>REPORT TRANSMITTED</h2>
-        <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 32px', lineHeight: '1.6' }}>
+        <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 32px', lineHeight: '1.6' }}>
           Station advisory has been logged. The regional logistics controller and relevant agents have been alerted.
         </p>
         <button 
@@ -131,7 +131,7 @@ export default function FlagIssue() {
     <div style={styles.container}>
       <header style={styles.header}>
         <h1 style={styles.title}>INCIDENT REPORTING</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Flag discrepancies or security anomalies for immediate review</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Flag discrepancies or security anomalies for immediate review</p>
       </header>
 
       <div style={styles.card}>
@@ -139,7 +139,7 @@ export default function FlagIssue() {
           <div style={styles.group}>
             <label style={styles.label}>Manifest Search</label>
             <div style={{ position: 'relative' }}>
-              <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
               <input 
                 style={{ ...styles.input, paddingLeft: '40px' }} 
                 placeholder="Scan or enter Shipment ID..." 
@@ -154,7 +154,7 @@ export default function FlagIssue() {
                   {suggestions.map(s => (
                     <div key={s.id} onClick={() => { setShipmentId(s.id); setSuggestions([]); }} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontSize: '13px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ fontWeight: '700' }}>{s.id}</span>
-                      <span style={{ color: 'var(--text-muted)' }}>{s.cargo_type}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>{s.cargo_type}</span>
                     </div>
                   ))}
                 </div>

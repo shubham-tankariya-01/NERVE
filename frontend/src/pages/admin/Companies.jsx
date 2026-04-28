@@ -38,30 +38,30 @@ const OnboardingDrawer = ({ isOpen, onClose, onComplete }) => {
       display: 'flex', justifyContent: 'flex-end'
     }} onClick={onClose}>
       <div style={{
-        width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg-secondary)',
+        width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg-card)',
         padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px',
         animation: 'slideInRight 0.3s ease-out'
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '900' }}>ONBOARD NEW COMPANY</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }}><X size={24} /></button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)' }}><X size={24} /></button>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)' }}>COMPANY NAME</label>
+            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-secondary)' }}>COMPANY NAME</label>
             <input 
               required
-              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff' }}
+              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)' }}>SERVICE PLAN</label>
+            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-secondary)' }}>SERVICE PLAN</label>
             <select 
-              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff' }}
+              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
               value={formData.plan}
               onChange={e => setFormData({...formData, plan: e.target.value})}
             >
@@ -71,37 +71,37 @@ const OnboardingDrawer = ({ isOpen, onClose, onComplete }) => {
             </select>
           </div>
 
-          <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '10px 0' }} />
-          <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--status-live)' }}>INITIAL ADMINISTRATOR</div>
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '10px 0' }} />
+          <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--status-success)' }}>INITIAL ADMINISTRATOR</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)' }}>OWNER NAME</label>
+            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-secondary)' }}>OWNER NAME</label>
             <input 
               required
-              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff' }}
+              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
               value={formData.owner_name}
               onChange={e => setFormData({...formData, owner_name: e.target.value})}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)' }}>OWNER EMAIL</label>
+            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-secondary)' }}>OWNER EMAIL</label>
             <input 
               required
               type="email"
-              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff' }}
+              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
               value={formData.owner_email}
               onChange={e => setFormData({...formData, owner_email: e.target.value})}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)' }}>TEMPORARY PASSWORD</label>
+            <label style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-secondary)' }}>TEMPORARY PASSWORD</label>
             <input 
               required
               type="password"
               minLength={8}
-              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff' }}
+              style={{ padding: '12px', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
               value={formData.password}
               onChange={e => setFormData({...formData, password: e.target.value})}
             />
@@ -111,7 +111,7 @@ const OnboardingDrawer = ({ isOpen, onClose, onComplete }) => {
             type="submit"
             disabled={isSubmitting}
             style={{ 
-              marginTop: '12px', padding: '16px', backgroundColor: 'var(--status-critical)', 
+              marginTop: '12px', padding: '16px', backgroundColor: 'var(--status-danger)', 
               color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '900',
               textTransform: 'uppercase', cursor: 'pointer', opacity: isSubmitting ? 0.6 : 1
             }}
@@ -150,7 +150,7 @@ const CompanyRow = ({ company }) => {
   };
 
   const planColors = {
-    starter: 'var(--text-muted)',
+    starter: 'var(--text-secondary)',
     professional: 'var(--accent-primary)',
     enterprise: '#FFB020'
   };
@@ -158,11 +158,11 @@ const CompanyRow = ({ company }) => {
   return (
     <>
       <tr>
-        <td style={{ padding: '16px', borderBottom: '1px solid var(--glass-border)' }}>
+        <td style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ fontWeight: '700' }}>{company.name}</div>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{company.id}</div>
+          <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{company.id}</div>
         </td>
-        <td style={{ padding: '16px', borderBottom: '1px solid var(--glass-border)' }}>
+        <td style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <span style={{ 
             fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', 
             color: planColors[company.plan], border: `1px solid ${planColors[company.plan]}44`,
@@ -171,63 +171,63 @@ const CompanyRow = ({ company }) => {
             {company.plan}
           </span>
         </td>
-        <td style={{ padding: '16px', borderBottom: '1px solid var(--glass-border)' }}>
+        <td style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={toggleExpand}>
-            <Users size={14} color="var(--text-muted)" />
+            <Users size={14} color="var(--text-secondary)" />
             <span style={{ fontWeight: '600' }}>{users.length || company.user_count || '?'}</span>
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </div>
         </td>
-        <td style={{ padding: '16px', borderBottom: '1px solid var(--glass-border)' }}>
+        <td style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <span style={{ 
-            fontSize: '10px', fontWeight: '800', color: company.is_active ? 'var(--status-live)' : 'var(--status-critical)',
+            fontSize: '10px', fontWeight: '800', color: company.is_active ? 'var(--status-success)' : 'var(--status-danger)',
             display: 'flex', alignItems: 'center', gap: '4px'
           }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: company.is_active ? 'var(--status-live)' : 'var(--status-critical)' }} />
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: company.is_active ? 'var(--status-success)' : 'var(--status-danger)' }} />
             {company.is_active ? 'ACTIVE' : 'INACTIVE'}
           </span>
         </td>
-        <td style={{ padding: '16px', borderBottom: '1px solid var(--glass-border)', fontSize: '12px', color: 'var(--text-muted)' }}>
+        <td style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)' }}>
           {new Date(company.created_at).toLocaleDateString()}
         </td>
-        <td style={{ padding: '16px', borderBottom: '1px solid var(--glass-border)' }}>
+        <td style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer' }}><Eye size={16} /></button>
-            <button style={{ background: 'none', border: 'none', color: 'var(--status-critical)', cursor: 'pointer' }}><ShieldAlert size={16} /></button>
+            <button style={{ background: 'none', border: 'none', color: 'var(--status-danger)', cursor: 'pointer' }}><ShieldAlert size={16} /></button>
           </div>
         </td>
       </tr>
       {expanded && (
         <tr>
           <td colSpan="6" style={{ padding: '0', backgroundColor: 'rgba(0,0,0,0.1)' }}>
-            <div style={{ padding: '24px', borderLeft: '4px solid var(--status-critical)' }}>
+            <div style={{ padding: '24px', borderLeft: '4px solid var(--status-danger)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <h4 style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-muted)' }}>COMPANY USERS</h4>
-                <button style={{ fontSize: '11px', background: 'none', border: '1px solid var(--glass-border)', color: '#fff', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+                <h4 style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-secondary)' }}>COMPANY USERS</h4>
+                <button style={{ fontSize: '11px', background: 'none', border: '1px solid var(--border-color)', color: '#fff', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}>
                   + ADD USER
                 </button>
               </div>
               {loadingUsers ? (
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Loading team members...</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Loading team members...</div>
               ) : (
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-muted)' }}>NAME</th>
-                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-muted)' }}>EMAIL</th>
-                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-muted)' }}>ROLE</th>
-                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-muted)' }}>STATUS</th>
+                    <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
+                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-secondary)' }}>NAME</th>
+                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-secondary)' }}>EMAIL</th>
+                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-secondary)' }}>ROLE</th>
+                      <th style={{ padding: '8px', fontSize: '10px', color: 'var(--text-secondary)' }}>STATUS</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map(u => (
                       <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
                         <td style={{ padding: '8px', fontSize: '12px', fontWeight: '600' }}>{u.full_name}</td>
-                        <td style={{ padding: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>{u.email}</td>
+                        <td style={{ padding: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>{u.email}</td>
                         <td style={{ padding: '8px', fontSize: '11px' }}>
                           <span style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{u.role}</span>
                         </td>
-                        <td style={{ padding: '8px', fontSize: '11px', color: u.is_active ? 'var(--status-live)' : 'var(--status-critical)' }}>
+                        <td style={{ padding: '8px', fontSize: '11px', color: u.is_active ? 'var(--status-success)' : 'var(--status-danger)' }}>
                           {u.is_active ? 'ACTIVE' : 'DISABLED'}
                         </td>
                       </tr>
@@ -284,7 +284,7 @@ export default function Companies() {
     },
     btnOnboard: {
       padding: '12px 24px',
-      backgroundColor: 'var(--status-critical)',
+      backgroundColor: 'var(--status-danger)',
       color: '#fff',
       border: 'none',
       borderRadius: '8px',
@@ -297,9 +297,9 @@ export default function Companies() {
       boxShadow: '0 4px 20px rgba(239, 71, 111, 0.3)',
     },
     tableWrapper: {
-      backgroundColor: 'var(--bg-secondary)',
+      backgroundColor: 'var(--bg-card)',
       borderRadius: '16px',
-      border: '1px solid var(--glass-border)',
+      border: '1px solid var(--border-color)',
       overflow: 'hidden',
     },
     table: {
@@ -311,9 +311,9 @@ export default function Companies() {
       padding: '16px',
       fontSize: '11px',
       fontWeight: '800',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       textTransform: 'uppercase',
-      borderBottom: '1px solid var(--glass-border)',
+      borderBottom: '1px solid var(--border-color)',
       backgroundColor: 'rgba(0,0,0,0.1)',
     }
   };
@@ -346,7 +346,7 @@ export default function Companies() {
             ))}
             {companies.length === 0 && !loading && (
               <tr>
-                <td colSpan="6" style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan="6" style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                   No companies found. Click "Onboard Company" to start.
                 </td>
               </tr>

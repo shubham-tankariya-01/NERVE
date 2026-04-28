@@ -15,11 +15,11 @@ export default function Analytics() {
   ];
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100vh' }}>
+    <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-primary)', minHeight: '100vh' }}>
       <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '0.5rem' }}>Network Intelligence</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Advanced predictive analytics and system performance metrics.</p>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Network Intelligence</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Advanced predictive analytics and system performance metrics.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div className="badge blue" style={{ padding: '0.6rem 1.2rem', borderRadius: '10px' }}>EXPORT REPORT</div>
@@ -30,19 +30,19 @@ export default function Analytics() {
       {/* Row 1: KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
         {[
-          { label: 'Network Health', value: networkHealth, unit: '%', trend: '+2.4%', color: 'var(--status-live)' },
+          { label: 'Network Health', value: networkHealth, unit: '%', trend: '+2.4%', color: 'var(--status-success)' },
           { label: 'System Utilization', value: '74.2', unit: '%', trend: '-1.2%', color: 'var(--accent-primary)' },
           { label: 'Risk Coefficient', value: '0.14', unit: '', trend: 'STABLE', color: 'var(--status-warning)' },
-          { label: 'Active Reroutes', value: '12', unit: '', trend: '+4', color: 'var(--status-critical)' }
+          { label: 'Active Reroutes', value: '12', unit: '', trend: '+4', color: 'var(--status-danger)' }
         ].map((stat, i) => (
           <div key={i} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{stat.label}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: stat.trend.includes('+') ? 'var(--status-live)' : stat.trend.includes('-') ? 'var(--status-critical)' : 'var(--text-muted)' }}>{stat.trend}</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{stat.label}</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: stat.trend.includes('+') ? 'var(--status-success)' : stat.trend.includes('-') ? 'var(--status-danger)' : 'var(--text-secondary)' }}>{stat.trend}</span>
             </div>
             <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
               <span style={{ fontSize: '2.25rem', fontWeight: 800, color: stat.color }}>{stat.value}</span>
-              <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>{stat.unit}</span>
+              <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{stat.unit}</span>
             </div>
             <div style={{ marginTop: '1.5rem', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
               <div style={{ width: stat.unit === '%' ? `${stat.value}%` : '60%', height: '100%', background: stat.color }}></div>
@@ -74,10 +74,10 @@ export default function Analytics() {
                         <stop offset="95%" stopColor="var(--accent-primary)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="t" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12}} domain={[0, 100]} />
+                    <XAxis dataKey="t" axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)', fontSize: 12}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)', fontSize: 12}} domain={[0, 100]} />
                     <Tooltip 
-                      contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px' }}
+                      contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
                       itemStyle={{ fontSize: '12px' }}
                     />
                     <Area type="monotone" dataKey="v" name="Performance" stroke="var(--accent-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorHealth)" />
@@ -93,17 +93,17 @@ export default function Analytics() {
               {cascadeDebt.slice(0, 5).map(node => (
                 <div key={node.id}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{node.name}</span>
-                      <span style={{ fontWeight: 700, color: node.score > 60 ? 'var(--status-critical)' : 'var(--status-warning)' }}>{node.score}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{node.name}</span>
+                      <span style={{ fontWeight: 700, color: node.score > 60 ? 'var(--status-danger)' : 'var(--status-warning)' }}>{node.score}</span>
                    </div>
                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ width: `${node.score}%`, height: '100%', background: node.score > 60 ? 'var(--status-critical)' : 'var(--accent-primary)', boxShadow: '0 0 10px rgba(0, 180, 216, 0.2)' }}></div>
+                      <div style={{ width: `${node.score}%`, height: '100%', background: node.score > 60 ? 'var(--status-danger)' : 'var(--accent-primary)', boxShadow: '0 0 10px rgba(0, 180, 216, 0.2)' }}></div>
                    </div>
                 </div>
               ))}
            </div>
-           <div style={{ marginTop: '2.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px dashed var(--glass-border)' }}>
-             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+           <div style={{ marginTop: '2.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px dashed var(--border-color)' }}>
+             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                High-risk nodes detected in Asian corridor. System automatically prioritizing secondary routes.
              </p>
            </div>
@@ -149,7 +149,7 @@ export default function Analytics() {
                     <tr>
                        <td style={{ fontWeight: 600 }}>Asia → Europe (Central)</td>
                        <td>8.4k tons</td>
-                       <td style={{ color: 'var(--status-live)' }}>-2.1h</td>
+                       <td style={{ color: 'var(--status-success)' }}>-2.1h</td>
                        <td>LOW</td>
                     </tr>
                     <tr>
@@ -161,7 +161,7 @@ export default function Analytics() {
                     <tr>
                        <td style={{ fontWeight: 600 }}>Pacific Corridor</td>
                        <td>12.8k tons</td>
-                       <td style={{ color: 'var(--status-live)' }}>STABLE</td>
+                       <td style={{ color: 'var(--status-success)' }}>STABLE</td>
                        <td>LOW</td>
                     </tr>
                  </tbody>

@@ -5,6 +5,7 @@ import {
   LogOut, Package, CheckSquare, AlertTriangle, 
   MapPin, Cloud, LayoutDashboard, Settings, Menu, X, ChevronRight, User
 } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function OperatorShell() {
   const { user, logout } = useAuth();
@@ -148,7 +149,7 @@ export default function OperatorShell() {
       alignItems: 'center',
       gap: '8px',
       fontSize: '14px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
     },
     content: {
       flex: 1,
@@ -159,7 +160,7 @@ export default function OperatorShell() {
     toggleBtn: {
       background: 'none',
       border: 'none',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       cursor: 'pointer',
       padding: '8px',
       display: 'flex',
@@ -225,7 +226,7 @@ export default function OperatorShell() {
               <div style={{ fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.full_name || 'Operator'}
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {nodeName}
               </div>
             </div>
@@ -257,6 +258,7 @@ export default function OperatorShell() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+             <ThemeToggle />
              <div style={{ 
                backgroundColor: 'var(--info-dim)', 
                color: 'var(--info)', 

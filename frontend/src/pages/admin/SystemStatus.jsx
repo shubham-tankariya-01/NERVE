@@ -5,8 +5,8 @@ import { Activity, Database, Server, Users, AlertTriangle, Route, Clock, Refresh
 
 const StatusCard = ({ title, value, status, icon: Icon, color }) => (
   <div style={{
-    backgroundColor: 'var(--bg-secondary)',
-    border: '1px solid var(--glass-border)',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-color)',
     borderRadius: '16px',
     padding: '24px',
     display: 'flex',
@@ -24,19 +24,19 @@ const StatusCard = ({ title, value, status, icon: Icon, color }) => (
         <Icon size={24} />
       </div>
       <div style={{ 
-        fontSize: '10px', fontWeight: '900', color: status === 'healthy' ? 'var(--status-live)' : 'var(--status-critical)',
+        fontSize: '10px', fontWeight: '900', color: status === 'healthy' ? 'var(--status-success)' : 'var(--status-danger)',
         display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase'
       }}>
         <div style={{ 
           width: '6px', height: '6px', borderRadius: '50%', 
-          backgroundColor: status === 'healthy' ? 'var(--status-live)' : 'var(--status-critical)',
-          boxShadow: `0 0 8px ${status === 'healthy' ? 'var(--status-live)' : 'var(--status-critical)'}`
+          backgroundColor: status === 'healthy' ? 'var(--status-success)' : 'var(--status-danger)',
+          boxShadow: `0 0 8px ${status === 'healthy' ? 'var(--status-success)' : 'var(--status-danger)'}`
         }} />
         {status}
       </div>
     </div>
     <div>
-      <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</div>
+      <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</div>
       <div style={{ fontSize: '24px', fontWeight: '900', fontFamily: 'var(--font-mono)' }}>{value}</div>
     </div>
     <div style={{ 
@@ -99,8 +99,8 @@ export default function SystemStatus() {
       marginBottom: '40px',
     },
     section: {
-      backgroundColor: 'var(--bg-secondary)',
-      border: '1px solid var(--glass-border)',
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid var(--border-color)',
       borderRadius: '16px',
       padding: '32px',
     }
@@ -114,7 +114,7 @@ export default function SystemStatus() {
         <h1 style={styles.title}>SYSTEM DIAGNOSTICS</h1>
         <button 
           onClick={loadData}
-          style={{ background: 'none', border: 'none', color: 'var(--status-critical)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '800', cursor: 'pointer' }}
+          style={{ background: 'none', border: 'none', color: 'var(--status-danger)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '800', cursor: 'pointer' }}
         >
           <RefreshCw size={18} /> REFRESH LIVE
         </button>
@@ -167,40 +167,40 @@ export default function SystemStatus() {
           value={health?.uptime || '99.9%'} 
           status="healthy"
           icon={Activity}
-          color="var(--status-live)"
+          color="var(--status-success)"
         />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         <div style={styles.section}>
-          <h3 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text-muted)', marginBottom: '24px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={16} color="var(--status-critical)" />
+          <h3 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text-secondary)', marginBottom: '24px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={16} color="var(--status-danger)" />
             GLOBAL DISRUPTIONS
           </h3>
-          <div style={{ fontSize: '48px', fontWeight: '900', color: 'var(--status-critical)' }}>
+          <div style={{ fontSize: '48px', fontWeight: '900', color: 'var(--status-danger)' }}>
             {health?.metrics?.active_disruptions || '0'}
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>Across all onboarded companies</p>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px' }}>Across all onboarded companies</p>
         </div>
 
         <div style={styles.section}>
-          <h3 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text-muted)', marginBottom: '24px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text-secondary)', marginBottom: '24px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Route size={16} color="var(--accent-primary)" />
             PENDING REROUTES
           </h3>
           <div style={{ fontSize: '48px', fontWeight: '900', color: '#fff' }}>
             {health?.metrics?.pending_approvals || '0'}
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>Awaiting manager intervention</p>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px' }}>Awaiting manager intervention</p>
         </div>
       </div>
 
       <div style={{ marginTop: '24px', backgroundColor: 'rgba(255, 77, 77, 0.05)', border: '1px solid rgba(255, 77, 77, 0.1)', padding: '16px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700', color: 'var(--status-critical)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700', color: 'var(--status-danger)' }}>
           <Clock size={14} />
           LAST FULL SCAN: {health?.orchestrator?.last_scan ? new Date(health.orchestrator.last_scan).toLocaleTimeString() : 'NEVER'}
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>
           NERVE CORE v1.4.2
         </div>
       </div>

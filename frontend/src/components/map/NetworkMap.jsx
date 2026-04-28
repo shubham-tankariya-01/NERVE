@@ -22,7 +22,7 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
   // Light tile URL: CartoDB Positron
   const LIGHT_TILE = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
-  const tileUrl = theme === 'dark' ? DARK_TILE : LIGHT_TILE;
+  const tileUrl = theme === 'light' ? LIGHT_TILE : DARK_TILE;
 
   const getNodeColor = (type, status) => {
     if (status === 'alert') return 'var(--danger)';
@@ -89,7 +89,7 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
             center={pos}
             radius={isCritical ? 7 : 5}
             fillColor={getNodeColor(node.type, node.status)}
-            color={isCritical ? 'var(--status-critical)' : isWarning ? 'var(--status-warning)' : 'rgba(255,255,255,0.2)'}
+            color={isCritical ? 'var(--status-danger)' : isWarning ? 'var(--status-warning)' : 'rgba(255,255,255,0.2)'}
             weight={isCritical ? 2 : 1}
             fillOpacity={1}
             className={`custom-marker ${isCritical ? 'blink-red' : ''}`}
@@ -107,19 +107,19 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem' }}>
                   <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Status</div>
-                    <div style={{ color: isCritical ? 'var(--status-critical)' : node.status === 'congested' ? 'var(--status-warning)' : 'var(--brand)', textTransform: 'uppercase' }}>{node.status}</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>Status</div>
+                    <div style={{ color: isCritical ? 'var(--status-danger)' : node.status === 'congested' ? 'var(--status-warning)' : 'var(--brand)', textTransform: 'uppercase' }}>{node.status}</div>
                   </div>
                   <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Risk</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>Risk</div>
                     <div>{node.risk_level || 'Low'}</div>
                   </div>
                   <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Load</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>Load</div>
                     <div>{node.current_load}/{node.capacity}</div>
                   </div>
                   <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Proc. Time</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>Proc. Time</div>
                     <div>{node.processing_time_hrs}h</div>
                   </div>
                 </div>
@@ -130,7 +130,7 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
                       <span>{node.weather.condition || 'Clear'}</span>
                       <span style={{ fontWeight: 'bold' }}>{node.weather.temperature_c || node.weather.temp || 0}°C</span>
                     </div>
-                    <div style={{ color: 'var(--text-muted)' }}>Wind: {node.weather.wind_speed_kmh || node.weather.wind || 0} km/h</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>Wind: {node.weather.wind_speed_kmh || node.weather.wind || 0} km/h</div>
                   </div>
                 )}
               </div>

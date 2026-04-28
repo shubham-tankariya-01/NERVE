@@ -44,6 +44,7 @@ import CompanyDetail from './pages/admin/CompanyDetail';
 import CustomerShell from './layouts/CustomerShell';
 import MyShipments from './pages/customer/MyShipments';
 import TrackShipment from './pages/customer/TrackShipment';
+import CustomerDashboard from './pages/customer/CustomerDashboard';
 
 // Placeholders
 const CustomerTracking = () => <div style={{ padding: '40px', color: 'var(--text-primary)' }}>Public Tracking View - Coming Soon</div>;
@@ -126,7 +127,8 @@ export default function App() {
                       </ProtectedRoute>
                     } 
                   >
-                    <Route index element={<MyShipments />} />
+                    <Route index element={<CustomerDashboard />} />
+                    <Route path="shipments" element={<MyShipments />} />
                     <Route path="track/:id" element={<TrackShipment />} />
                     <Route path="alerts" element={<div style={{ padding: '20px', color: 'var(--text-primary)', fontSize: '14px' }}>Alerts — Coming soon</div>} />
                     <Route path="settings" element={<Settings />} />

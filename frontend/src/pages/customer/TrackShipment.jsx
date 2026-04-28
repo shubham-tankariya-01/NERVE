@@ -41,7 +41,7 @@ export default function TrackShipment() {
 
   if (loading) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-muted)', gap:'16px' }}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-secondary)', gap:'16px' }}>
         <Loader size={32} style={{ animation:'spin 1s linear infinite' }} />
         <span style={{ fontSize:'14px', fontWeight:'600', letterSpacing: '0.5px' }}>INTERROGATING SHIPMENT NETWORK...</span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -77,7 +77,7 @@ export default function TrackShipment() {
   const nodeStatusIcon = (st) => {
     if (st === 'visited') return <CheckCircle size={18} color="var(--brand)" />;
     if (st === 'current') return <Circle size={18} color="var(--info)" fill="var(--info)" />;
-    return <Circle size={18} color="var(--text-muted)" />;
+    return <Circle size={18} color="var(--text-secondary)" />;
   };
 
   const styles = {
@@ -116,7 +116,7 @@ export default function TrackShipment() {
     },
     label: {
       fontSize: '11px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       fontWeight: '700',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
@@ -151,7 +151,7 @@ export default function TrackShipment() {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Fleet / Tracking</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Fleet / Tracking</div>
             <div style={{ fontSize: '24px', fontWeight: '800', fontFamily: "'Space Grotesk', sans-serif" }}>{shipment.id}</div>
           </div>
         </div>
@@ -216,8 +216,8 @@ export default function TrackShipment() {
             </div>
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
-                <div style={{ fontSize: '32px', fontWeight: '800', color: 'var(--brand)' }}>{progress}<span style={{ fontSize: '16px', color: 'var(--text-muted)', marginLeft: '4px' }}>%</span></div>
-                <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
+                <div style={{ fontSize: '32px', fontWeight: '800', color: 'var(--brand)' }}>{progress}<span style={{ fontSize: '16px', color: 'var(--text-secondary)', marginLeft: '4px' }}>%</span></div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
                   {taken.length} OF {planned.length} NODES CLEARED
                 </div>
               </div>
@@ -235,7 +235,7 @@ export default function TrackShipment() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', backgroundColor: 'var(--bg-elevated)', borderRadius: '10px' }}>
                 <Clock size={20} color="var(--brand)" />
                 <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Time in Transit</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Time in Transit</div>
                   <div style={{ fontSize: '14px', fontWeight: '700' }}>{Math.round(data.total_transit_hrs)} Hours and Counting</div>
                 </div>
               </div>
@@ -267,11 +267,11 @@ export default function TrackShipment() {
                           <div style={{ fontSize:'15px', fontWeight:'700', color: st === 'current' ? 'var(--info)' : 'var(--text-primary)' }}>
                             {node.name || nodeId}
                           </div>
-                          <div style={{ fontSize:'12px', color:'var(--text-muted)', marginTop:'2px', fontWeight: '500' }}>
+                          <div style={{ fontSize:'12px', color:'var(--text-secondary)', marginTop:'2px', fontWeight: '500' }}>
                             {node.type || 'In-Network Point'}
                           </div>
                         </div>
-                        <div style={{ fontSize:'10px', fontWeight:'800', textTransform:'uppercase', color: st === 'visited' ? 'var(--brand)' : st === 'current' ? 'var(--info)' : 'var(--text-muted)', padding: '4px 8px', border: '1px solid currentColor', borderRadius: '4px' }}>
+                        <div style={{ fontSize:'10px', fontWeight:'800', textTransform:'uppercase', color: st === 'visited' ? 'var(--brand)' : st === 'current' ? 'var(--info)' : 'var(--text-secondary)', padding: '4px 8px', border: '1px solid currentColor', borderRadius: '4px' }}>
                           {st}
                         </div>
                       </div>

@@ -66,7 +66,7 @@ export default function Dashboard() {
               <span className="kpi-title" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>{kpi.title}</span>
               <span className="kpi-value" style={{ fontSize: '2.25rem', fontWeight: 800 }}>{kpi.value}</span>
             </div>
-            <div className="kpi-icon" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)' }}>{kpi.icon}</div>
+            <div className="kpi-icon" style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)' }}>{kpi.icon}</div>
           </div>
         ))}
       </div>
@@ -90,7 +90,7 @@ export default function Dashboard() {
              </div>
           ) : (
             alerts.map(a => (
-              <div key={a.id || a.node_id} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', borderLeft: `4px solid var(--${a.severity === 'CRITICAL' ? 'danger' : 'warning'})` }}>
+              <div key={a.id || a.node_id} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--bg-elevated)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', borderLeft: `4px solid var(--${a.severity === 'CRITICAL' ? 'danger' : 'warning'})` }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-main)' }}>{a.node_name}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{a.reasons?.join(' • ')}</div>
@@ -133,8 +133,8 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', background: 'rgba(10, 17, 40, 0.4)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', marginBottom: '0.25rem' }}>
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '0.25rem' }}>
             <span>STATUS</span>
             <span>UNITS</span>
           </div>
@@ -147,7 +147,7 @@ export default function Dashboard() {
               <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{s.value.toString().padStart(2, '0')}</span>
             </div>
           ))}
-          <div style={{ marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>TOTAL OPERATIONS</span>
             <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)' }}>
               {deliveryStatus.reduce((acc, curr) => acc + curr.value, 0).toString().padStart(2, '0')}
@@ -165,9 +165,9 @@ export default function Dashboard() {
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{wsData?.agent_logs?.length || 0} EVENTS DETECTED</div>
         </div>
-        <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+        <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-muted)', background: 'var(--bg-canvas)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
           {(wsData?.agent_logs || []).slice().reverse().map((log, i) => (
-            <div key={i} style={{ marginBottom: '0.75rem', display: 'flex', gap: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem', animation: 'slideIn 0.3s ease-out forwards' }}>
+            <div key={i} style={{ marginBottom: '0.75rem', display: 'flex', gap: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', animation: 'slideIn 0.3s ease-out forwards' }}>
               <span style={{ color: 'var(--text-muted)', opacity: 0.5, fontSize: '0.75rem' }}>{new Date().toLocaleTimeString()}</span>
               <span style={{ color: 'var(--accent-primary)', fontWeight: 700, width: '110px', fontSize: '0.75rem' }}>[{log.agent?.toUpperCase()}]</span>
               <span style={{ color: 'var(--text-main)', flex: 1 }}>{log.action}</span>

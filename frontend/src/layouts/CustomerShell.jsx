@@ -5,6 +5,7 @@ import {
   LogOut, Package, MapPin, Bell, LayoutDashboard, 
   Settings, HelpCircle, User, ChevronRight, Menu, X 
 } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function CustomerShell() {
   const { user, logout } = useAuth();
@@ -148,7 +149,7 @@ export default function CustomerShell() {
       alignItems: 'center',
       gap: '8px',
       fontSize: '14px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
     },
     content: {
       flex: 1,
@@ -159,7 +160,7 @@ export default function CustomerShell() {
     toggleBtn: {
       background: 'none',
       border: 'none',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       cursor: 'pointer',
       padding: '8px',
       display: 'flex',
@@ -189,7 +190,7 @@ export default function CustomerShell() {
             <LayoutDashboard size={18} />
             <span>Dashboard</span>
           </NavLink>
-          <NavLink to="/customer" style={({ isActive }) => styles.navItem(isActive && location.pathname === '/customer')}>
+          <NavLink to="/customer/shipments" style={({ isActive }) => styles.navItem(isActive)}>
             <Package size={18} />
             <span>My Shipments</span>
           </NavLink>
@@ -218,7 +219,7 @@ export default function CustomerShell() {
               <div style={{ fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {displayName}
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {user?.role?.replace('_', ' ')}
               </div>
             </div>
@@ -250,6 +251,7 @@ export default function CustomerShell() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+             <ThemeToggle />
              <div style={{ 
                backgroundColor: 'var(--brand-dim)', 
                color: 'var(--brand)', 

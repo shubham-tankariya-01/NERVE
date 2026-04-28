@@ -31,7 +31,7 @@ export default function NodeWeather() {
     },
     subtitle: {
       fontSize: '14px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
     },
     grid: {
       display: 'grid',
@@ -71,7 +71,7 @@ export default function NodeWeather() {
     },
     statLabel: {
       fontSize: '10px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       fontWeight: '700',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
@@ -109,7 +109,7 @@ export default function NodeWeather() {
       )}
 
       {filteredWeather.length === 0 ? (
-        <div style={{ padding: '80px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div style={{ padding: '80px 20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
           <Cloud size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
           <div style={{ fontSize: '15px', fontWeight: '600' }}>No weather data received for your nodes.</div>
           <div style={{ fontSize: '12px' }}>Waiting for global satellite sync...</div>
@@ -122,7 +122,7 @@ export default function NodeWeather() {
               <div key={node.node_id} style={styles.weatherCard(hasAlert)}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>{node.node_id}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>{node.node_id}</div>
                     <div style={{ fontSize: '18px', fontWeight: '800' }}>{node.node_name}</div>
                   </div>
                   <div style={{ fontSize: '28px' }}>
@@ -132,11 +132,11 @@ export default function NodeWeather() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                   <div style={styles.tempLarge}>
-                    {node.temperature_c}<span style={{ fontSize: '18px', color: 'var(--text-muted)' }}>°C</span>
+                    {node.temperature_c}<span style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>°C</span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '12px', fontWeight: '800', color: hasAlert ? 'var(--danger)' : 'var(--info)', textTransform: 'uppercase' }}>{node.condition}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>{hasAlert ? 'WARNING' : 'STABLE'}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>{hasAlert ? 'WARNING' : 'STABLE'}</div>
                   </div>
                 </div>
 
@@ -171,7 +171,7 @@ export default function NodeWeather() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>
                    <MapPin size={12} /> STATION TELEMETRY VERIFIED
                 </div>
               </div>

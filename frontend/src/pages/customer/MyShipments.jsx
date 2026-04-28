@@ -65,7 +65,7 @@ export default function MyShipments() {
 
   if (loading && shipments.length === 0) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-muted)', gap:'16px' }}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-secondary)', gap:'16px' }}>
         <Loader size={32} style={{ animation:'spin 1s linear infinite' }} />
         <span style={{ fontSize:'15px', fontWeight:'600', letterSpacing:'1px' }}>SYNCHRONIZING LOGISTICS DATA...</span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -147,28 +147,28 @@ export default function MyShipments() {
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--info)')}><TrendingUp size={24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Active Shipments</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Active Shipments</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.active}</div>
           </div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--warning)')}><AlertTriangle size={24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Delayed</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Delayed</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.delayed}</div>
           </div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--brand)')}><CheckCircle size={24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Delivered</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Delivered</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.delivered}</div>
           </div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statIcon('var(--text-secondary)')}><Package size={24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Total Managed</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Total Managed</div>
             <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.total}</div>
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function MyShipments() {
       {/* Toolbar */}
       <div style={styles.toolbar}>
         <div style={styles.searchContainer}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
           <input 
             type="text" 
             placeholder="Search by Shipment ID, Origin, or Destination..." 
@@ -202,7 +202,7 @@ export default function MyShipments() {
 
       {/* Shipments List */}
       {filteredShipments.length === 0 ? (
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'100px 20px', backgroundColor: 'var(--bg-surface)', borderRadius: '12px', border: '1px dashed var(--border)', color:'var(--text-muted)', gap:'16px' }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'100px 20px', backgroundColor: 'var(--bg-surface)', borderRadius: '12px', border: '1px dashed var(--border)', color:'var(--text-secondary)', gap:'16px' }}>
           <Package size={48} strokeWidth={1} />
           <div style={{ fontSize:'16px', fontWeight:'700', color: 'var(--text-primary)' }}>No matching shipments found</div>
           <div style={{ fontSize:'14px', textAlign:'center', maxWidth: '400px' }}>
@@ -227,7 +227,7 @@ export default function MyShipments() {
             >
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'16px' }}>
                 <div>
-                  <div style={{ fontSize:'11px', color:'var(--text-muted)', fontWeight:'700', textTransform:'uppercase', letterSpacing:'1px', marginBottom: '4px' }}>Shipment ID</div>
+                  <div style={{ fontSize:'11px', color:'var(--text-secondary)', fontWeight:'700', textTransform:'uppercase', letterSpacing:'1px', marginBottom: '4px' }}>Shipment ID</div>
                   <div style={{ fontSize:'16px', fontWeight:'800', fontFamily:"'JetBrains Mono', monospace", color: 'var(--brand)' }}>{s.id}</div>
                 </div>
                 <div style={{ padding:'4px 12px', borderRadius:'6px', fontSize:'11px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.5px', backgroundColor: STATUS_BG[s.status] || 'var(--bg-elevated)', color: STATUS_COLORS[s.status] || 'var(--text-secondary)' }}>
@@ -237,12 +237,12 @@ export default function MyShipments() {
 
               <div style={{ display:'flex', alignItems:'center', gap:'12px', padding: '12px', backgroundColor: 'var(--bg-canvas)', borderRadius: '8px', marginBottom: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Origin</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>Origin</div>
                   <div style={{ fontSize: '13px', fontWeight: '700' }}>{s.origin}</div>
                 </div>
-                <ArrowRight size={16} color="var(--text-muted)" />
+                <ArrowRight size={16} color="var(--text-secondary)" />
                 <div style={{ flex: 1, textAlign: 'right' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Destination</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>Destination</div>
                   <div style={{ fontSize: '13px', fontWeight: '700' }}>{s.destination}</div>
                 </div>
               </div>
@@ -273,7 +273,7 @@ export default function MyShipments() {
                 justifyContent: 'space-between', 
                 alignItems: 'center' 
               }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>View live tracking details</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>View live tracking details</span>
                 <ChevronRight size={16} color="var(--brand)" />
               </div>
             </div>

@@ -61,8 +61,8 @@ export default function Nodes() {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ 
               width: '100%', 
-              background: 'rgba(255,255,255,0.02)', 
-              border: '1px solid var(--glass-border)', 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border)', 
               padding: '0.8rem 1rem 0.8rem 3rem',
               color: 'var(--text-main)',
               fontSize: '0.75rem',
@@ -83,9 +83,9 @@ export default function Nodes() {
                 fontWeight: 900,
                 borderRadius: '4px',
                 cursor: 'pointer',
-                background: filterType === t ? 'var(--accent-primary)' : 'rgba(255,255,255,0.02)',
+                background: filterType === t ? 'var(--accent-primary)' : 'var(--bg-surface)',
                 color: filterType === t ? '#000' : 'var(--text-muted)',
-                border: `1px solid ${filterType === t ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
+                border: `1px solid ${filterType === t ? 'var(--accent-primary)' : 'var(--border)'}`,
                 transition: 'all 0.2s',
                 textTransform: 'uppercase'
               }}
@@ -116,15 +116,15 @@ export default function Nodes() {
                 transition: 'transform 0.2s, background 0.2s'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.background = 'var(--bg-elevated)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--bg-card)';
+                e.currentTarget.style.background = 'var(--bg-surface)';
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-muted)', border: '1px solid var(--glass-border)' }}>
+                    <div style={{ padding: '0.2rem 0.6rem', background: 'var(--bg-elevated)', borderRadius: '2px', fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
                       {node.type?.toUpperCase()}
                     </div>
                     <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{node.id}</span>
@@ -142,14 +142,14 @@ export default function Nodes() {
                 </div>
               </div>
               
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px' }}>
+              <div style={{ background: 'var(--bg-canvas)', padding: '1rem', borderRadius: '4px' }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 800 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                        <Zap size={10} /> UTILIZATION
                     </div>
                     <span>{Math.round(loadRatio * 100)}%</span>
                  </div>
-                 <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                 <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
                     <div style={{ 
                       width: `${loadRatio * 100}%`, 
                       height: '100%', 

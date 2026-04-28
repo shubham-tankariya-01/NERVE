@@ -31,9 +31,9 @@ export default function Weather() {
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Network Sync</div>
-           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--status-live)', fontWeight: 700, fontSize: '0.85rem' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-live)', boxShadow: '0 0 10px var(--status-live)' }}></div>
+           <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Network Sync</div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--status-success)', fontWeight: 700, fontSize: '0.85rem' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-success)', boxShadow: '0 0 10px var(--status-success)' }}></div>
               LIVE FEED
            </div>
         </div>
@@ -43,13 +43,13 @@ export default function Weather() {
         <div className="glass-panel" style={{ 
           padding: '1.5rem', 
           marginBottom: '2.5rem', 
-          borderLeft: '4px solid var(--status-critical)', 
+          borderLeft: '4px solid var(--status-danger)', 
           background: 'rgba(255,20,50,0.03)',
           display: 'flex',
           flexDirection: 'column',
           gap: '1rem'
         }}>
-           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--status-critical)', fontWeight: 900, fontSize: '0.9rem' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--status-danger)', fontWeight: 900, fontSize: '0.9rem' }}>
               <AlertTriangle size={18} /> CRITICAL WEATHER ADVISORIES ACTIVE
            </div>
            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -60,7 +60,7 @@ export default function Weather() {
                   borderRadius: '4px', 
                   fontSize: '0.75rem', 
                   fontWeight: 700,
-                  color: 'var(--text-main)',
+                  color: 'var(--text-primary)',
                   border: '1px solid rgba(255,20,50,0.2)'
                 }}>
                   {a.node_name?.toUpperCase()}: {a.description}
@@ -72,12 +72,12 @@ export default function Weather() {
         <div className="glass-panel" style={{ 
           padding: '1rem 1.5rem', 
           marginBottom: '2.5rem', 
-          borderLeft: '4px solid var(--status-live)', 
+          borderLeft: '4px solid var(--status-success)', 
           background: 'rgba(50,255,100,0.02)',
           display: 'flex',
           alignItems: 'center',
           gap: '1rem',
-          color: 'var(--status-live)',
+          color: 'var(--status-success)',
           fontWeight: 700,
           fontSize: '0.85rem'
         }}>
@@ -88,7 +88,7 @@ export default function Weather() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
         {weatherData.length > 0 ? weatherData.map(node => {
           const hasAlert = activeAlerts.some(a => a.node_id === node.node_id);
-          const statusColor = hasAlert ? 'var(--status-critical)' : 'var(--accent-primary)';
+          const statusColor = hasAlert ? 'var(--status-danger)' : 'var(--accent-primary)';
           
           return (
             <div key={node.node_id} className="glass-panel" style={{ 
@@ -101,10 +101,10 @@ export default function Weather() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-muted)', border: '1px solid var(--glass-border)' }}>
+                    <div style={{ padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                       {node.node_id}
                     </div>
-                    <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>{node.node_name}</span>
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)', textTransform: 'uppercase' }}>{node.node_name}</span>
                  </div>
                  <div style={{ fontSize: '1.25rem' }}>
                    {node.temperature_c > 30 ? '☀️' : node.temperature_c < 10 ? '❄️' : '🌤️'}
@@ -112,12 +112,12 @@ export default function Weather() {
               </div>
               
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
-                   {node.temperature_c}<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>°C</span>
+                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
+                   {node.temperature_c}<span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>°C</span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: statusColor, textTransform: 'uppercase' }}>{node.condition}</div>
-                   <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600 }}>STATION STATUS: {hasAlert ? 'ALERT' : 'OPTIMAL'}</div>
+                   <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 600 }}>STATION STATUS: {hasAlert ? 'ALERT' : 'OPTIMAL'}</div>
                 </div>
               </div>
               
@@ -125,41 +125,41 @@ export default function Weather() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <Wind size={14} style={{ color: 'var(--accent-primary)' }} />
                    <div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800 }}>WIND</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>WIND</div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>{node.wind_speed_kmh} km/h</div>
                    </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <Droplets size={14} style={{ color: 'var(--accent-primary)' }} />
                    <div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800 }}>HUMIDITY</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>HUMIDITY</div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>{node.humidity_pct}%</div>
                    </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <CloudRain size={14} style={{ color: 'var(--accent-primary)' }} />
                    <div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800 }}>PRECIP</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>PRECIP</div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>{node.precipitation_mm}mm</div>
                    </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <Zap size={14} style={{ color: 'var(--accent-primary)' }} />
                    <div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800 }}>GUSTS</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>GUSTS</div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>{node.wind_gusts_kmh} km/h</div>
                    </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                  <MapPin size={10} /> STATION_COORDS_VERIFIED
               </div>
             </div>
           );
         }) : (
           <div style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center' }}>
-             <div className="animate-pulse" style={{ color: 'var(--text-muted)', fontWeight: 700 }}>INITIALIZING GLOBAL WEATHER SYNC...</div>
+             <div className="animate-pulse" style={{ color: 'var(--text-secondary)', fontWeight: 700 }}>INITIALIZING GLOBAL WEATHER SYNC...</div>
           </div>
         )}
       </div>

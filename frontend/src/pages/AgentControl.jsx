@@ -16,12 +16,12 @@ export default function AgentControl() {
 
   const getLogColor = (level) => {
     switch (level) {
-      case 'INFO': return '#22d3ee'; // cyan
-      case 'REROUTE': return 'var(--brand)';
-      case 'BLOCKED': return 'var(--danger)';
-      case 'ALERT': return 'var(--danger)';
-      case 'MONITOR': return '#94a3b8'; // grey
-      default: return 'var(--text-primary)';
+      case 'INFO': return 'var(--accent-primary)'; 
+      case 'REROUTE': return 'var(--status-live)';
+      case 'BLOCKED': return 'var(--status-critical)';
+      case 'ALERT': return 'var(--status-critical)';
+      case 'MONITOR': return 'var(--text-muted)'; 
+      default: return 'var(--text-main)';
     }
   };
 
@@ -65,7 +65,7 @@ export default function AgentControl() {
           <div key={i} className="card" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{c.icon}</div>
              <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>{c.label}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>{c.label}</div>
                 <div style={{ fontWeight: 700, fontSize: '1rem' }}>{c.val}</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{c.sub}</div>
              </div>
@@ -75,17 +75,17 @@ export default function AgentControl() {
 
       <div style={{ flex: 1, padding: '0 2rem 2rem 2rem', display: 'flex', gap: '1.5rem', overflow: 'hidden' }}>
         {/* Terminal Log */}
-        <div style={{ flex: 1, background: '#000', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-           <div style={{ background: '#111', padding: '0.5rem 1rem', borderBottom: '1px solid #222', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', fontSize: '0.75rem' }}>
+        <div style={{ flex: 1, background: 'var(--bg-canvas)', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+           <div style={{ background: 'var(--bg-elevated)', padding: '0.5rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
               <Terminal size={14} />
               AGENT_DECISION_LOG.EXE
            </div>
            <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', fontFamily: 'JetBrains Mono', fontSize: '0.85rem', lineHeight: '1.6' }}>
               {logs.map((log, i) => (
                 <div key={i} style={{ marginBottom: '0.25rem' }}>
-                  <span style={{ color: '#444', marginRight: '0.75rem' }}>[{log.ts}]</span>
+                  <span style={{ color: 'var(--text-muted)', marginRight: '0.75rem', opacity: 0.7 }}>[{log.ts}]</span>
                   <span style={{ color: getLogColor(log.level), marginRight: '0.75rem' }}>&lt;{log.tag}&gt;</span>
-                  <span style={{ color: '#ccc' }}>{log.msg}</span>
+                  <span style={{ color: 'var(--text-main)' }}>{log.msg}</span>
                 </div>
               ))}
               <div ref={logEndRef}></div>
@@ -101,7 +101,7 @@ export default function AgentControl() {
                     <div key={i} style={{ fontSize: '0.8rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                           <span style={{ color: getLogColor(l.level), fontWeight: 700 }}>{l.level}</span>
-                          <span style={{ color: 'var(--text-muted)' }}>{l.ts}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{l.ts}</span>
                        </div>
                        <div style={{ color: 'var(--text-primary)' }}>{l.msg}</div>
                     </div>

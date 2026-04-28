@@ -12,7 +12,7 @@ export default function CommandCenter() {
   return (
     <div style={{ height: 'calc(100vh - 64px)', position: 'relative', display: 'flex', overflow: 'hidden', background: 'var(--bg-canvas)' }}>
       {/* Left Panels */}
-      <div style={{ width: '320px', padding: '1rem', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', background: 'rgba(10, 17, 40, 0.4)', backdropFilter: 'blur(10px)', zIndex: 10 }}>
+      <div style={{ width: '320px', padding: '1rem', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', background: 'var(--bg-surface)', backdropFilter: 'blur(10px)', zIndex: 10 }}>
         <RiskyNodesPanel onSelectNode={setSelectedNode} />
         <RiskHorizonPanel selectedNode={selectedNode} />
       </div>
@@ -30,9 +30,9 @@ export default function CommandCenter() {
               right: '1rem', 
               top: '1rem', 
               zIndex: 1000,
-              background: 'var(--bg-secondary)',
+              background: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              color: 'var(--text-main)',
+              color: 'var(--text-primary)',
               padding: '0.5rem',
               borderRadius: '8px',
               cursor: 'pointer',
@@ -60,7 +60,7 @@ export default function CommandCenter() {
         flexDirection: 'column', 
         gap: '1rem',
         overflowY: 'auto', 
-        background: 'rgba(10, 17, 40, 0.4)', 
+        background: 'var(--bg-surface)', 
         backdropFilter: 'blur(10px)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: 10

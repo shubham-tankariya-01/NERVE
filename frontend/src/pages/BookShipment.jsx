@@ -72,19 +72,19 @@ export default function BookShipment() {
              <div style={{ 
                width: '36px', height: '36px', borderRadius: '50%', 
                background: step >= s ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)', 
-               color: step >= s ? '#000' : 'var(--text-muted)',
+               color: step >= s ? '#000' : 'var(--text-secondary)',
                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem',
-               border: `1px solid ${step >= s ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
+               border: `1px solid ${step >= s ? 'var(--accent-primary)' : 'var(--border-color)'}`,
                boxShadow: step === s ? '0 0 15px var(--accent-primary)44' : 'none',
                transition: 'all 0.3s'
              }}>{s}</div>
-             {s < 3 && <div style={{ width: '80px', height: '2px', background: step > s ? 'var(--accent-primary)' : 'var(--glass-border)', transition: 'all 0.3s' }}></div>}
+             {s < 3 && <div style={{ width: '80px', height: '2px', background: step > s ? 'var(--accent-primary)' : 'var(--border-color)', transition: 'all 0.3s' }}></div>}
            </React.Fragment>
          ))}
       </div>
 
       {error && (
-        <div style={{ padding: '1rem', background: 'rgba(255,20,50,0.1)', border: '1px solid var(--status-critical)', color: 'var(--status-critical)', borderRadius: '4px', marginBottom: '2rem', fontSize: '0.85rem', fontWeight: 600 }}>
+        <div style={{ padding: '1rem', background: 'rgba(255,20,50,0.1)', border: '1px solid var(--status-danger)', color: 'var(--status-danger)', borderRadius: '4px', marginBottom: '2rem', fontSize: '0.85rem', fontWeight: 600 }}>
           {error}
         </div>
       )}
@@ -92,14 +92,14 @@ export default function BookShipment() {
       <div className="glass-panel" style={{ padding: '2.5rem' }}>
         {step === 1 && (
           <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '2rem', textTransform: 'uppercase' }}>I. Vector Assignment</h2>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '2rem', textTransform: 'uppercase' }}>I. Vector Assignment</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div>
-                     <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Origin Node</label>
+                     <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Origin Node</label>
                      <select 
                        className="input-control" 
-                       style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', padding: '0.8rem', fontWeight: 600 }}
+                       style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.8rem', fontWeight: 600 }}
                        value={formData.origin}
                        onChange={(e) => setFormData({...formData, origin: e.target.value})}
                      >
@@ -108,10 +108,10 @@ export default function BookShipment() {
                      </select>
                   </div>
                   <div>
-                     <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Destination Node</label>
+                     <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Destination Node</label>
                      <select 
                        className="input-control" 
-                       style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', padding: '0.8rem', fontWeight: 600 }}
+                       style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.8rem', fontWeight: 600 }}
                        value={formData.destination}
                        onChange={(e) => setFormData({...formData, destination: e.target.value})}
                      >
@@ -133,7 +133,7 @@ export default function BookShipment() {
 
         {step === 2 && (
           <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '2rem', textTransform: 'uppercase' }}>II. Payload Intelligence</h2>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '2rem', textTransform: 'uppercase' }}>II. Payload Intelligence</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
                {cargoTypes.map(c => (
                  <div 
@@ -141,22 +141,22 @@ export default function BookShipment() {
                   onClick={() => setFormData({...formData, cargo_type: c.label})}
                   style={{ 
                     padding: '1.25rem', borderRadius: '4px', background: formData.cargo_type === c.label ? 'rgba(0, 180, 216, 0.1)' : 'rgba(255,255,255,0.02)', 
-                    border: `1px solid ${formData.cargo_type === c.label ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
+                    border: `1px solid ${formData.cargo_type === c.label ? 'var(--accent-primary)' : 'var(--border-color)'}`,
                     cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s'
                   }}
                  >
                     <div style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{c.icon}</div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: formData.cargo_type === c.label ? 'var(--accent-primary)' : 'var(--text-muted)' }}>{c.label}</div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: formData.cargo_type === c.label ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>{c.label}</div>
                  </div>
                ))}
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
                <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Priority Level</label>
+                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Priority Level</label>
                   <select 
                     className="input-control" 
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', padding: '0.8rem', fontWeight: 600 }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.8rem', fontWeight: 600 }}
                     value={formData.priority}
                     onChange={(e) => setFormData({...formData, priority: e.target.value})}
                   >
@@ -167,11 +167,11 @@ export default function BookShipment() {
                   </select>
                </div>
                <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Gross Weight (kg)</label>
+                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Gross Weight (kg)</label>
                   <input 
                     type="number" 
                     className="input-control" 
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', padding: '0.8rem', fontWeight: 600 }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.8rem', fontWeight: 600 }}
                     placeholder="5000" 
                     value={formData.weight_kg}
                     onChange={(e) => setFormData({...formData, weight_kg: parseFloat(e.target.value)})}
@@ -180,7 +180,7 @@ export default function BookShipment() {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
-               <button onClick={() => setStep(1)} style={{ flex: 1, padding: '1rem', borderRadius: '4px', border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-muted)', fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase' }}>Back</button>
+               <button onClick={() => setStep(1)} style={{ flex: 1, padding: '1rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase' }}>Back</button>
                <button 
                 onClick={handleBook} 
                 disabled={loading || !formData.cargo_type}
@@ -194,42 +194,42 @@ export default function BookShipment() {
 
         {step === 3 && result && (
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(0, 229, 160, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-live)', margin: '0 auto 1.5rem auto', border: '1px solid var(--status-live)' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(0, 229, 160, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-success)', margin: '0 auto 1.5rem auto', border: '1px solid var(--status-success)' }}>
                <CheckCircle size={40} />
             </div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>MISSION PROVISIONED</h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', fontWeight: 600, fontSize: '0.9rem' }}>SHIPMENT_ID: <span style={{color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)'}}>{result.shipment?.id}</span> · STATUS: ACTIVE</p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>MISSION PROVISIONED</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem', fontWeight: 600, fontSize: '0.9rem' }}>SHIPMENT_ID: <span style={{color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)'}}>{result.shipment?.id}</span> · STATUS: ACTIVE</p>
             
-            <div className="glass-panel" style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', textAlign: 'left', marginBottom: '2.5rem', border: '1px solid var(--glass-border)' }}>
-               <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '1.5rem', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em' }}>Neural Optimized Route Analytics</div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontWeight: 800, fontSize: '1.25rem', marginBottom: '2.5rem', color: 'var(--text-main)' }}>
+            <div className="glass-panel" style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', textAlign: 'left', marginBottom: '2.5rem', border: '1px solid var(--border-color)' }}>
+               <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em' }}>Neural Optimized Route Analytics</div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontWeight: 800, fontSize: '1.25rem', marginBottom: '2.5rem', color: 'var(--text-primary)' }}>
                   <div style={{display: 'flex', flexDirection: 'column'}}>
-                     <span style={{fontSize: '0.6rem', color: 'var(--text-muted)'}}>ORIGIN</span>
+                     <span style={{fontSize: '0.6rem', color: 'var(--text-secondary)'}}>ORIGIN</span>
                      {result.shipment?.origin}
                   </div>
                   <ChevronRight size={24} style={{ color: 'var(--accent-primary)', marginTop: '1rem' }} />
                   <div style={{display: 'flex', flexDirection: 'column'}}>
-                     <span style={{fontSize: '0.6rem', color: 'var(--text-muted)'}}>DESTINATION</span>
+                     <span style={{fontSize: '0.6rem', color: 'var(--text-secondary)'}}>DESTINATION</span>
                      {result.shipment?.destination}
                   </div>
                </div>
                
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
                   <div>
-                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><Clock size={10} /> TRANSIT</div>
-                     <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{result.route_analytics?.total_transit_hrs.toFixed(0)}H</div>
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><Clock size={10} /> TRANSIT</div>
+                     <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{result.route_analytics?.total_transit_hrs.toFixed(0)}H</div>
                   </div>
                   <div>
-                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><DollarSign size={10} /> EST. COST</div>
-                     <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>${result.route_analytics?.total_cost.toFixed(0)}</div>
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><DollarSign size={10} /> EST. COST</div>
+                     <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>${result.route_analytics?.total_cost.toFixed(0)}</div>
                   </div>
                   <div>
-                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><MapPin size={10} /> DISTANCE</div>
-                     <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{result.route_analytics?.total_distance_km.toLocaleString()}km</div>
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><MapPin size={10} /> DISTANCE</div>
+                     <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{result.route_analytics?.total_distance_km.toLocaleString()}km</div>
                   </div>
                   <div>
-                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><Activity size={10} /> HOPS</div>
-                     <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{result.route_analytics?.hop_count}</div>
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><Activity size={10} /> HOPS</div>
+                     <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{result.route_analytics?.hop_count}</div>
                   </div>
                </div>
             </div>

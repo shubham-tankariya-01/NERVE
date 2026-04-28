@@ -66,7 +66,7 @@ const ExpiryTimer = ({ expiresAt }) => {
     normal: 'var(--brand)',
     warning: 'var(--warning)',
     critical: 'var(--danger)',
-    expired: 'var(--text-muted)'
+    expired: 'var(--text-secondary)'
   };
 
   return (
@@ -101,7 +101,7 @@ const RerouteCard = ({ item, onAction }) => {
     critical: 'var(--danger)',
     high: 'var(--warning)',
     medium: 'var(--info)',
-    low: 'var(--text-muted)'
+    low: 'var(--text-secondary)'
   };
 
   const isExpired = new Date(item.expires_at) < new Date();
@@ -154,7 +154,7 @@ const RerouteCard = ({ item, onAction }) => {
             {item.shipment_id}
           </span>
         </div>
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>
           {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
@@ -179,11 +179,11 @@ const RerouteCard = ({ item, onAction }) => {
       {/* Route Comparison */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ fontSize: '12px', display: 'flex', gap: '8px', fontFamily: 'var(--font-mono)' }}>
-          <span style={{ color: 'var(--text-muted)', width: '70px' }}>ORIGINAL:</span>
+          <span style={{ color: 'var(--text-secondary)', width: '70px' }}>ORIGINAL:</span>
           <span style={{ color: 'var(--text-secondary)' }}>{item.original_route.join(' → ')}</span>
         </div>
         <div style={{ fontSize: '12px', display: 'flex', gap: '8px', fontFamily: 'var(--font-mono)' }}>
-          <span style={{ color: 'var(--text-muted)', width: '70px' }}>SUGGESTED:</span>
+          <span style={{ color: 'var(--text-secondary)', width: '70px' }}>SUGGESTED:</span>
           <span style={{ color: 'var(--text-primary)' }}>
             {item.suggested_route.map((node, idx) => {
               const isDifferent = !item.original_route.includes(node);
@@ -211,7 +211,7 @@ const RerouteCard = ({ item, onAction }) => {
         </div>
         <div style={{ 
           fontSize: '13px', 
-          color: 'var(--text-muted)', 
+          color: 'var(--text-secondary)', 
           lineHeight: '1.5',
           overflow: 'hidden',
           display: '-webkit-box',
@@ -290,7 +290,7 @@ const RerouteCard = ({ item, onAction }) => {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button 
                 onClick={() => { setMode('view'); setNotes(''); }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
               >
                 CANCEL
               </button>
@@ -416,7 +416,7 @@ export default function ReroutingQueue() {
       fontSize: '14px',
       fontWeight: '700',
       cursor: 'pointer',
-      color: active ? 'var(--brand)' : 'var(--text-muted)',
+      color: active ? 'var(--brand)' : 'var(--text-secondary)',
       borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
       transition: 'all 0.2s',
       display: 'flex',
@@ -434,7 +434,7 @@ export default function ReroutingQueue() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '100px 0',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       gap: '16px'
     },
     table: {
@@ -445,7 +445,7 @@ export default function ReroutingQueue() {
     th: {
       textAlign: 'left',
       padding: '12px',
-      color: 'var(--text-muted)',
+      color: 'var(--text-secondary)',
       fontSize: '11px',
       fontWeight: '700',
       textTransform: 'uppercase',
@@ -531,7 +531,7 @@ export default function ReroutingQueue() {
                 <tr key={item.id}>
                   <td style={{...styles.td, fontWeight: '700', fontFamily: 'var(--font-mono)'}}>{item.shipment_id}</td>
                   <td style={styles.td}>
-                    <span style={{ color: ({critical: 'var(--danger)', high: 'var(--warning)', medium: 'var(--info)'}[item.priority] || 'var(--text-muted)'), textTransform: 'uppercase', fontWeight: '800', fontSize: '11px' }}>
+                    <span style={{ color: ({critical: 'var(--danger)', high: 'var(--warning)', medium: 'var(--info)'}[item.priority] || 'var(--text-secondary)'), textTransform: 'uppercase', fontWeight: '800', fontSize: '11px' }}>
                       {item.priority}
                     </span>
                   </td>
@@ -549,7 +549,7 @@ export default function ReroutingQueue() {
                     </span>
                   </td>
                   <td style={styles.td}>{item.reviewed_by}</td>
-                  <td style={{...styles.td, color: 'var(--text-muted)'}}>{new Date(item.reviewed_at).toLocaleDateString()}</td>
+                  <td style={{...styles.td, color: 'var(--text-secondary)'}}>{new Date(item.reviewed_at).toLocaleDateString()}</td>
                   <td style={{...styles.td, color: 'var(--text-secondary)', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
                     {item.review_reason || item.agent_reasoning}
                   </td>
@@ -557,7 +557,7 @@ export default function ReroutingQueue() {
               ))}
               {history.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{...styles.td, textAlign: 'center', padding: '40px', color: 'var(--text-muted)'}}>No decision history found</td>
+                  <td colSpan="6" style={{...styles.td, textAlign: 'center', padding: '40px', color: 'var(--text-secondary)'}}>No decision history found</td>
                 </tr>
               )}
             </tbody>

@@ -17,7 +17,7 @@ const NavItem = React.memo(({ item, collapsed }) => (
       gap: '1rem',
       padding: '0.75rem',
       borderRadius: '10px',
-      color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
+      color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
       background: isActive ? 'rgba(0, 180, 216, 0.08)' : 'transparent',
       textDecoration: 'none',
       fontSize: '0.85rem',
@@ -59,7 +59,7 @@ const UserChip = ({ collapsed }) => {
     <div style={{ 
       display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', 
       background: 'rgba(255,255,255,0.03)', borderRadius: '10px',
-      border: '1px solid var(--glass-border)',
+      border: '1px solid var(--border-color)',
       justifyContent: collapsed ? 'center' : 'flex-start', transition: 'all 0.2s'
     }}>
       <div style={{ 
@@ -70,8 +70,8 @@ const UserChip = ({ collapsed }) => {
       }}>{initials}</div>
       {!collapsed && (
         <div style={{ display: 'flex', flexDirection: 'column', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>{user.full_name || user.username}</span>
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{roleLabel}</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{user.full_name || user.username}</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{roleLabel}</span>
         </div>
       )}
     </div>
@@ -130,8 +130,8 @@ export default function Sidebar() {
       onMouseLeave={() => setIsHovered(false)}
       style={{ 
         width: collapsed ? '72px' : '260px', 
-        background: 'var(--bg-secondary)', 
-        borderRight: '1px solid var(--glass-border)', 
+        background: 'var(--bg-card)', 
+        borderRight: '1px solid var(--border-color)', 
         display: 'flex', 
         flexDirection: 'column', 
         transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -143,7 +143,7 @@ export default function Sidebar() {
     >
       <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '64px' }}>
         <div style={{ 
-          width: '32px', height: '32px', background: 'var(--accent-primary)', borderRadius: '8px', 
+          width: '32px', height: '32px', background: '#22E6A3', borderRadius: '8px', 
           display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', 
           fontSize: '1.1rem', fontWeight: 800 
         }}>
@@ -152,7 +152,7 @@ export default function Sidebar() {
         {!collapsed && (
           <span style={{ 
             marginLeft: '0.75rem', fontWeight: 800, fontSize: '1.25rem', 
-            letterSpacing: '-0.03em', color: 'var(--text-main)',
+            letterSpacing: '-0.03em', color: 'var(--text-primary)',
             whiteSpace: 'nowrap'
           }}>
             NERVE
@@ -167,27 +167,27 @@ export default function Sidebar() {
           ))
         ) : (
           !collapsed && (
-            <div style={{ padding: '1rem 0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
+            <div style={{ padding: '1rem 0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>
               Use the dedicated app for your role.
             </div>
           )
         )}
       </nav>
 
-      <div style={{ padding: '1rem 0.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div style={{ padding: '1rem 0.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <NavLink to="/settings" style={({ isActive }) => ({
           display: 'flex', 
           alignItems: 'center', 
           gap: '1rem', 
           padding: '0.75rem', 
           borderRadius: '10px',
-          color: 'var(--text-muted)', 
+          color: 'var(--text-secondary)', 
           textDecoration: 'none', 
           fontSize: '0.85rem', 
           fontWeight: 500,
           justifyContent: collapsed ? 'center' : 'flex-start',
           background: collapsed ? 'rgba(255,255,255,0.03)' : 'transparent',
-          border: collapsed ? '1px solid var(--glass-border)' : '1px solid transparent',
+          border: collapsed ? '1px solid var(--border-color)' : '1px solid transparent',
           transition: 'all 0.2s'
         })}>
           <Settings size={20} />

@@ -35,7 +35,7 @@ export default function NodeDetail() {
 
   if (networkLoading) {
     return (
-      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
         <div className="animate-pulse">SYNCHRONIZING NODE TELEMETRY...</div>
       </div>
     );
@@ -43,9 +43,9 @@ export default function NodeDetail() {
 
   if (!node) {
     return (
-      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
         <Database size={48} style={{ marginBottom: '1rem', color: 'var(--status-warning)' }} />
-        <h2 style={{ color: 'var(--text-main)' }}>Node Connection Lost</h2>
+        <h2 style={{ color: 'var(--text-primary)' }}>Node Connection Lost</h2>
         <p>The specified node ID ({id}) is not responding to current network pings.</p>
         <Link to="/nodes" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 600 }}>Back to Infrastructure View</Link>
       </div>
@@ -57,15 +57,15 @@ export default function NodeDetail() {
 
   const getRiskColor = (level) => {
     switch (level?.toLowerCase()) {
-      case 'low': return 'var(--status-live)';
+      case 'low': return 'var(--status-success)';
       case 'medium': return 'var(--status-warning)';
-      case 'high': return 'var(--status-critical)';
-      default: return 'var(--text-muted)';
+      case 'high': return 'var(--status-danger)';
+      default: return 'var(--text-secondary)';
     }
   };
 
   const styles = {
-    container: { padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100%' },
+    container: { padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-primary)', minHeight: '100%' },
     header: { display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' },
     pill: { padding: '0.3rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)', letterSpacing: '0.05em' },
     grid4: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' },
@@ -85,8 +85,8 @@ export default function NodeDetail() {
       borderRadius: '12px',
       marginBottom: '1rem'
     },
-    label: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' },
-    value: { fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' },
+    label: { fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' },
+    value: { fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' },
     highlightBorder: (color) => ({
       border: `1px solid ${color || 'var(--border)'}`,
       boxShadow: `0 0 15px ${color}22`
@@ -96,12 +96,12 @@ export default function NodeDetail() {
   return (
     <div className="animate-slide-up" style={styles.container}>
       <header style={styles.header}>
-        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
           <ChevronLeft size={24} />
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={styles.pill}>{node.type?.toUpperCase()}</div>
-          <h1 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>{node.name}</h1>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>{node.name}</h1>
           <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', background: 'rgba(0,180,216,0.1)', padding: '4px 10px', borderRadius: '4px' }}>#{node.id}</span>
         </div>
       </header>
@@ -113,11 +113,11 @@ export default function NodeDetail() {
         </div>
         <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('var(--accent-primary)'), padding: '1.5rem', borderLeft: `4px solid var(--accent-primary)` }}>
            <div style={styles.label}><Activity size={14} /> Processing Latency</div>
-           <div style={styles.value}>{node.processing_time_hrs || 0.4}H <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>BASE OFFSET</span></div>
+           <div style={styles.value}>{node.processing_time_hrs || 0.4}H <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 400 }}>BASE OFFSET</span></div>
         </div>
         <div className="glass-panel" style={{ ...styles.card, ...styles.highlightBorder('var(--accent-purple)'), padding: '1.5rem', borderLeft: `4px solid var(--accent-purple)` }}>
            <div style={styles.label}><Truck size={14} /> Local Inventory</div>
-           <div style={styles.value}>{nodeShipments.length} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>ACTIVE UNITS</span></div>
+           <div style={styles.value}>{nodeShipments.length} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 400 }}>ACTIVE UNITS</span></div>
         </div>
       </div>
 
@@ -127,13 +127,13 @@ export default function NodeDetail() {
                <h3 style={styles.label}><MapPin size={16} /> Vector Coordinates</h3>
                <div style={{ ...styles.innerBox, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: 0 }}>
                   <div>
-                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '4px' }}>LATITUDE</div>
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>LATITUDE</div>
                      <div style={{ fontWeight: 800, fontSize: '1.1rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>
                         {(node.lat || node.location?.lat || 0).toFixed(6)}
                      </div>
                   </div>
                   <div>
-                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '4px' }}>LONGITUDE</div>
+                     <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>LONGITUDE</div>
                      <div style={{ fontWeight: 800, fontSize: '1.1rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>
                         {(node.lng || node.location?.lng || 0).toFixed(6)}
                      </div>
@@ -145,34 +145,34 @@ export default function NodeDetail() {
                <h3 style={styles.label}><Thermometer size={16} /> Regional Meteorological Telemetry</h3>
                <div style={styles.innerBox}>
                   {!station ? (
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center' }}>Awaiting satellite telemetry...</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', textAlign: 'center' }}>Awaiting satellite telemetry...</div>
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <Thermometer size={20} color="#00b4d8" />
                           <div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>TEMP</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>TEMP</div>
                             <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.temperature_c}°C</div>
                           </div>
                        </div>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <Wind size={20} color="var(--text-main)" />
+                          <Wind size={20} color="var(--text-primary)" />
                           <div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>WIND</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>WIND</div>
                             <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.wind_speed_kmh} <span style={{ fontSize: '0.6rem' }}>KM/H</span></div>
                           </div>
                        </div>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <Droplets size={20} color="#06d6a0" />
                           <div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>HUMIDITY</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>HUMIDITY</div>
                             <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.humidity_pct || 45}%</div>
                           </div>
                        </div>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <CloudRain size={20} color="#ff9800" />
                           <div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>PRECIP</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>PRECIP</div>
                             <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{station.precipitation_mm || 0} <span style={{ fontSize: '0.6rem' }}>MM</span></div>
                           </div>
                        </div>
@@ -192,12 +192,12 @@ export default function NodeDetail() {
                </div>
 
                {opLoading ? (
-                 <div className="animate-pulse" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Retrieving personnel records from Central Registry...</div>
+                 <div className="animate-pulse" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Retrieving personnel records from Central Registry...</div>
                ) : !operator ? (
                  <div style={{ ...styles.innerBox, textAlign: 'center', padding: '3rem' }}>
                     <Shield size={40} style={{ color: 'var(--status-warning)', opacity: 0.5, marginBottom: '1rem' }} />
-                    <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>STATION UNMANNED</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Operating under autonomous neural protocols.</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>STATION UNMANNED</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Operating under autonomous neural protocols.</div>
                  </div>
                ) : (
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -206,7 +206,7 @@ export default function NodeDetail() {
                           {operator.full_name?.[0] || 'U'}
                        </div>
                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 900, fontSize: '1.5rem', color: 'var(--text-main)', letterSpacing: '-0.01em' }}>{operator.full_name}</div>
+                          <div style={{ fontWeight: 900, fontSize: '1.5rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{operator.full_name}</div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 800, textTransform: 'uppercase', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                              Senior Node Manager <Globe size={12} />
                           </div>
@@ -216,11 +216,11 @@ export default function NodeDetail() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                        <div style={{ ...styles.innerBox, marginBottom: 0 }}>
                           <div style={styles.label}><Mail size={14} /> Registered Email</div>
-                          <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>{operator.email}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>{operator.email}</div>
                        </div>
                        <div style={{ ...styles.innerBox, marginBottom: 0 }}>
                           <div style={styles.label}><Phone size={14} /> Direct Comms</div>
-                          <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>{operator.mobile || '+1 (555) 000-0000'}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>{operator.mobile || '+1 (555) 000-0000'}</div>
                        </div>
                     </div>
 
@@ -232,7 +232,7 @@ export default function NodeDetail() {
                              'Incident Response: 100% Efficiency',
                              'Assigned: 12 months in current sector'
                           ].map((item, i) => (
-                             <div key={i} style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                             <div key={i} style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <div style={{ width: '4px', height: '4px', background: 'var(--accent-primary)', borderRadius: '50%' }}></div>
                                 {item}
                              </div>
