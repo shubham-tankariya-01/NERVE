@@ -194,7 +194,14 @@ class AgentOrchestrator:
                 "timestamp": ts,
             })
 
-        return global_logs, reroutes
+        # Calculate final stats for this run using the most up-to-date data
+        stats = {
+            "rerouted": len(reroutes),
+            "blocked": sum(1 for info in self.processed_shipments.values() if info.get("result") == "blocked"),
+            "optimal": sum(1 for info in self.processed_shipments.values() if info.get("result") == "optimal")
+        }
+
+        return global_logs, reroutes, stats
 
     async def _save_reroute_suggestions(
         self,

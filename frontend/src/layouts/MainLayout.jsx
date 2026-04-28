@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Activity, Box, LayoutDashboard, Map, Settings, Truck } from 'lucide-react';
+import { Activity, Box, LayoutDashboard, Map, Truck } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function MainLayout() {

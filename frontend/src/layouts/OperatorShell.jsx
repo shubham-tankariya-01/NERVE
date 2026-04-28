@@ -3,8 +3,9 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LogOut, Package, CheckSquare, AlertTriangle, 
-  MapPin, Cloud, LayoutDashboard, Settings, Menu, X, ChevronRight, User, ChevronDown
+  MapPin, Cloud, LayoutDashboard, Menu, X, ChevronRight, User, ChevronDown
 } from 'lucide-react';
+import FloatingManualButton from '../components/common/FloatingManualButton';
 
 export default function OperatorShell() {
   const { user, logout, activeNodeId, setActiveNodeId } = useAuth();
@@ -24,7 +25,7 @@ export default function OperatorShell() {
     layout: { height: '100vh', width: '100vw', backgroundColor: 'var(--bg-canvas)', display: 'flex', overflow: 'hidden', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif" },
     sidebar: { width: sidebarOpen ? '260px' : '0px', height: '100%', backgroundColor: 'var(--bg-surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', zIndex: 50, overflow: 'hidden' },
     sidebarHeader: { padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border)' },
-    logoIcon: { width: '32px', height: '32px', backgroundColor: 'var(--info)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: '900', fontSize: '20px', fontFamily: "'Space Grotesk', sans-serif" },
+    logoIcon: { width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '900', fontSize: '18px', fontFamily: "'Space Grotesk', sans-serif" },
     logoText: { fontSize: '16px', fontWeight: '800', letterSpacing: '1px', fontFamily: "'Space Grotesk', sans-serif", color: 'var(--text-primary)' },
     navSection: { padding: '24px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' },
     navItem: (isActive) => ({ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '8px', textDecoration: 'none', color: isActive ? 'var(--info)' : 'var(--text-secondary)', backgroundColor: isActive ? 'var(--info-dim)' : 'transparent', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s' }),
@@ -141,6 +142,7 @@ export default function OperatorShell() {
           </div>
         </main>
       </div>
+      <FloatingManualButton />
     </div>
   );
 }

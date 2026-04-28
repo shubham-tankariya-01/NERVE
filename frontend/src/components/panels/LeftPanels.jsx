@@ -11,7 +11,7 @@ export function RiskyNodesPanel({ onSelectNode }) {
     <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: '300px', flex: 1 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
         <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: 'var(--status-critical)', fontWeight: 800 }}>Risky Network Nodes</h2>
-        <Link to="/nodes" style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+        <Link to="/app/nodes" style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
           VIEW NODES <ChevronRight size={12} />
         </Link>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNetwork } from '../../context/NetworkContext';
 import { useAuth } from '../../context/AuthContext';
 import { fetchShipments, fetchDecisionLogs, manualReroute } from '../../services/api';
-import { Package, Activity, AlertTriangle, CheckCircle, Search, Settings, Save, History, MessageSquare, Shield, ArrowRight } from 'lucide-react';
+import { Package, Activity, AlertTriangle, CheckCircle, Search, Terminal, Save, History, MessageSquare, Shield, ArrowRight } from 'lucide-react';
 
 export default function OwnerDashboard() {
   const { networkHealth, alerts } = useNetwork();
@@ -179,7 +179,7 @@ export default function OwnerDashboard() {
 
           <div style={s.panel}>
             <h2 style={{ fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Settings size={20} style={{ color: '#EF476F' }} /> MANUAL INTERVENTION
+              <Terminal size={20} style={{ color: '#EF476F' }} /> MANUAL INTERVENTION
             </h2>
             <form onSubmit={handleReroute} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '16px', alignItems: 'flex-end' }}>
               <div>

@@ -3,8 +3,20 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { loginStep1, loginStep2 } from '../services/api';
 import { Eye, EyeOff, ChevronDown, Lock } from 'lucide-react';
+import FloatingManualButton from '../components/common/FloatingManualButton';
 
-// Roles are now derived from the account automatically
+const DEMO_USERS = [
+  { label: 'SG: Owner (Green)', email: 'owner@solarisglobal.com', password: 'solarisglobal-owner', color: '#00E5A0' },
+  { label: 'SG: Manager (Green)', email: 'manager@solarisglobal.com', password: 'solarisglobal-manager', color: '#00E5A0' },
+  { label: 'SG: Operator 1 (Green)', email: 'operator1@solarisglobal.com', password: 'solarisglobal-operator1', color: '#00E5A0' },
+  { label: 'SG: Operator 2 (Green)', email: 'operator2@solarisglobal.com', password: 'solarisglobal-operator2', color: '#00E5A0' },
+  { label: 'SG: Customer (Green)', email: 'customer@solarisglobal.com', password: 'solarisglobal-customer', color: '#00E5A0' },
+  { label: 'TNT: Owner (Red)', email: 'owner@terranovatransit.com', password: 'terranovatransit-owner', color: '#ef476f' },
+  { label: 'TNT: Manager (Red)', email: 'manager@terranovatransit.com', password: 'terranovatransit-manager', color: '#ef476f' },
+  { label: 'TNT: Operator 1 (Red)', email: 'operator1@terranovatransit.com', password: 'terranovatransit-operator1', color: '#ef476f' },
+  { label: 'TNT: Operator 2 (Red)', email: 'operator2@terranovatransit.com', password: 'terranovatransit-operator2', color: '#ef476f' },
+  { label: 'TNT: Customer (Red)', email: 'customer@terranovatransit.com', password: 'terranovatransit-customer', color: '#ef476f' },
+];
 
 export default function Login() {
   const [step, setStep] = useState(1);
@@ -17,8 +29,32 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   
-  const { completeLogin } = useAuth();
+  const [selectedColor, setSelectedColor] = useState('var(--brand)');
+  
+  const { user, isAuthenticated, completeLogin } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      const role = user.role;
+      if (role === 'node_operator') navigate('/operator');
+      else if (role === 'platform_admin' || role === 'company_owner') navigate('/owner');
+      else if (role === 'customer') navigate('/customer');
+      else navigate('/');
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleDemoSelect = (e) => {
+    const selected = DEMO_USERS.find(u => u.label === e.target.value);
+    if (selected) {
+      setEmail(selected.email);
+      setPassword(selected.password);
+      setSelectedColor(selected.color);
+    } else {
+      setSelectedColor('var(--brand)');
+    }
+  };
 
   const handleStep1 = async (e) => {
     e.preventDefault();
@@ -28,7 +64,27 @@ export default function Login() {
 
     try {
       const res = await loginStep1({ email, password });
-      // Backend now sends OTP — just advance to OTP screen
+      
+      if (res.bypass_otp) {
+        await completeLogin(res);
+        if (!res.user) {
+          setError("Session creation failed. Please try again.");
+          return;
+        }
+        const userRole = res.user.role;
+        if (userRole === 'node_operator') {
+          navigate('/operator');
+        } else if (userRole === 'platform_admin' || userRole === 'company_owner') {
+          navigate('/owner');
+        } else if (userRole === 'customer') {
+          navigate('/customer');
+        } else {
+          navigate('/');
+        }
+        return;
+      }
+
+      // Normal case: advance to OTP screen
       setMessage(res.message || 'OTP sent to your email.');
       setStep(2);
     } catch (err) {
@@ -45,8 +101,13 @@ export default function Login() {
 
     try {
       const res = await loginStep2({ email, otp });
-      await completeLogin(res); // Store tokens & trigger auth context update
+      await completeLogin(res); 
       
+      if (!res.user) {
+        setError("Verification successful, but user session is missing. Please re-login.");
+        return;
+      }
+
       const userRole = res.user.role;
       if (userRole === 'node_operator') {
         navigate('/operator');
@@ -78,9 +139,11 @@ export default function Login() {
     header: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
     logoRow: { display: 'flex', alignItems: 'center', gap: '12px' },
     logoIcon: {
-      width: '32px', height: '32px', backgroundColor: 'var(--brand)', borderRadius: '4px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000',
-      fontWeight: '900', fontSize: '20px', fontFamily: 'Space Grotesk, sans-serif',
+      width: '32px', height: '32px', 
+      background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', 
+      borderRadius: '8px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+      fontWeight: '900', fontSize: '18px', fontFamily: "'Space Grotesk', sans-serif",
     },
     logoText: {
       fontSize: '24px', fontWeight: '700', letterSpacing: '2px',
@@ -98,8 +161,9 @@ export default function Login() {
     },
     select: {
       width: '100%', padding: '12px', backgroundColor: 'var(--bg-elevated)',
-      border: '1px solid var(--border)', borderRadius: '4px', color: 'var(--text-primary)',
-      fontSize: '14px', appearance: 'none', outline: 'none', cursor: 'pointer',
+      border: `1px solid ${selectedColor}`, borderRadius: '4px', color: selectedColor,
+      fontSize: '13px', fontWeight: '700', appearance: 'none', outline: 'none', cursor: 'pointer',
+      textAlign: 'center', transition: 'all 0.2s',
     },
     toggleButton: {
       position: 'absolute', right: '12px', background: 'none', border: 'none',
@@ -146,7 +210,24 @@ export default function Login() {
 
         {step === 1 ? (
           <form style={styles.form} onSubmit={handleStep1}>
-            {/* Role selection removed - derived from account */}
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Quick Demo Access</label>
+              <select style={styles.select} onChange={handleDemoSelect}>
+                <option value="">--- Select Demo Account ---</option>
+                <optgroup label="SOLARIS GLOBAL (GREEN)">
+                  {DEMO_USERS.filter(u => u.label.startsWith('SG')).map(u => (
+                    <option key={u.label} value={u.label}>{u.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="TERRA NOVA TRANSIT (RED)">
+                  {DEMO_USERS.filter(u => u.label.startsWith('TNT')).map(u => (
+                    <option key={u.label} value={u.label}>{u.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border)', margin: '10px 0' }} />
 
             <div style={styles.inputGroup}>
               <label style={styles.label}>Email Address</label>
@@ -185,6 +266,9 @@ export default function Login() {
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '4px' }}>
                 A 6-digit code was sent to {email}
               </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '8px' }}>
+                If you don't see the email, please check your <strong>spam folder</strong>.
+              </div>
             </div>
 
             {error && <div style={styles.error}>{error}</div>}
@@ -208,6 +292,7 @@ export default function Login() {
         @keyframes spin { to { transform: rotate(360deg); } }
         input:focus, select:focus { border-color: var(--brand) !important; }
       `}</style>
+      <FloatingManualButton />
     </div>
   );
 }

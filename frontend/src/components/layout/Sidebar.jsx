@@ -4,8 +4,8 @@ import { useAgent } from '../../context/AgentContext';
 import { useAppWebSocket } from '../../context/WebSocketContext';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  LayoutDashboard, Map, Package, Box, GitBranch,
-  AlertTriangle, Bot, BarChart2, CloudRain, PlusCircle, Settings, ChevronLeft, ChevronRight, Shield, ArrowLeft
+  LayoutDashboard, Map, Package, Box, GitBranch, Zap,
+  AlertTriangle, Bot, BarChart2, CloudRain, PlusCircle, Settings, ChevronLeft, ChevronRight, Shield, ArrowLeft, Users
 } from 'lucide-react';
 
 const NavItem = React.memo(({ item, collapsed }) => (
@@ -28,23 +28,29 @@ const NavItem = React.memo(({ item, collapsed }) => (
       minWidth: collapsed ? '44px' : 'auto'
     })}
   >
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '20px' }}>
-      {item.icon}
-    </div>
-    {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}>{item.label}</span>}
-    {!collapsed && item.badge && (
-      <span style={{ 
-        background: item.color || 'var(--bg-glass)', 
-        color: '#fff', 
-        fontSize: '0.65rem', 
-        padding: '2px 6px', 
-        borderRadius: '4px',
-        fontWeight: 700
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minWidth: '20px',
+        color: item.iconColor || 'inherit'
       }}>
-        {item.badge}
-      </span>
-    )}
-  </NavLink>
+        {item.icon}
+      </div>
+      {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}>{item.label}</span>}
+      {!collapsed && item.badge && (
+        <span style={{ 
+          background: item.color || 'var(--bg-glass)', 
+          color: '#fff', 
+          fontSize: '0.65rem', 
+          padding: '2px 6px', 
+          borderRadius: '4px',
+          fontWeight: 700
+        }}>
+          {item.badge}
+        </span>
+      )}
+    </NavLink>
 ));
 
 // ← NEW: Dynamic user chip in sidebar footer
@@ -90,40 +96,37 @@ export default function Sidebar() {
 
     if (role === 'logistics_manager') {
       return [
-        { to: '/',                  icon: <Map size={20} />,          label: 'Command Center' },
-        { to: '/dashboard',         icon: <LayoutDashboard size={20} />, label: 'Executive Dashboard' },
-        { to: '/shipments',         icon: <Package size={20} />,      label: 'Shipments' },
-        { to: '/nodes',             icon: <Box size={20} />,          label: 'Nodes' },
-        { to: '/disruptions',       icon: <AlertTriangle size={20} />, label: 'Disruptions' },
+        { to: '/app',               icon: <Map size={20} />,          label: 'Command Center' },
+        { to: '/app/dashboard',     icon: <LayoutDashboard size={20} />, label: 'Executive Dashboard' },
+        { to: '/app/shipments',     icon: <Package size={20} />,      label: 'Shipments' },
+        { to: '/app/nodes',         icon: <Box size={20} />,          label: 'Nodes' },
+        { to: '/app/disruptions',   icon: <AlertTriangle size={20} />, label: 'Disruptions' },
+        { to: '/app/mission-control', icon: <Shield size={20} />,       label: 'Mission Control' },
         {
-          to: '/manager/rerouting',
-          icon: <GitBranch size={20} />,
-          label: 'Rerouting Queue',
-          badge: pendingRerouteCount > 0 ? pendingRerouteCount : null,
-          color: 'var(--danger)',
-        },
-        {
-          to: '/agents',
+          to: '/app/agents',
           icon: <Bot size={20} />,
           label: 'Agent Control',
           badge: unreadCount > 0 ? unreadCount : null,
           color: 'var(--warning)',
         },
-        { to: '/weather',           icon: <CloudRain size={20} />,    label: 'Weather' },
-        { to: '/book',              icon: <PlusCircle size={20} />,   label: 'Book Shipment' },
-        { to: '/mission-control',   icon: <Shield size={20} />,       label: 'Mission Control' },
+        { to: '/app/weather',       icon: <CloudRain size={20} />,    label: 'Weather' },
+        { to: '/app/book',          icon: <PlusCircle size={20} />,   label: 'Book Shipment' },
+        { to: '/app/simulate',      icon: <Zap size={20} />,          label: 'Simulate Disruption', iconColor: 'var(--danger)' },
+        { to: '/app/rerouting-center', icon: <GitBranch size={20} />,    label: 'Rerouting Center', badge: pendingRerouteCount > 0 ? pendingRerouteCount : null, color: 'var(--danger)' },
       ];
     }
 
     if (role === 'company_owner') {
       return [
         { to: '/owner',             icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-        { to: '/',                  icon: <Map size={20} />,          label: 'Command Center' },
-        { to: '/owner/users',       icon: <Settings size={20} />,      label: 'User Management' },
+        { to: '/app',               icon: <Map size={20} />,          label: 'Command Center' },
+        { to: '/owner/users',       icon: <Users size={20} />,      label: 'User Management' },
         { to: '/owner/nodes',       icon: <PlusCircle size={20} />,   label: 'Node Management' },
-        { to: '/shipments',         icon: <Package size={20} />,      label: 'Shipments' },
-        { to: '/nodes',             icon: <Box size={20} />,          label: 'Nodes' },
-        { to: '/weather',           icon: <CloudRain size={20} />,    label: 'Weather' },
+        { to: '/app/simulate',      icon: <Zap size={20} />,          label: 'Simulate Disruption', iconColor: 'var(--danger)' },
+        { to: '/app/rerouting-center', icon: <GitBranch size={20} />,    label: 'Rerouting Center', badge: pendingRerouteCount > 0 ? pendingRerouteCount : null, color: 'var(--danger)' },
+        { to: '/app/shipments',     icon: <Package size={20} />,      label: 'Shipments' },
+        { to: '/app/nodes',         icon: <Box size={20} />,          label: 'Nodes' },
+        { to: '/app/weather',       icon: <CloudRain size={20} />,    label: 'Weather' },
       ];
     }
 
@@ -131,7 +134,7 @@ export default function Sidebar() {
       return [
         { to: '/owner', icon: <LayoutDashboard size={20} />, label: 'Owner View' },
         { to: '/owner/nodes', icon: <PlusCircle size={20} />, label: 'Node Management' },
-        { to: '/', icon: <ArrowLeft size={20} />, label: 'Back to App' },
+        { to: '/app', icon: <ArrowLeft size={20} />, label: 'Back to App' },
       ];
     }
 
@@ -158,9 +161,9 @@ export default function Sidebar() {
     >
       <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '64px' }}>
         <div style={{ 
-          width: '32px', height: '32px', background: 'var(--accent-primary)', borderRadius: '8px', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', 
-          fontSize: '1.1rem', fontWeight: 800 
+          width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', borderRadius: '8px', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', 
+          fontSize: '1.1rem', fontWeight: 900 
         }}>
           N
         </div>
@@ -190,24 +193,6 @@ export default function Sidebar() {
       </nav>
 
       <div style={{ padding: '1rem 0.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <NavLink to="/settings" style={({ isActive }) => ({
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '1rem', 
-          padding: '0.75rem', 
-          borderRadius: '10px',
-          color: 'var(--text-muted)', 
-          textDecoration: 'none', 
-          fontSize: '0.85rem', 
-          fontWeight: 500,
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          background: collapsed ? 'rgba(255,255,255,0.03)' : 'transparent',
-          border: collapsed ? '1px solid var(--glass-border)' : '1px solid transparent',
-          transition: 'all 0.2s'
-        })}>
-          <Settings size={20} />
-          {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>Settings</span>}
-        </NavLink>
         
         <UserChip collapsed={collapsed} />
       </div>

@@ -176,6 +176,7 @@ class OptimizerAgent:
             )
 
             try:
+                # --- YEN'S K-SHORTEST PATHS ---
                 paths_gen = nx.shortest_simple_paths(
                     dynamic_G, curr, dest, weight="dynamic_weight"
                 )
@@ -187,11 +188,14 @@ class OptimizerAgent:
                     best_paths.append(path)
 
                 if not best_paths:
-                    processed_shipments[s_id] = {"result": "blocked", "route": None}
-                    blocked_ids.append(s_id)
-                    continue
-
-                best_route = best_paths[0]
+                    # FALLBACK: Try to find the nearest reachable node to the destination
+                    best_route = self._find_nearest_reachable_path(dynamic_G, curr, dest, scg)
+                    if not best_route:
+                        processed_shipments[s_id] = {"result": "blocked", "route": None}
+                        blocked_ids.append(s_id)
+                        continue
+                else:
+                    best_route = best_paths[0]
 
                 # Compare against current planned route from current node onward
                 planned = shipment.get("planned_route", [])
@@ -205,27 +209,42 @@ class OptimizerAgent:
                     reroutes[s_id] = best_route
                     processed_shipments[s_id] = {"result": "rerouted", "route": best_route}
 
-                    # Compute original vs new cost for the communicator
+                    # Compute effort level
                     orig_cost = self._path_cost(dynamic_G, orig_remaining) if len(orig_remaining) > 1 else None
                     new_cost = self._path_cost(dynamic_G, best_route)
-                    savings_pct = ""
+                    
+                    effort = "LOW"
                     if orig_cost and orig_cost > 0:
-                        savings_pct = f" ({round((1 - new_cost/orig_cost)*100)}% lower cost)"
-
+                        diff = (new_cost / orig_cost) - 1
+                        if diff > 0.5: effort = "CRITICAL"
+                        elif diff > 0.2: effort = "HIGH"
+                        elif diff > 0.05: effort = "MEDIUM"
+                    
                     logs.append({
                         "agent": "Optimizer",
                         "action": (
                             f"Rerouted {s_id} (Priority: {shipment['priority']}). "
-                            f"New path: {len(best_route)} hops{savings_pct}."
+                            f"Effort: {effort}. New path: {len(best_route)} hops. "
+                            f"Optimal bypass around {shipment.get('last_disrupted_node', 'incident')}."
                         ),
                     })
                 else:
                     processed_shipments[s_id] = {"result": "optimal", "route": None}
                     optimal_ids.append(s_id)
 
-            except nx.NetworkXNoPath:
-                processed_shipments[s_id] = {"result": "blocked", "route": None}
-                blocked_ids.append(s_id)
+            except (nx.NetworkXNoPath, nx.NodeNotFound):
+                # FALLBACK: Try to find the nearest reachable node to the destination
+                best_route = self._find_nearest_reachable_path(dynamic_G, curr, dest, scg)
+                if best_route:
+                    reroutes[s_id] = best_route
+                    processed_shipments[s_id] = {"result": "rerouted", "route": best_route}
+                    logs.append({
+                        "agent": "Optimizer",
+                        "action": f"Partial reroute for {s_id}: Destination unreachable. Routing to nearest hub: {best_route[-1]}.",
+                    })
+                else:
+                    processed_shipments[s_id] = {"result": "blocked", "route": None}
+                    blocked_ids.append(s_id)
             except Exception as e:
                 logs.append({
                     "agent": "Optimizer",
@@ -236,12 +255,12 @@ class OptimizerAgent:
         if optimal_ids:
             logs.append({
                 "agent": "Optimizer",
-                "action": f"{', '.join(optimal_ids)} — routes remain optimal despite disruption.",
+                "action": f"{', '.join(optimal_ids)} — current paths remain best available options.",
             })
         if blocked_ids:
             logs.append({
                 "agent": "Optimizer",
-                "action": f"⚠ BLOCKED: {', '.join(blocked_ids)} — no viable route to destination.",
+                "action": f"⚠ UNREACHABLE: {', '.join(blocked_ids)} — network partition detected. No viable path found.",
             })
 
         # ── Summary log for skipped (already-evaluated) shipments ──
@@ -258,11 +277,48 @@ class OptimizerAgent:
                 "agent": "Monitor",
                 "action": (
                     f"{skipped_total} shipment(s) already evaluated — "
-                    f"standing by ({', '.join(parts)})."
+                    f"skipping redundant graph computation."
                 ),
             })
 
         return reroutes, logs
+
+    def _find_nearest_reachable_path(self, G: nx.DiGraph, start: str, target: str, scg: SupplyChainGraph) -> list[str] | None:
+        """
+        If target is unreachable, find the node 'n' that is reachable from start
+        and has the minimum geographical distance to target.
+        """
+        try:
+            reachable_nodes = nx.descendants(G, start) | {start}
+            if not reachable_nodes:
+                return None
+            
+            target_node = scg.nodes.get(target)
+            if not target_node:
+                return None
+            
+            target_loc = target_node.get("location", {"lat": 0, "lng": 0})
+            
+            best_node = None
+            min_dist = float('inf')
+            
+            for node_id in reachable_nodes:
+                node_data = scg.nodes.get(node_id)
+                if not node_data: continue
+                
+                loc = node_data.get("location", {"lat": 0, "lng": 0})
+                dist = (loc["lat"] - target_loc["lat"])**2 + (loc["lng"] - target_loc["lng"])**2
+                
+                if dist < min_dist:
+                    min_dist = dist
+                    best_node = node_id
+            
+            if best_node and best_node != start:
+                return nx.shortest_path(G, start, best_node, weight="dynamic_weight")
+            
+            return None
+        except:
+            return None
 
     def optimize_llm(
         self,

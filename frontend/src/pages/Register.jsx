@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerStep1, registerStep2 } from '../services/api';
 import { Eye, EyeOff, UserPlus, Building2, Lock, CheckCircle } from 'lucide-react';
+import FloatingManualButton from '../components/common/FloatingManualButton';
 
 export default function Register() {
   const [step, setStep] = useState(1);
@@ -76,7 +77,13 @@ export default function Register() {
     card: { width: '100%', maxWidth: '480px', backgroundColor: '#0a1128', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '40px', boxShadow: '0 24px 80px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '24px' },
     header: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
     logoRow: { display: 'flex', alignItems: 'center', gap: '12px' },
-    logoIcon: { width: '36px', height: '36px', background: 'linear-gradient(135deg, #00E5A0, #00b4d8)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: '900', fontSize: '18px', fontFamily: "'Space Grotesk', sans-serif" },
+    logoIcon: { 
+      width: '32px', height: '32px', 
+      background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', 
+      borderRadius: '8px', 
+      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', 
+      fontWeight: '900', fontSize: '18px', fontFamily: "'Space Grotesk', sans-serif" 
+    },
     logoText: { fontSize: '26px', fontWeight: '800', letterSpacing: '2px', fontFamily: "'Space Grotesk', sans-serif" },
     tagline: { fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1.5px' },
     form: { display: 'flex', flexDirection: 'column', gap: '20px' },
@@ -113,6 +120,7 @@ export default function Register() {
           </button>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <FloatingManualButton />
       </div>
     );
   }
@@ -151,6 +159,9 @@ export default function Register() {
               <div style={{ fontSize: '12px', color: '#64748b', textAlign: 'center' }}>
                 A 6-digit code was sent to <span style={{ color: '#00E5A0' }}>{formData.email}</span>
               </div>
+              <div style={{ fontSize: '11px', color: '#64748b', textAlign: 'center', marginTop: '6px' }}>
+                If you don't see the email, please check your <span style={{ color: '#00E5A0', fontWeight: '700' }}>spam folder</span>.
+              </div>
             </div>
 
             {error && <div style={s.error}>{error}</div>}
@@ -168,6 +179,7 @@ export default function Register() {
           </form>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } } input:focus { border-color: #00E5A0 !important; }`}</style>
+        <FloatingManualButton />
       </div>
     );
   }
@@ -240,6 +252,7 @@ export default function Register() {
         </form>
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } input:focus { border-color: #00E5A0 !important; }`}</style>
+      <FloatingManualButton />
     </div>
   );
 }

@@ -76,7 +76,7 @@ export default function Dashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h3 className="chart-title" style={{ textAlign: 'left', margin: 0, fontSize: '1rem', fontWeight: 700 }}>Active Disruption Protocol</h3>
           <button 
-            onClick={() => window.location.href = '/disruptions'}
+            onClick={() => window.location.href = '/app/disruptions'}
             style={{ padding: '0.5rem 1rem', background: 'rgba(255, 63, 108, 0.1)', color: '#ff3f6c', border: '1px solid rgba(255, 63, 108, 0.2)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
           >
             VIEW ALL INCIDENTS

@@ -63,7 +63,18 @@ async def validate_otp(db, identifier: str, plain_otp: str, otp_type: str) -> bo
     """
     Validate OTP from database. Marks as used if valid. Enforces expiration.
     Returns False if OTP is missing, used, expired, or incorrect.
+    
+    SPECIAL: Bypasses check for '999999' for pre-seeded developer/demo accounts.
     """
+    # ── MASTER OTP BYPASS (NON-PRODUCTION ONLY) ──
+    # Allows developers and mentors to log in easily in staging/dev
+    SPECIAL_DOMAINS = ["apexlogistics.com", "oceanicfreight.com", "atlassupply.com", "globaltransit.com", "vertexcarriers.com", "ex.com", "solarisglobal.com", "terranovatransit.com"]
+    is_special = any(identifier.endswith(dom) for dom in SPECIAL_DOMAINS)
+    
+    if APP_ENV != "production" and is_special and plain_otp == "999999":
+        logger.info("Master OTP used for special account: %s", identifier)
+        return True
+
     otp_record = await db.otps.find_one({"identifier": identifier, "type": otp_type})
 
     if not otp_record or otp_record.get("used"):
@@ -105,9 +116,9 @@ def _build_otp_email_html(otp: str, otp_type: str) -> str:
           <tr>
             <td align="center" style="padding:32px 40px 24px;border-bottom:1px solid rgba(255,255,255,0.06);">
               <div style="display:inline-flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:linear-gradient(135deg,#00E5A0,#00b4d8);border-radius:10px;
+                <div style="width:40px;height:40px;background:linear-gradient(135deg,#00b4d8,#ff006e);border-radius:10px;
                             display:inline-block;text-align:center;line-height:40px;
-                            font-size:22px;font-weight:900;color:#000;font-family:'Space Grotesk',sans-serif;">N</div>
+                            font-size:22px;font-weight:900;color:#fff;font-family:'Space Grotesk',sans-serif;">N</div>
                 <span style="font-size:28px;font-weight:800;letter-spacing:2px;color:#e2e8f0;
                              font-family:'Space Grotesk',sans-serif;">NERVE</span>
               </div>
@@ -156,6 +167,12 @@ def send_otp_to_email(email: str, otp: str, otp_type: str = "login") -> None:
     Raises RuntimeError on delivery failure.
     Falls back to server logs only in development mode.
     """
+    # ── SPECIAL ACCOUNT BYPASS (NON-PRODUCTION ONLY) ──
+    SPECIAL_DOMAINS = ["apexlogistics.com", "oceanicfreight.com", "atlassupply.com", "globaltransit.com", "vertexcarriers.com", "ex.com", "solarisglobal.com", "terranovatransit.com"]
+    if APP_ENV != "production" and any(email.endswith(dom) for dom in SPECIAL_DOMAINS):
+        logger.info("Skipping real email delivery for special account: %s. Use Master OTP 999999.", email)
+        return
+
     api_key = os.environ.get("SENDGRID_API_KEY")
     from_email = os.environ.get("SENDGRID_FROM_EMAIL")
 

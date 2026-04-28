@@ -66,8 +66,7 @@ detector = AnomalyDetector()
 agent_orchestrator = AgentOrchestrator()
 route_planner = RoutePlanner()
 
-# Auto-incrementing shipment ID counter
-_next_shipment_id = 100
+# Counters and persistent state are now handled in the database.
 
 # active weather overrides for simulation
 weather_overrides: dict[str, dict[str, float]] = {}
@@ -249,7 +248,7 @@ async def lifespan(app: FastAPI):
     else:
         log.info("Background scanner disabled for this instance")
     log.info(
-        "Nerve server ready — ws://localhost:%d/ws  |  "
+        "Nerve server ready — PORT: %d | "
         "Network: %d nodes, %d edges, %d shipments",
         PORT,
         scg.graph.number_of_nodes(),
@@ -319,13 +318,15 @@ async def global_exception_handler(request: Request, exc: Exception):
         },
     )
 
-from backend.routers import auth, companies, checkins, rerouting, nodes, owner
+from backend.routers import auth, companies, checkins, rerouting, nodes, owner, admin, simulation
 app.include_router(auth.router)
 app.include_router(companies.router)
 app.include_router(checkins.router)
 app.include_router(rerouting.router)
 app.include_router(nodes.router)
 app.include_router(owner.router)
+app.include_router(admin.router)
+app.include_router(simulation.router)
 
 
 # ── REST endpoints ────────────────────────────────────────────────
@@ -927,7 +928,6 @@ async def book_shipment(payload: BookingRequest, user: dict = Depends(get_curren
     and risk scores.
     """
     from fastapi import HTTPException
-    global _next_shipment_id
 
     # ── Validate nodes ──
     if not scg.graph.has_node(payload.origin):
@@ -973,8 +973,18 @@ async def book_shipment(payload: BookingRequest, user: dict = Depends(get_curren
     best = candidates[0]
 
     # ── Create shipment in DB ──
-    _next_shipment_id += 1
-    shipment_id = f"S{_next_shipment_id:03d}"
+    db = get_async_db()
+    
+    # Persistent counter for shipment IDs
+    counter = await db.counters.find_one_and_update(
+        {"_id": "shipment_id"},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True
+    )
+    seq = counter.get("seq", 100)
+    shipment_id = f"S{seq:03d}"
+    
     now = datetime.now(timezone.utc)
 
     from datetime import timedelta

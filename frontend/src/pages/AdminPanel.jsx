@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { fetchDecisionLogs, fetchShipments, manualReroute } from '../services/api';
-import { Shield, Activity, Settings, MessageSquare, Save, History, AlertCircle, TrendingUp } from 'lucide-react';
+import { Shield, Activity, Terminal, MessageSquare, Save, History, AlertCircle, TrendingUp } from 'lucide-react';
 
 export default function AdminPanel() {
   const { getAuthHeaders } = useAuth();
@@ -97,7 +97,7 @@ export default function AdminPanel() {
         {/* Left Column: Manual Intervention */}
         <section className="glass-panel" style={{ padding: '2rem', height: 'fit-content' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Settings size={20} style={{ color: '#ef476f' }} />
+            <Terminal size={20} style={{ color: '#ef476f' }} />
             MANUAL OVERRIDE
           </h2>
           

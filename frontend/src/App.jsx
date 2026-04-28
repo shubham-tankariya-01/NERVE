@@ -8,6 +8,7 @@ import { AgentProvider } from './context/AgentContext';
 import AppShell from './components/layout/AppShell';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
+import UserManual from './pages/UserManual';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CommandCenter from './pages/CommandCenter';
@@ -22,6 +23,8 @@ import Weather from './pages/Weather';
 import BookShipment from './pages/BookShipment';
 import AdminPanel from './pages/AdminPanel';
 import ReroutingQueue from './pages/ReroutingQueue';
+import DisruptionSimulator from './pages/DisruptionSimulator';
+import ReroutingCenter from './pages/ReroutingCenter';
 
 // Owner Pages
 import OwnerDashboard from './pages/owner/OwnerDashboard';
@@ -62,12 +65,13 @@ export default function App() {
               <BrowserRouter>
                 <Routes>
                   {/* Public Routes */}
+                  <Route path="/" element={<UserManual />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/track/:shipmentId" element={<CustomerTracking />} />
 
                   <Route 
-                    path="/" 
+                    path="/app" 
                     element={
                       <ProtectedRoute allowedRoles={['logistics_manager', 'platform_admin', 'company_owner']}>
                         <AppShell />
@@ -86,6 +90,8 @@ export default function App() {
                     <Route path="book" element={<BookShipment />} />
                     <Route path="manager/rerouting" element={<ReroutingQueue />} />
                     <Route path="mission-control" element={<AdminPanel />} />
+                    <Route path="simulate" element={<DisruptionSimulator />} />
+                    <Route path="rerouting-center" element={<ReroutingCenter />} />
                   </Route>
 
                   {/* Role-Specific Shells */}

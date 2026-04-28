@@ -5,6 +5,7 @@ import {
   LogOut, Package, MapPin, Bell, LayoutDashboard, 
   Settings, HelpCircle, User, ChevronRight, Menu, X 
 } from 'lucide-react';
+import FloatingManualButton from '../components/common/FloatingManualButton';
 
 export default function CustomerShell() {
   const { user, logout } = useAuth();
@@ -48,26 +49,8 @@ export default function CustomerShell() {
       gap: '12px',
       borderBottom: '1px solid var(--border)',
     },
-    logoIcon: {
-      width: '32px',
-      height: '32px',
-      backgroundColor: 'var(--brand)',
-      borderRadius: '6px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#000',
-      fontWeight: '900',
-      fontSize: '20px',
-      fontFamily: "'Space Grotesk', sans-serif",
-    },
-    logoText: {
-      fontSize: '18px',
-      fontWeight: '800',
-      letterSpacing: '1px',
-      fontFamily: "'Space Grotesk', sans-serif",
-      color: 'var(--brand)',
-    },
+    logoIcon: { width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '900', fontSize: '18px', fontFamily: "'Space Grotesk', sans-serif" },
+    logoText: { fontSize: '18px', fontWeight: '800', letterSpacing: '1px', fontFamily: "'Space Grotesk', sans-serif", color: 'var(--text-primary)' },
     navSection: {
       padding: '24px 12px',
       flex: 1,
@@ -199,10 +182,6 @@ export default function CustomerShell() {
           </NavLink>
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <NavLink to="#" style={styles.navItem(false)}>
-              <Settings size={18} />
-              <span>Settings</span>
-            </NavLink>
-            <NavLink to="#" style={styles.navItem(false)}>
               <HelpCircle size={18} />
               <span>Support</span>
             </NavLink>
@@ -270,6 +249,7 @@ export default function CustomerShell() {
           </div>
         </main>
       </div>
+      <FloatingManualButton />
     </div>
   );
 }

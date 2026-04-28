@@ -8,6 +8,7 @@ from backend.auth.dependencies import get_current_user, require_role, get_compan
 from backend import state as app_state
 from backend.serializers import clean_doc, clean_list
 from pydantic import BaseModel
+import json
 
 router = APIRouter(prefix="/api/rerouting", tags=["Reroute Approvals"])
 
@@ -104,9 +105,12 @@ async def approve_reroute(
     if user["role"] != "platform_admin" and approval["company_id"] != user["company_id"]:
         raise HTTPException(status_code=403, detail="Not authorized to approve this reroute")
 
+    now = datetime.now(timezone.utc).isoformat()
+    
     # 1. Update Shipment Path
     shipment_id = approval["shipment_id"]
     new_route = approval["suggested_route"]
+    company_id = approval["company_id"]
     
     await db.shipments.update_one(
         {"id": shipment_id},
@@ -121,7 +125,6 @@ async def approve_reroute(
     )
 
     # 2. Update Approval Status
-    now = datetime.now(timezone.utc).isoformat()
     await db.reroute_approvals.update_one(
         {"id": approval_id},
         {
@@ -137,6 +140,7 @@ async def approve_reroute(
     # 3. Log Decision
     log_entry = {
         "shipment_id": shipment_id,
+        "company_id": company_id,
         "action_type": "AGENT_REROUTE_APPROVED",
         "reasoning": f"Approved by {user['user_id']}: {payload.notes or 'No notes provided'}",
         "performed_by": user["user_id"],
@@ -147,6 +151,20 @@ async def approve_reroute(
     # 4. Sync memory graph (non-blocking)
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, app_state.scg.refresh_from_db)
+
+    # 5. Broadcast live updates to dashboards
+    from backend.state import build_company_payload, broadcast_to_company
+    
+    # Refresh in-memory and broadcast
+    fresh_payload = build_company_payload(company_id)
+    await broadcast_to_company(json.loads(fresh_payload), company_id)
+    
+    # Also broadcast a simple signal to refresh the pending list in the UI
+    await broadcast_to_company({"type": "reroute_approval_update", "shipment_id": shipment_id}, company_id)
+    
+    # Notify Platform Admin
+    admin_payload = build_company_payload("platform_admin")
+    await broadcast_to_company(json.loads(admin_payload), "platform_admin")
     
     return {"status": "success", "message": "Reroute applied successfully"}
 
@@ -188,12 +206,17 @@ async def reject_reroute(
     # Log Rejection
     log_entry = {
         "shipment_id": approval["shipment_id"],
+        "company_id": approval["company_id"],
         "action_type": "AGENT_REROUTE_REJECTED",
         "reasoning": f"Rejected by {user['user_id']}: {payload.reason}",
         "performed_by": user["user_id"],
         "timestamp": now
     }
     await db.decision_logs.insert_one(log_entry)
+
+    # Broadcast update
+    from backend.state import broadcast_to_company
+    await broadcast_to_company({"type": "reroute_approval_update", "shipment_id": approval["shipment_id"]}, approval["company_id"])
 
     return {"status": "rejected", "message": "Reroute suggestion rejected"}
 
@@ -223,3 +246,17 @@ async def suggest_reroute_internal(payload: SuggestionCreate, db = Depends(get_a
     
     await db.reroute_approvals.insert_one(new_suggestion)
     return {"approval_id": new_suggestion["id"]}
+
+@router.get("/decision-logs")
+async def get_decision_logs(
+    limit: int = 50,
+    user: dict = Depends(require_role("logistics_manager", "company_owner", "platform_admin")),
+    db = Depends(get_async_db)
+):
+    """Returns historical decision logs for the company."""
+    query = {}
+    if user["role"] != "platform_admin":
+        query["company_id"] = user["company_id"]
+        
+    logs = await db.decision_logs.find(query).sort("timestamp", -1).to_list(length=limit)
+    return clean_list(logs)

@@ -137,10 +137,19 @@ export const clearDisruptions = async (headers = {}) => {
   return response.json();
 };
 
+export const restoreDemoData = async (headers = {}) => {
+  const response = await fetch(`${API_BASE}/admin/restore-demo-data`, {
+    method: 'POST',
+    headers
+  });
+  if (!response.ok) throw new Error('Failed to restore demo data');
+  return response.json();
+};
+
 // ── Admin Panel Endpoints ──
 
 export const fetchDecisionLogs = async (headers = {}) => {
-  const response = await fetch(`${API_BASE}/admin/logs`, { headers });
+  const response = await fetch(`${API_BASE}/rerouting/decision-logs`, { headers });
   if (!response.ok) throw new Error('Failed to fetch decision logs');
   return response.json();
 };
@@ -401,4 +410,53 @@ export const updateOwnerUserPassword = async (username, password) => {
   });
   if (!response.ok) await extractError(response, 'Failed to update password');
   return response.json();
+};
+
+// ── Simulation Endpoints ──
+
+export const fetchSimulationParameters = async (headers = {}) => {
+  const r = await fetch(`${API_BASE}/simulation/parameters`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch simulation parameters');
+  return r.json();
+};
+
+export const triggerSimulation = async (data, headers = {}) => {
+  const r = await fetch(`${API_BASE}/simulation/trigger`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...headers },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.detail || 'Simulation failed');
+  }
+  return r.json();
+};
+
+export const fetchSimulationHistory = async (headers = {}) => {
+  const r = await fetch(`${API_BASE}/simulation/history`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch simulation history');
+  return r.json();
+};
+
+export const clearNodeSimulation = async (nodeId, headers = {}) => {
+  const r = await fetch(`${API_BASE}/simulation/clear/${nodeId}`, {
+    method: 'DELETE',
+    headers
+  });
+  if (!r.ok) throw new Error('Failed to clear simulation');
+  return r.json();
+};
+
+export const createManualDisruption = async (data, headers = {}) => {
+  const r = await fetch(`${API_BASE}/simulation/manual-disruption`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...headers },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to create disruption');
+  }
+  return r.json();
 };

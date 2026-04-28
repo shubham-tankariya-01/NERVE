@@ -10,7 +10,7 @@ export function ShipmentTrackerPanel() {
 
   const handleTrack = (id) => {
     const targetId = id || search;
-    if (targetId) navigate(`/shipment/${targetId}`);
+    if (targetId) navigate(`/app/shipment/${targetId}`);
   };
 
   return (
@@ -59,7 +59,7 @@ export function ShipmentTrackerPanel() {
       </div>
 
       <button 
-        onClick={() => navigate('/shipments')}
+        onClick={() => navigate('/app/shipments')}
         style={{ width: '100%', marginTop: '1rem', padding: '0.5rem', background: 'transparent', border: '1px dashed var(--border)', color: 'var(--accent-primary)', fontSize: '0.7rem', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
       >
         VIEW ALL SHIPMENTS
@@ -99,7 +99,7 @@ export function DisruptionAlertsPanel() {
       
       {alerts.length > 0 && (
         <button 
-          onClick={() => navigate('/disruptions')}
+          onClick={() => navigate('/app/disruptions')}
           style={{ width: '100%', marginTop: '1rem', padding: '0.5rem', background: 'transparent', border: '1px dashed var(--border)', color: 'var(--status-critical)', fontSize: '0.7rem', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
         >
           OPEN INCIDENT CENTER
@@ -148,7 +148,7 @@ export function WeatherOverviewPanel() {
       </div>
       
       <button 
-        onClick={() => navigate('/weather')}
+        onClick={() => navigate('/app/weather')}
         style={{ width: '100%', marginTop: '1rem', padding: '0.5rem', background: 'transparent', border: '1px dashed var(--border)', color: 'var(--accent-primary)', fontSize: '0.7rem', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
       >
         METEOROLOGICAL DATA

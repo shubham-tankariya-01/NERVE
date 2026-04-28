@@ -187,6 +187,35 @@ async def login_step1(payload: LoginRequestStep1, db=Depends(get_async_db)):
             detail="Account deactivated. Contact your administrator.",
         )
 
+    # ── SPECIAL ACCOUNT BYPASS ──
+    # If it's a pre-seeded account, bypass OTP and return tokens immediately
+    SPECIAL_DOMAINS = ["apexlogistics.com", "oceanicfreight.com", "atlassupply.com", "globaltransit.com", "vertexcarriers.com", "ex.com", "solarisglobal.com", "terranovatransit.com"]
+    if any(payload.email.endswith(dom) for dom in SPECIAL_DOMAINS):
+        token_data = {
+            "user_id": user.get("username"),
+            "email": user.get("email"),
+            "role": user.get("role"),
+            "company_id": user.get("company_id"),
+        }
+        access_token = create_access_token(data=token_data)
+        refresh_token = create_refresh_token(data=token_data)
+        
+        log.info("Master bypass login for special account: %s", payload.email)
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": {
+                "id": user.get("username"),
+                "username": user.get("username"),
+                "email": user.get("email"),
+                "role": user.get("role"),
+                "company_id": user.get("company_id"),
+                "full_name": user.get("full_name"),
+            },
+            "bypass_otp": True
+        }
+
     otp = generate_otp()
     await store_otp(db, identifier=payload.email, plain_otp=otp, otp_type="login")
     try:
@@ -196,7 +225,7 @@ async def login_step1(payload: LoginRequestStep1, db=Depends(get_async_db)):
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     log.info("Login OTP sent to %s", payload.email)
-    return {"message": "OTP sent to your email. Please check your inbox."}
+    return {"message": "OTP sent to your email. Please check your inbox.", "bypass_otp": False}
 
 
 @router.post("/login/step2")

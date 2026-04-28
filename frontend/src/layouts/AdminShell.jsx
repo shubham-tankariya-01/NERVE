@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Building2, Users, Activity, LogOut, ArrowLeft } from 'lucide-react';
+import FloatingManualButton from '../components/common/FloatingManualButton';
 
 export default function AdminShell() {
   const { user, logout } = useAuth();
@@ -126,7 +127,7 @@ export default function AdminShell() {
             <Shield size={18} />
             <span>MISSION CONTROL</span>
           </NavLink>
-          <NavLink to="/" style={() => styles.navItem(false)}>
+          <NavLink to="/app" style={() => styles.navItem(false)}>
             <ArrowLeft size={18} />
             <span>BACK TO PLATFORM</span>
           </NavLink>
@@ -150,6 +151,7 @@ export default function AdminShell() {
       <main style={styles.main}>
         <Outlet />
       </main>
+      <FloatingManualButton />
     </div>
   );
 }

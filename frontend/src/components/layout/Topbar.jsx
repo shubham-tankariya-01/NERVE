@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 import { useNetwork } from '../../context/NetworkContext';
 import { useAgent } from '../../context/AgentContext';
@@ -53,7 +54,7 @@ const UserInfoChip = () => {
           position: 'absolute', top: '100%', right: 0, marginTop: '6px',
           background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)',
           borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-          minWidth: '160px', zIndex: 200, overflow: 'hidden'
+          minWidth: '160px', zIndex: 2100, overflow: 'hidden'
         }}>
           <div 
             onClick={() => { setIsOpen(false); }}
@@ -76,15 +77,17 @@ const UserInfoChip = () => {
 export default function Topbar() {
   const { theme, toggleTheme } = useTheme();
   const { networkHealth, nodes, routes, shipments, alerts } = useNetwork();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
   const healthColor = networkHealth >= 80 ? 'green' : networkHealth >= 50 ? 'amber' : 'red';
 
   return (
-    <header style={{ height: '64px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'var(--bg-surface)', zIndex: 40 }}>
+    <header style={{ height: '64px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'var(--bg-surface)', zIndex: 2000, position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontFamily: 'Space Grotesk', fontSize: '1.25rem', letterSpacing: '-0.02em', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
-          <div style={{ background: 'var(--brand)', color: '#000', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '14px' }}>N</div>
-          Nerve
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, fontFamily: 'var(--font-display)', fontSize: '1.25rem', letterSpacing: '-0.03em', cursor: 'pointer' }} onClick={() => navigate('/app')}>
+          <div style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))', color: '#fff', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', fontSize: '18px', fontWeight: 900 }}>N</div>
+          NERVE
         </div>
         
         <div style={{ height: '24px', width: '1px', background: 'var(--border)' }}></div>
@@ -107,15 +110,37 @@ export default function Topbar() {
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        {/* ← NEW: User info chip */}
         <UserInfoChip />
 
         <button onClick={toggleTheme} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', color: 'inherit' }}>
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
+
+        {user?.role === 'platform_admin' && (
+          <button 
+            onClick={async () => {
+              if (window.confirm('This will reset all demo accounts and data. Continue?')) {
+                const { restoreDemoData } = await import('../../services/api');
+                const { logout } = await import('../../context/AuthContext');
+                try {
+                  await restoreDemoData({ Authorization: `Bearer ${localStorage.getItem('nerve_access_token')}` });
+                  alert('Demo data restored. You will be logged out to refresh the state.');
+                  localStorage.clear();
+                  navigate('/login');
+                } catch (err) {
+                  alert('Restore failed: ' + err.message);
+                }
+              }
+            }}
+            className="badge pink" 
+            style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid #ef476f', cursor: 'pointer' }}
+          >
+            🔄 Restore Demo
+          </button>
+        )}
         
         <button 
-          onClick={() => window.location.href = '/book'}
+          onClick={() => navigate('/app/book')}
           className="badge blue" 
           style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--info)', cursor: 'pointer' }}
         >

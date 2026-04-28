@@ -35,9 +35,12 @@ class MapperAgent:
         for alert in actionable_alerts:
             disrupted_node = alert.node_id
             affected_ships = []
+            skipped_delivered = 0
+            skipped_not_on_path = 0
             
             for ship in shipments:
                 if ship["status"] == "delivered":
+                    skipped_delivered += 1
                     continue
                     
                 planned = ship.get("planned_route", [])
@@ -52,7 +55,6 @@ class MapperAgent:
                 # Only care if the disruption is ahead of us or right here
                 if disrupted_node in planned[curr_idx:]:
                     # --- SUPPRESS DUPLICATES ---
-                    # If this disruption was already reviewed and the route is what we approved, skip.
                     reviewed = ship.get("reviewed_disruptions", [])
                     if disrupted_node in reviewed:
                         last_approved = ship.get("last_approved_route")
@@ -60,24 +62,31 @@ class MapperAgent:
                             continue
                     # ---------------------------
                     affected_ships.append(ship)
+                else:
+                    skipped_not_on_path += 1
                     
             if affected_ships:
                 impacts[disrupted_node] = affected_ships
                 ship_ids = [s["id"] for s in affected_ships]
-                # Keep logs readable
-                if len(ship_ids) > 3:
-                    ship_str = f"{', '.join(ship_ids[:3])}... (+{len(ship_ids)-3} more)"
-                else:
-                    ship_str = ", ".join(ship_ids)
-                    
+                
+                at_node = [s["id"] for s in affected_ships if s["current_node"] == disrupted_node]
+                approaching = [s["id"] for s in affected_ships if s["current_node"] != disrupted_node]
+                
                 logs.append({
                     "agent": "Mapper",
-                    "action": f"Identified {len(affected_ships)} shipment(s) on collision course with {disrupted_node} ({ship_str}). Escalating to Optimizer."
+                    "action": (
+                        f"Detected {len(affected_ships)} shipment(s) impacted by {disrupted_node}. "
+                        f"{len(at_node)} currently at node, {len(approaching)} approaching. "
+                        f"Skipped: {skipped_delivered} delivered, {skipped_not_on_path} unaffected."
+                    )
                 })
             else:
                 logs.append({
                     "agent": "Mapper",
-                    "action": f"No active shipments are routed through {disrupted_node}. Stand down."
+                    "action": (
+                        f"No active shipments are routed through {disrupted_node}. "
+                        f"Analysis complete (Skipped {skipped_delivered} delivered, {skipped_not_on_path} unaffected)."
+                    )
                 })
 
         return impacts, logs

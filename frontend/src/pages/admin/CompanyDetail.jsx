@@ -6,7 +6,7 @@ import { useAppWebSocket } from '../../context/WebSocketContext';
 import { API_BASE } from '../../config';
 import { 
   Building2, Users, Package, MapPin, ChevronLeft, 
-  Settings, Mail, Calendar, Shield, Trash2, Edit3, 
+  Mail, Calendar, Shield, Trash2, Edit3, 
   Truck, Loader, AlertTriangle, Activity
 } from 'lucide-react';
 
@@ -224,9 +224,6 @@ export default function CompanyDetail() {
                  <Shield size={18} style={{ color: '#06d6a0' }} /> <span style={{ color: '#06d6a0' }}>REACTIVATE</span>
                </>
              )}
-           </button>
-           <button style={styles.btnNoGlow()} onMouseOver={e => e.currentTarget.style.background = '#d93d5f'} onMouseOut={e => e.currentTarget.style.background = '#ef476f'}>
-             <Settings size={18} /> ACCOUNT SETTINGS
            </button>
         </div>
       </header>
