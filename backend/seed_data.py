@@ -21,10 +21,15 @@ DB_NAME = os.getenv("MONGO_DB_NAME", "nerve_db")
 import certifi
 is_local = "localhost" in MONGO_URL or "127.0.0.1" in MONGO_URL
 CLIENT_OPTIONS = {
-    "serverSelectionTimeoutMS": 5000,
+    "serverSelectionTimeoutMS": 10000,
+    "connectTimeoutMS": 10000,
+    "socketTimeoutMS": 20000,
     "tls": not is_local,
-    "tlsCAFile": certifi.where() if not is_local else None
+    "retryWrites": True,
 }
+
+if not is_local:
+    CLIENT_OPTIONS["tlsCAFile"] = certifi.where()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

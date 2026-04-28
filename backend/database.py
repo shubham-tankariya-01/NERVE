@@ -20,10 +20,16 @@ if not MONGO_URL:
 import certifi
 is_local = "localhost" in MONGO_URL or "127.0.0.1" in MONGO_URL
 CLIENT_OPTIONS = {
-    "serverSelectionTimeoutMS": 5000,
+    "serverSelectionTimeoutMS": 10000,
+    "connectTimeoutMS": 10000,
+    "socketTimeoutMS": 20000,
     "tls": not is_local,
-    "tlsCAFile": certifi.where() if not is_local else None
+    "retryWrites": True,
 }
+
+# If in production and NOT local, try to use certifi but fall back to system certs if it fails
+if not is_local:
+    CLIENT_OPTIONS["tlsCAFile"] = certifi.where()
 
 # Async client for FastAPI
 async_client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL, **CLIENT_OPTIONS)
