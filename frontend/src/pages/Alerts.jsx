@@ -1,15 +1,14 @@
 import React from 'react';
+import { useNetwork } from '../context/NetworkContext';
 import { useAppWebSocket } from '../context/WebSocketContext';
 import AlertPanel from '../old_components/AlertPanel';
 import DisruptionGenerator from '../old_components/DisruptionGenerator';
 import AgentLog from '../old_components/AgentLog';
 
 export default function Alerts() {
-  const { data, connected } = useAppWebSocket();
-  const alerts = data?.alerts || [];
-  const weather = data?.weather || [];
-  const agentLogs = data?.agent_logs || [];
-  const timestamp = data?.timestamp;
+  const { alerts, weatherData: weather, agentLogs } = useNetwork();
+  const { connected } = useAppWebSocket();
+  const timestamp = new Date().toISOString(); // Default to now if not provided
 
   return (
     <div className="animate-slide-up dashboard-grid">

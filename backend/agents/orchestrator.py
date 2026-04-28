@@ -39,10 +39,6 @@ class AgentOrchestrator:
         # When this changes, stale cache entries are invalidated.
         self._last_disrupted_nodes: frozenset[str] = frozenset()
 
-        # Persistent reroute history — survives cache clears.
-        # [{shipment_id, old_route, new_route, avoided_nodes, reason, timestamp}]
-        self.reroute_history: list[dict] = []
-
     def clear_reroutes(self) -> None:
         """Clear all tracked state (e.g. when disruptions are manually cleared)."""
         self.processed_shipments.clear()
@@ -54,7 +50,6 @@ class AgentOrchestrator:
         scg: SupplyChainGraph,
         risk_scores: dict[str, float] | None = None,
         cascade_debt: list[dict] | None = None,
-        company_id: str = "company_demo",
     ) -> tuple[list[dict], dict]:
         """
         Run the full agent pipeline via LangGraph.
@@ -90,19 +85,28 @@ class AgentOrchestrator:
             return global_logs, {}
 
         # ── Detect disruption landscape changes ──────────────────
-        current_disrupted = frozenset(a.node_id for a in alerts)
+        # Fingerprint the landscape: (node_id, severity, summary of reasons)
+        current_disrupted = frozenset(
+            (a.node_id, a.severity.value, tuple(sorted(a.reasons))) 
+            for a in alerts
+        )
 
         if current_disrupted != self._last_disrupted_nodes:
             if self._last_disrupted_nodes:
-                new_disruptions = current_disrupted - self._last_disrupted_nodes
+                # Calculate which nodes have NEW or CHANGED disruptions
+                old_nodes = {item[0] for item in self._last_disrupted_nodes}
+                new_items = current_disrupted - self._last_disrupted_nodes
+                affected_nodes = {item[0] for item in new_items}
+                
                 to_remove: list[str] = []
 
                 for s_id, info in self.processed_shipments.items():
                     if info["result"] == "rerouted":
                         route = info.get("route", [])
-                        if any(n in new_disruptions for n in route):
+                        if any(n in affected_nodes for n in route):
                             to_remove.append(s_id)
                     else:
+                        # For non-rerouted shipments (optimal/blocked), re-evaluate if any alert changed
                         to_remove.append(s_id)
 
                 ts = datetime.now(timezone.utc).isoformat()
@@ -155,19 +159,18 @@ class AgentOrchestrator:
 
         except Exception as e:
             log.error("LangGraph pipeline failed: %s — running heuristic fallback", e)
-            return self._fallback_process(alerts, scg, risk_scores, cascade_debt)
+            return await self._fallback_process(alerts, scg, risk_scores, cascade_debt)
 
         # ── SAVE reroute suggestions for human approval ────────────────
         if reroutes:
             await self._save_reroute_suggestions(
-                reroutes, actionable_alerts, reasoning, company_id, scg
+                reroutes, actionable_alerts, reasoning, scg
             )
 
         # ── Persistent reroute history log ────────────────────────
         # Shows APPROVED reroutes from DB
         ts = datetime.now(timezone.utc).isoformat()
         approved = await db.reroute_approvals.find({
-            "company_id": company_id,
             "status": "approved"
         }).to_list(length=None)
         
@@ -198,7 +201,6 @@ class AgentOrchestrator:
         reroutes: dict,
         alerts: list,
         reasoning: dict,
-        company_id: str,
         scg: SupplyChainGraph
     ) -> None:
         """
@@ -217,10 +219,12 @@ class AgentOrchestrator:
             # Find original shipment
             original_route = []
             priority = "medium"
+            company_id = "unknown"
             for ship in scg.shipments:
                 if ship["id"] == s_id:
                     original_route = ship.get("planned_route", [])
                     priority = ship.get("priority", "medium")
+                    company_id = ship.get("company_id", "unknown")
                     break
             
             # Find which disrupted node triggered this
@@ -273,23 +277,22 @@ class AgentOrchestrator:
             }
             
             await db.reroute_approvals.insert_one(approval)
-            log.info("Reroute suggestion saved for %s (approval_id: %s)", s_id, approval_id)
-        
-        # Count pending approvals and broadcast notification
-        pending_count = await db.reroute_approvals.count_documents({
-            "company_id": company_id,
-            "status": "pending"
-        })
-        
-        # Broadcast pending count update via WebSocket
-        notification = {
-            "type": "reroute_approval_update",
-            "pending_count": pending_count,
-            "company_id": company_id
-        }
-        await broadcast_to_company(notification, company_id)
+            log.info("Reroute suggestion saved for %s (company: %s, approval_id: %s)", s_id, company_id, approval_id)
+            
+            # Count pending approvals and broadcast notification for THIS company
+            pending_count = await db.reroute_approvals.count_documents({
+                "company_id": company_id,
+                "status": "pending"
+            })
+            
+            notification = {
+                "type": "reroute_approval_update",
+                "pending_count": pending_count,
+                "company_id": company_id
+            }
+            await broadcast_to_company(notification, company_id)
 
-    def _fallback_process(
+    async def _fallback_process(
         self,
         alerts: list[DisruptionAlert],
         scg: SupplyChainGraph,
@@ -356,31 +359,44 @@ class AgentOrchestrator:
             if c_logs:
                 append_logs(c_logs)
 
-            # Apply reroutes
+            # Persistent Reroutes (Fallbacks are applied directly but logged)
+            db = get_async_db()
             disrupted_node_ids = {a.node_id for a in actionable}
+            
             for s_id, new_path in reroutes.items():
-                for ship in scg.shipments:
-                    if ship["id"] == s_id:
-                        old_route = list(ship["planned_route"])
-                        curr = ship["current_node"]
-                        try:
-                            ci = ship["planned_route"].index(curr)
-                            ship["planned_route"] = ship["planned_route"][:ci] + new_path
-                        except ValueError:
-                            ship["planned_route"] = new_path
+                target_ship = next((s for s in scg.shipments if s["id"] == s_id), None)
+                if not target_ship: continue
+                
+                old_route = list(target_ship.get("planned_route", []))
+                curr = target_ship.get("current_node")
+                try:
+                    ci = old_route.index(curr)
+                    final_route = old_route[:ci] + new_path
+                except (ValueError, TypeError):
+                    final_route = new_path
 
-                        avoided = [n for n in old_route if n in disrupted_node_ids]
-                        reasons = []
-                        for a in actionable:
-                            if a.node_id in avoided:
-                                reasons.append(f"{a.node_name}: {'; '.join(a.reasons)}")
-                        self.reroute_history.append({
-                            "shipment_id": s_id,
-                            "old_route": old_route,
-                            "new_route": list(ship["planned_route"]),
-                            "avoided_nodes": avoided,
-                            "reason": "; ".join(reasons) if reasons else "Route optimization",
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                        })
+                # 1. Update DB (source of truth)
+                await db.shipments.update_one(
+                    {"id": s_id},
+                    {"$set": {"planned_route": final_route}}
+                )
+
+                # 2. Log History to DB
+                avoided = [n for n in old_route if n in disrupted_node_ids]
+                reasons = [f"{a.node_name}: {'; '.join(a.reasons)}" for a in actionable if a.node_id in avoided]
+                
+                await db.reroute_history.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "shipment_id": s_id,
+                    "old_route": old_route,
+                    "new_route": final_route,
+                    "avoided_nodes": avoided,
+                    "reason": "; ".join(reasons) if reasons else "Heuristic optimization",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "type": "fallback_reroute"
+                })
+
+            # 3. Refresh in-memory cache from the new source of truth
+            scg.refresh_from_db()
 
         return global_logs, reroutes

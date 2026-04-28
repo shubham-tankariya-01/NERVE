@@ -77,7 +77,7 @@ The project requires **Node.js/npm** for the frontend and **Python 3** for the b
 
 ### 1. Start the Backend (FastAPI)
 
-Open a terminal in the project root directory (`supply-chain-google-solution`).
+Open a terminal in the project root directory.
 Make sure your Python virtual environment (`venv`) is activated and dependencies (`fastapi`, `uvicorn`, `networkx`, `requests`) are installed
 Run the backend server:
 

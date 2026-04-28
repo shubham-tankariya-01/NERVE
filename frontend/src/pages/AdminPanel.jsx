@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { fetchDecisionLogs, fetchShipments, manualReroute } from '../services/api';
 import { Shield, Activity, Settings, MessageSquare, Save, History, AlertCircle, TrendingUp } from 'lucide-react';
 
 export default function AdminPanel() {
+  const { getAuthHeaders } = useAuth();
   const [logs, setLogs] = useState([]);
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,8 +20,8 @@ export default function AdminPanel() {
   const loadData = async () => {
     try {
       const [logsData, shipmentsData] = await Promise.all([
-        fetchDecisionLogs(),
-        fetchShipments()
+        fetchDecisionLogs(getAuthHeaders()),
+        fetchShipments(getAuthHeaders())
       ]);
       setLogs(logsData.logs || []);
       setShipments(shipmentsData.shipments || []);
@@ -43,7 +45,7 @@ export default function AdminPanel() {
         shipment_id: selectedShipment,
         new_route: routeArray,
         reason: reason
-      });
+      }, getAuthHeaders());
       setStatusMsg({ text: 'Reroute applied successfully', type: 'success' });
       setNewRoute('');
       setReason('');

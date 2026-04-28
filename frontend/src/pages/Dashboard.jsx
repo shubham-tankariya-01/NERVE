@@ -8,8 +8,7 @@ import {
 } from 'recharts';
 
 export default function Dashboard() {
-  const { nodes, shipments, networkHealth, alerts } = useNetwork();
-  const { data: wsData } = useAppWebSocket();
+  const { nodes, shipments, networkHealth, alerts, agentLogs, deliveryMetrics } = useNetwork();
   
   // Derived KPI values based on real data
   const totalWeight = shipments.reduce((acc, s) => acc + (s.weight_kg || 0), 0);
@@ -20,7 +19,7 @@ export default function Dashboard() {
   const healthScore = networkHealth;
 
   // Map backend data to charts
-  const backendMetrics = wsData?.delivery_metrics || {};
+  const backendMetrics = deliveryMetrics || {};
   const deliveryStatus = [
     { name: 'In Transit', value: backendMetrics.in_transit || 0 },
     { name: 'At Station', value: (shipments.filter(s => s.status === 'arrived_at_node').length) || 0 },
@@ -164,18 +163,18 @@ export default function Dashboard() {
             <h3 className="chart-title" style={{ textAlign: 'left', margin: 0, fontSize: '1rem', fontWeight: 700 }}>Neural Agent Operations Log</h3>
             <div className="badge blue" style={{ fontSize: '0.7rem' }}>VERIFIED BY LLM</div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{wsData?.agent_logs?.length || 0} EVENTS DETECTED</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>{agentLogs.length} EVENTS DETECTED</div>
         </div>
-        <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-          {(wsData?.agent_logs || []).slice().reverse().map((log, i) => (
-            <div key={i} style={{ marginBottom: '0.75rem', display: 'flex', gap: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem', animation: 'slideIn 0.3s ease-out forwards' }}>
-              <span style={{ color: 'var(--text-muted)', opacity: 0.5, fontSize: '0.75rem' }}>{new Date().toLocaleTimeString()}</span>
-              <span style={{ color: 'var(--accent-primary)', fontWeight: 700, width: '110px', fontSize: '0.75rem' }}>[{log.agent?.toUpperCase()}]</span>
-              <span style={{ color: 'var(--text-main)', flex: 1 }}>{log.action}</span>
+        <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#94a3b8', background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+          {agentLogs.slice().reverse().map((log, i) => (
+            <div key={i} style={{ marginBottom: '0.75rem', display: 'flex', gap: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem' }}>
+              <span style={{ color: '#475569', fontSize: '0.75rem' }}>{new Date().toLocaleTimeString()}</span>
+              <span style={{ color: '#00B4D8', fontWeight: 700, width: '110px', fontSize: '0.75rem' }}>[{log.agent?.toUpperCase()}]</span>
+              <span style={{ color: '#cbd5e1', flex: 1 }}>{log.action}</span>
             </div>
           ))}
-          {(!wsData?.agent_logs || wsData.agent_logs.length === 0) && (
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontStyle: 'italic', gap: '1rem' }}>
+          {agentLogs.length === 0 && (
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontStyle: 'italic', gap: '1rem' }}>
               <div className="pulse-ring-container" style={{ transform: 'scale(1.2)' }}>
                 <div className="pulse-dot"></div>
                 <div className="pulse-ring-outer"></div>

@@ -3,8 +3,10 @@ from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
 from backend.database import get_async_db
+from backend.state import broadcast_to_company
 from backend.auth.dependencies import require_role
 from backend.auth.jwt_handler import hash_password
+from backend.serializers import clean_doc, clean_list
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/companies", tags=["Companies"])
@@ -31,9 +33,7 @@ class UserCreate(BaseModel):
 async def get_companies(db = Depends(get_async_db)):
     """Returns all companies. Restricted to platform admins."""
     companies = await db.companies.find({}).to_list(length=None)
-    for c in companies:
-        c.pop("_id", None)
-    return companies
+    return clean_list(companies)
 
 @router.post("", dependencies=[Depends(require_role("platform_admin"))])
 async def create_company(payload: CompanyCreate, db = Depends(get_async_db)):
@@ -47,8 +47,14 @@ async def create_company(payload: CompanyCreate, db = Depends(get_async_db)):
         "owner_email": payload.owner_email
     }
     await db.companies.insert_one(new_company)
-    new_company.pop("_id", None)
-    return new_company
+    
+    # Broadcast to platform admins
+    await broadcast_to_company({
+        "type": "admin_company_created",
+        "company": clean_doc(new_company)
+    }, "platform_admin")
+    
+    return clean_doc(new_company)
 
 @router.put("/{company_id}", dependencies=[Depends(require_role("platform_admin"))])
 async def update_company(company_id: str, payload: CompanyUpdate, db = Depends(get_async_db)):
@@ -65,17 +71,15 @@ async def update_company(company_id: str, payload: CompanyUpdate, db = Depends(g
         raise HTTPException(status_code=404, detail="Company not found")
         
     company = await db.companies.find_one({"id": company_id})
-    company.pop("_id", None)
-    return company
+    return clean_doc(company)
 
 @router.get("/{company_id}/users", dependencies=[Depends(require_role("platform_admin"))])
 async def get_company_users(company_id: str, db = Depends(get_async_db)):
     """Returns all users belonging to a specific company."""
     users = await db.users.find({"company_id": company_id}).to_list(length=None)
     for u in users:
-        u.pop("_id", None)
         u.pop("hashed_password", None)
-    return users
+    return clean_list(users)
 
 @router.post("/{company_id}/users", dependencies=[Depends(require_role("platform_admin"))])
 async def create_company_user(company_id: str, payload: UserCreate, db = Depends(get_async_db)):
@@ -103,9 +107,16 @@ async def create_company_user(company_id: str, payload: UserCreate, db = Depends
     }
     
     await db.users.insert_one(new_user)
-    new_user.pop("_id", None)
     new_user.pop("hashed_password", None)
-    return new_user
+    
+    # Broadcast to platform admins for realtime management refresh
+    await broadcast_to_company({
+        "type": "admin_user_created",
+        "company_id": company_id,
+        "user": clean_doc(new_user)
+    }, "platform_admin")
+    
+    return clean_doc(new_user)
 
 @router.get("/{company_id}/full-data", dependencies=[Depends(require_role("platform_admin"))])
 async def get_company_full_details(company_id: str, db = Depends(get_async_db)):
@@ -128,16 +139,14 @@ async def get_company_full_details(company_id: str, db = Depends(get_async_db)):
         
         logger.info(f"Found {len(nodes)} nodes, {len(shipments)} shipments, {len(users)} users")
 
-        for item in nodes + shipments + users:
-            item.pop("_id", None)
-            item.pop("hashed_password", None)
-            # Ensure all objects are JSON serializable (handle datetimes if needed)
+        for u in users:
+            u.pop("hashed_password", None)
             
         return {
-            "company": company,
-            "nodes": nodes,
-            "shipments": shipments,
-            "users": users
+            "company": clean_doc(company),
+            "nodes": clean_list(nodes),
+            "shipments": clean_list(shipments),
+            "users": clean_list(users)
         }
     except Exception as e:
         logger.exception(f"Error aggregating company data for {company_id}")

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNetwork } from '../context/NetworkContext';
-import { Truck, Package, CheckCircle, ChevronRight, Activity, Zap, MapPin, DollarSign, Clock } from 'lucide-react';
 import { bookShipment } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function BookShipment() {
   const [step, setStep] = useState(1);
   const { nodes, setShipments } = useNetwork();
+  const { getAuthHeaders } = useAuth();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -19,21 +20,21 @@ export default function BookShipment() {
   });
 
   const cargoTypes = [
-    { id: 'elec', label: 'Electronics', icon: '💻' },
-    { id: 'text', label: 'Textiles', icon: '👕' },
-    { id: 'med', label: 'Medical Supplies', icon: '💊' },
-    { id: 'cons', label: 'Consumer Goods', icon: '🛒' },
-    { id: 'mach', label: 'Machinery', icon: '⚙' },
-    { id: 'chem', label: 'Chemicals', icon: '🧪' },
-    { id: 'food', label: 'Food Products', icon: '🍎' },
-    { id: 'auto', label: 'Auto Parts', icon: '🔧' }
+    { id: 'electronics', label: 'Electronics', icon: '💻' },
+    { id: 'textiles', label: 'Textiles', icon: '👕' },
+    { id: 'medical_supplies', label: 'Medical Supplies', icon: '💊' },
+    { id: 'consumer_goods', label: 'Consumer Goods', icon: '🛒' },
+    { id: 'machinery', label: 'Machinery', icon: '⚙' },
+    { id: 'chemicals', label: 'Chemicals', icon: '🧪' },
+    { id: 'food_products', label: 'Food Products', icon: '🍎' },
+    { id: 'automotive_parts', label: 'Auto Parts', icon: '🔧' }
   ];
 
   const handleBook = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await bookShipment(formData);
+      const res = await bookShipment(formData, getAuthHeaders());
       setResult(res);
       setShipments(prev => [...prev, res.shipment]);
       setStep(3);
@@ -123,15 +124,15 @@ export default function BookShipment() {
                {cargoTypes.map(c => (
                  <div 
                   key={c.id} 
-                  onClick={() => setFormData({...formData, cargo_type: c.label})}
+                  onClick={() => setFormData({...formData, cargo_type: c.id})}
                   style={{ 
-                    padding: '1.25rem', borderRadius: '4px', background: formData.cargo_type === c.label ? 'rgba(0, 180, 216, 0.1)' : 'rgba(255,255,255,0.02)', 
-                    border: `1px solid ${formData.cargo_type === c.label ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
-                    cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s'
+                    padding: '1.25rem', borderRadius: '4px', background: formData.cargo_type === c.id ? 'rgba(0, 180, 216, 0.1)' : 'rgba(255,255,255,0.02)', 
+                    border: `1px solid ${formData.cargo_type === c.id ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
+                    cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'center'
                   }}
                  >
                     <div style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{c.icon}</div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: formData.cargo_type === c.label ? 'var(--accent-primary)' : 'var(--text-muted)' }}>{c.label}</div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: formData.cargo_type === c.id ? 'var(--accent-primary)' : 'var(--text-muted)' }}>{c.label}</div>
                  </div>
                ))}
             </div>

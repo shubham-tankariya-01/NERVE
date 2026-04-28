@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { fetchCompanies } from '../../services/api';
+import { useAppWebSocket } from '../../context/WebSocketContext';
+import { API_BASE } from '../../config';
 import { 
   Building2, Users, Package, Search, 
   Plus, ChevronRight, Filter, Loader 
@@ -19,9 +21,17 @@ export default function CompanyManagement() {
   const [newCompany, setNewCompany] = useState({ name: '', plan: 'starter', owner_email: '' });
   const [isCreating, setIsCreating] = useState(false);
 
+  const { data: wsData } = useAppWebSocket();
+
   useEffect(() => {
     loadCompanies();
   }, [getAuthHeaders]);
+
+  useEffect(() => {
+    if (wsData && wsData.type === 'admin_company_created') {
+      loadCompanies();
+    }
+  }, [wsData]);
 
   const loadCompanies = async () => {
     setLoading(true);
@@ -39,7 +49,7 @@ export default function CompanyManagement() {
     e.preventDefault();
     setIsCreating(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/companies`, {
+      const response = await fetch(`${API_BASE}/companies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

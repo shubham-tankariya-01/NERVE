@@ -4,18 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { loginStep1, loginStep2 } from '../services/api';
 import { Eye, EyeOff, ChevronDown, Lock } from 'lucide-react';
 
-const ROLES = [
-  { value: 'platform_admin', label: 'Platform Admin' },
-  { value: 'logistics_manager', label: 'Logistics Manager' },
-  { value: 'node_operator', label: 'Node Operator' },
-  { value: 'customer', label: 'Customer' },
-];
+// Roles are now derived from the account automatically
 
 export default function Login() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('logistics_manager');
   const [otp, setOtp] = useState('');
   
   const [showPassword, setShowPassword] = useState(false);
@@ -33,19 +27,10 @@ export default function Login() {
     setIsSubmitting(true);
 
     try {
-      const res = await loginStep1({ email, password, role });
-      await completeLogin(res);
-      
-      const userRole = res.user.role;
-      if (userRole === 'node_operator') {
-        navigate('/operator');
-      } else if (userRole === 'platform_admin') {
-        navigate('/admin');
-      } else if (userRole === 'customer') {
-        navigate('/customer');
-      } else {
-        navigate('/');
-      }
+      const res = await loginStep1({ email, password });
+      // Backend now sends OTP — just advance to OTP screen
+      setMessage(res.message || 'OTP sent to your email.');
+      setStep(2);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,8 +50,8 @@ export default function Login() {
       const userRole = res.user.role;
       if (userRole === 'node_operator') {
         navigate('/operator');
-      } else if (userRole === 'platform_admin') {
-        navigate('/admin');
+      } else if (userRole === 'platform_admin' || userRole === 'company_owner') {
+        navigate('/owner');
       } else if (userRole === 'customer') {
         navigate('/customer');
       } else {
@@ -161,15 +146,7 @@ export default function Login() {
 
         {step === 1 ? (
           <form style={styles.form} onSubmit={handleStep1}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Role</label>
-              <div style={styles.inputWrapper}>
-                <select style={styles.select} value={role} onChange={(e) => setRole(e.target.value)} required>
-                  {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                </select>
-                <ChevronDown size={16} style={{ position: 'absolute', right: '12px', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-              </div>
-            </div>
+            {/* Role selection removed - derived from account */}
 
             <div style={styles.inputGroup}>
               <label style={styles.label}>Email Address</label>

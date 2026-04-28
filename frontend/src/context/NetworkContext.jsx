@@ -14,6 +14,8 @@ export function NetworkProvider({ children }) {
   const [networkHealth, setNetworkHealth] = useState(100);
   const [alerts, setAlerts] = useState([]);
   const [weatherData, setWeatherData] = useState([]);
+  const [agentLogs, setAgentLogs] = useState([]);
+  const [deliveryMetrics, setDeliveryMetrics] = useState({});
   const [loading, setLoading] = useState(true);
 
   const { data: wsData } = useAppWebSocket();
@@ -29,90 +31,125 @@ export function NetworkProvider({ children }) {
         (s.planned_route || []).some(n => assignedNodes.has(n))
       );
     }
-    // logistics_manager and any other role: filter by company_id, allow legacy data with no company_id
-    return allShipments.filter(s =>
-      !s.company_id || s.company_id === user.company_id
-    );
+    // logistics_manager and company_owner: strict filter by company_id
+    return allShipments.filter(s => s.company_id === user.company_id);
+  };
+
+  const filterNetworkByRole = (rawNodes, rawEdges) => {
+    if (!user || user.role === 'platform_admin') return { nodes: rawNodes, edges: rawEdges };
+    
+    const compId = user.company_id;
+    if (user.role === 'node_operator') {
+      const assignedNodes = new Set(user.assigned_node_ids || []);
+      const filteredNodes = rawNodes.filter(n => assignedNodes.has(n.id));
+      const filteredEdges = rawEdges.filter(e => assignedNodes.has(e.from) && assignedNodes.has(e.to));
+      return { nodes: filteredNodes, edges: filteredEdges };
+    }
+    
+    // Strict company filtering
+    const filteredNodes = rawNodes.filter(n => n.company_id === compId);
+    const filteredEdges = rawEdges.filter(e => e.company_id === compId);
+    return { nodes: filteredNodes, edges: filteredEdges };
   };
 
   // Initial Fetch
   useEffect(() => {
-    if (authLoading || !isAuthenticated) return;
-
-    const loadInitialData = async () => {
-      setLoading(true);
+    async function initialFetch() {
+      if (authLoading || !isAuthenticated) return;
+      
+      const headers = getAuthHeaders();
       try {
-        const headers = getAuthHeaders();
         const [networkRes, shipmentsRes, alertsRes] = await Promise.all([
           fetchNetwork(headers),
           fetchShipments(headers),
           fetchAlerts(headers)
         ]);
         
-        setNodes(networkRes.nodes || []);
-        setRoutes((networkRes.edges || []).map(e => ({
-          id: `${e.from}-${e.to}`,
-          from: e.from,
-          to: e.to,
+        // 1. Filter Network (Nodes & Edges)
+        const { nodes: fNodes, edges: fEdges } = filterNetworkByRole(networkRes.nodes || [], networkRes.edges || []);
+        const nodeIds = new Set(fNodes.map(n => n.id));
+        
+        setNodes(fNodes);
+        setRoutes(fEdges.map(e => ({
+          ...e,
+          id: e.id || `${e.from}-${e.to}`,
           mode: e.transport_mode
         })));
-        // Defensive client-side filter — backend returns pre-filtered data after fix,
-        // but this guards against legacy broadcasts or timing issues.
+
+        // 2. Filter Shipments
         setShipments(filterShipmentsByRole(shipmentsRes.shipments || []));
-        setAlerts(alertsRes.alerts || []);
+
+        // 3. Filter Alerts
+        setAlerts((alertsRes.alerts || []).filter(a => nodeIds.has(a.node_id)));
+
+        // 4. Filter Weather (Backwards compatibility with alertsRes or standalone)
+        const rawWeather = alertsRes.weather || networkRes.weather || [];
+        setWeatherData(rawWeather.filter(w => nodeIds.has(w.node_id)));
+
       } catch (err) {
         console.error('Failed to load initial network data:', err);
       } finally {
         setLoading(false);
       }
-    };
-
-    loadInitialData();
+    }
+    initialFetch();
   }, [isAuthenticated, authLoading, getAuthHeaders]);
 
-  // Sync with WebSocket
+  const lastProcessedTs = React.useRef(null);
+
+  const nodesRef = React.useRef(nodes);
   useEffect(() => {
-    if (wsData && wsData.type === 'disruption_scan') {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
+  // WebSocket Data Processing
+  useEffect(() => {
+    if (wsData && wsData.timestamp !== lastProcessedTs.current) {
+      lastProcessedTs.current = wsData.timestamp;
+      
+      const currentNodeIds = new Set(nodesRef.current.map(n => n.id));
+
+      if (wsData.alerts && user?.role !== 'node_operator') {
+        // trust backend filtering but apply safety layer
+        setAlerts(wsData.alerts.filter(a => currentNodeIds.size === 0 || currentNodeIds.has(a.node_id)));
+      }
       if (wsData.network_health !== undefined) {
         setNetworkHealth(wsData.network_health);
       }
       if (wsData.cascade_debt) {
-        setCascadeDebt(wsData.cascade_debt);
+        setCascadeDebt(wsData.cascade_debt.filter(d => currentNodeIds.size === 0 || currentNodeIds.has(d.node_id)));
       }
       if (wsData.risk_horizon) {
-        setRiskHorizon(wsData.risk_horizon || []);
-      }
-      if (wsData.alerts) {
-        // node_operator: ignore alert updates from WS (their shell doesn't show alerts)
-        if (!user || user.role !== 'node_operator') {
-          setAlerts(wsData.alerts);
-        }
+        setRiskHorizon((wsData.risk_horizon || []).filter(h => currentNodeIds.size === 0 || currentNodeIds.has(h.node_id)));
       }
       if (wsData.shipments) {
         setShipments(filterShipmentsByRole(wsData.shipments));
       }
       if (wsData.network) {
-        if (wsData.network.nodes) {
-          setNodes(wsData.network.nodes.map(([id, attrs]) => ({ id, ...attrs })));
-        }
-        if (wsData.network.edges) {
-          setRoutes(wsData.network.edges.map(([from, to, attrs]) => ({
-            id: `${from}-${to}`,
-            from,
-            to,
-            mode: attrs.transport_mode || attrs.mode
-          })));
-        }
+        const { nodes: fNodes, edges: fEdges } = filterNetworkByRole(wsData.network.nodes || [], wsData.network.edges || []);
+        setNodes(fNodes);
+        setRoutes(fEdges.map(e => ({
+          ...e,
+          id: e.id || `${e.from}-${e.to}`,
+          mode: e.transport_mode
+        })));
       }
       if (wsData.weather) {
-        setWeatherData(wsData.weather);
+        setWeatherData(wsData.weather.filter(w => currentNodeIds.size === 0 || currentNodeIds.has(w.node_id)));
+      }
+      if (wsData.agent_logs) {
+        setAgentLogs(wsData.agent_logs);
+      }
+      if (wsData.delivery_metrics) {
+        setDeliveryMetrics(wsData.delivery_metrics);
       }
     }
-  }, [wsData]);
+  }, [wsData, user]);
 
   return (
     <NetworkContext.Provider value={{
       nodes, routes, shipments, cascadeDebt, riskHorizon, networkHealth, alerts, weatherData,
+      agentLogs, deliveryMetrics,
       setNodes, setRoutes, setShipments, loading
     }}>
       {children}

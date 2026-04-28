@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { WS_BASE } from '../config';
 import useWebSocket from '../hooks/useWebSocket';
 
 const WebSocketContext = createContext();
@@ -7,8 +8,8 @@ export function WebSocketProvider({ children }) {
   const token = localStorage.getItem("nerve_access_token");
   const wsUrl = useMemo(() => {
     return token 
-      ? `ws://127.0.0.1:8000/ws?token=${token}`
-      : "ws://127.0.0.1:8000/ws";
+      ? `${WS_BASE}/ws?token=${token}`
+      : `${WS_BASE}/ws`;
   }, [token]);
 
   const { connected, data } = useWebSocket(wsUrl);

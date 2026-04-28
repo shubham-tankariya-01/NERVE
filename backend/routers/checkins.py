@@ -19,7 +19,8 @@ class NodeCheckinCreate(BaseModel):
     weight_verified: Optional[float] = None
     condition: str = "good"
 
-from backend.state import broadcast_to_company, build_payload, detector
+from backend.state import broadcast_to_company, build_company_payload
+from backend.serializers import clean_doc, clean_list
 
 @router.post("")
 async def create_checkin(
@@ -97,33 +98,20 @@ async def create_checkin(
             {"$set": {"status": payload.event_type}}
         )
 
-    # 7. Notify Manager via WebSocket (IMMEDIATE)
-    # We broadcast a full "disruption_scan" type payload so the UI context updates instantly
-    # Filter shipments for this company
-    c_shipments = [s for s in app_state.scg.shipments if s.get("company_id") == user["company_id"]]
-    
-    # Filter alerts for this company (using standard detector alerts)
-    c_nodes = set()
-    for s in c_shipments:
-        c_nodes.update(s.get("planned_route", []))
-        c_nodes.update(s.get("route_taken", []))
-    c_alerts = [a for a in detector.alerts if a.node_id in c_nodes]
-
-    update_payload = build_payload(
-        c_alerts, 
-        shipments=c_shipments,
-        network_health=100 # Placeholder as it will be recomputed by scan loop
-    )
-    
-    # Direct broadcast to ensure UI consistency
-    await broadcast_to_company(json.loads(update_payload), user["company_id"])
-
-    # 8. Sync memory graph (non-blocking)
+    # Refresh memory first, then broadcast fresh state
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, app_state.scg.refresh_from_db)
+
+    # Build company-filtered payload
+    update_payload = build_company_payload(user["company_id"])
+    await broadcast_to_company(json.loads(update_payload), user["company_id"])
     
-    checkin.pop("_id", None)
-    return checkin
+    # Also notify platform admins with full state
+    if user["role"] != "platform_admin":
+        admin_payload = build_company_payload("platform_admin")
+        await broadcast_to_company(json.loads(admin_payload), "platform_admin")
+
+    return clean_doc(checkin)
 
 @router.get("/node/{node_id}")
 async def get_node_checkins(
@@ -151,9 +139,7 @@ async def get_node_checkins(
         query["timestamp"] = {"$gte": start, "$lte": end}
 
     checkins = await db.node_checkins.find(query).sort("timestamp", -1).to_list(length=None)
-    for c in checkins:
-        c.pop("_id", None)
-    return checkins
+    return clean_list(checkins)
 
 @router.get("/shipment/{shipment_id}")
 async def get_shipment_checkins(
@@ -167,9 +153,7 @@ async def get_shipment_checkins(
         query["company_id"] = user["company_id"]
 
     checkins = await db.node_checkins.find(query).sort("timestamp", 1).to_list(length=None)
-    for c in checkins:
-        c.pop("_id", None)
-    return checkins
+    return clean_list(checkins)
 
 @router.get("/pending/{node_id}")
 async def get_pending_at_node(

@@ -6,9 +6,17 @@ from passlib.context import CryptContext
 from motor.motor_asyncio import AsyncIOMotorClient
 import uuid
 
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load environment variables
+_env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(_env_path)
+
 # Configuration
-MONGO_URL = "mongodb://localhost:27017"
-DB_NAME = "nerve_db"
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.getenv("MONGO_DB_NAME", "nerve_db")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -67,7 +75,22 @@ async def seed_data():
             "owner_email": f"manager@{safe_name}.com"
         })
 
-        # Insert Logistics Manager
+        # Insert Company Owner
+        owner_email = f"owner@{safe_name}.com"
+        owner_pwd = pwd_context.hash(f"{safe_name}-owner")
+        await db.users.insert_one({
+            "username": f"{safe_name}_owner",
+            "email": owner_email,
+            "role": "company_owner",
+            "company_id": comp_id,
+            "hashed_password": owner_pwd,
+            "is_active": True,
+            "full_name": f"{comp['name']} Owner",
+            "is_verified": True,
+            "created_at": datetime.now(timezone.utc)
+        })
+
+        # Insert Logistics Manager (as if created by owner)
         manager_pwd = pwd_context.hash(f"{safe_name}-manager")
         await db.users.insert_one({
             "username": f"{safe_name}_manager",
@@ -180,7 +203,8 @@ async def seed_data():
             "distance_km": round(dist, 2),
             "base_transit_time_hrs": round(dist / 500 if mode=="air" else dist/80, 1),
             "cost_per_unit": round(dist * 0.05, 2),
-            "risk_factor": round(random.uniform(0.05, 0.25), 3)
+            "risk_factor": round(random.uniform(0.05, 0.25), 3),
+            "company_id": n1["company_id"]
         }
         inter_routes.append(route)
         all_routes.append(route)
@@ -205,7 +229,7 @@ async def seed_data():
             "current_node": origin["id"] if status != "completed" else dest["id"],
             "status": status,
             "priority": random.choice(["low", "medium", "high", "critical"]),
-            "cargo_type": random.choice(["Electronics", "Pharma", "Raw Materials", "Automotive", "Retail"]),
+            "cargo_type": random.choice(["electronics", "medical_supplies", "machinery", "automotive_parts", "consumer_goods", "textiles", "chemicals", "food_products"]),
             "weight_kg": random.uniform(100, 5000),
             "planned_route": [origin["id"], dest["id"]],
             "route_taken": [origin["id"]],
@@ -227,6 +251,7 @@ async def seed_data():
     for c in COMPANIES:
         sn = c['name'].lower().replace(' ', '')
         print(f"  [{c['name']}]")
+        print(f"    Owner: owner@{sn}.com / {sn}-owner")
         print(f"    Manager: manager@{sn}.com / {sn}-manager")
         print(f"    Operator 1: nodemanager1@{sn}.com / {sn}-nodemanager1")
         print(f"    Customer 1: customer1@{sn}.com / {sn}-customer1")

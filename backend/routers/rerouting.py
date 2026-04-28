@@ -6,6 +6,7 @@ import uuid
 from backend.database import get_async_db
 from backend.auth.dependencies import get_current_user, require_role, get_company_filter
 from backend import state as app_state
+from backend.serializers import clean_doc, clean_list
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/rerouting", tags=["Reroute Approvals"])
@@ -28,7 +29,7 @@ class SuggestionCreate(BaseModel):
 
 @router.get("/pending")
 async def get_pending_reroutes(
-    user: dict = Depends(require_role("logistics_manager", "platform_admin")),
+    user: dict = Depends(require_role("logistics_manager", "company_owner", "platform_admin")),
     db = Depends(get_async_db)
 ):
     """Returns all pending reroute suggestions that have not expired."""
@@ -50,15 +51,13 @@ async def get_pending_reroutes(
     priority_map = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     approvals.sort(key=lambda x: (priority_map.get(x.get("priority", "medium").lower(), 2), x.get("created_at")))
     
-    for a in approvals:
-        a.pop("_id", None)
-    return approvals
+    return clean_list(approvals)
 
 @router.get("/history")
 async def get_reroute_history(
     status: Optional[str] = None,
     limit: int = 50,
-    user: dict = Depends(require_role("logistics_manager", "platform_admin")),
+    user: dict = Depends(require_role("logistics_manager", "company_owner", "platform_admin")),
     db = Depends(get_async_db)
 ):
     """Returns historical reroute decisions (approved, rejected, expired)."""
@@ -70,14 +69,12 @@ async def get_reroute_history(
         query["company_id"] = user["company_id"]
 
     history = await db.reroute_approvals.find(query).sort("created_at", -1).to_list(length=limit)
-    for h in history:
-        h.pop("_id", None)
-    return history
+    return clean_list(history)
 
 @router.get("/{approval_id}")
 async def get_approval_detail(
     approval_id: str,
-    user: dict = Depends(require_role("logistics_manager", "platform_admin")),
+    user: dict = Depends(require_role("logistics_manager", "company_owner", "platform_admin")),
     db = Depends(get_async_db)
 ):
     """Returns full details for a specific reroute suggestion."""
@@ -89,14 +86,13 @@ async def get_approval_detail(
     if not approval:
         raise HTTPException(status_code=404, detail="Reroute approval not found")
         
-    approval.pop("_id", None)
-    return approval
+    return clean_doc(approval)
 
 @router.post("/{approval_id}/approve")
 async def approve_reroute(
     approval_id: str,
     payload: ApprovalAction,
-    user: dict = Depends(require_role("logistics_manager", "platform_admin")),
+    user: dict = Depends(require_role("logistics_manager", "company_owner", "platform_admin")),
     db = Depends(get_async_db)
 ):
     """Approves a suggested reroute and updates the shipment path."""
@@ -114,7 +110,14 @@ async def approve_reroute(
     
     await db.shipments.update_one(
         {"id": shipment_id},
-        {"$set": {"planned_route": new_route}}
+        {
+            "$set": {
+                "planned_route": new_route,
+                "last_approved_route": new_route,
+                "last_approved_at": now
+            },
+            "$addToSet": {"reviewed_disruptions": approval.get("disrupted_node")}
+        }
     )
 
     # 2. Update Approval Status
@@ -151,7 +154,7 @@ async def approve_reroute(
 async def reject_reroute(
     approval_id: str,
     payload: RejectionAction,
-    user: dict = Depends(require_role("logistics_manager", "platform_admin")),
+    user: dict = Depends(require_role("logistics_manager", "company_owner", "platform_admin")),
     db = Depends(get_async_db)
 ):
     """Rejects a suggested reroute. The shipment maintains its current path."""
@@ -174,6 +177,12 @@ async def reject_reroute(
                 "review_reason": payload.reason
             }
         }
+    )
+
+    # Mark disruption as reviewed even on rejection to suppress immediate re-suggesting
+    await db.shipments.update_one(
+        {"id": approval["shipment_id"]},
+        {"$addToSet": {"reviewed_disruptions": approval.get("disrupted_node")}}
     )
 
     # Log Rejection

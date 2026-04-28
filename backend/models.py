@@ -9,6 +9,12 @@ class UserRole(str, Enum):
     LOGISTICS_MANAGER = "logistics_manager"
     NODE_OPERATOR = "node_operator"
     CUSTOMER = "customer"
+    COMPANY_OWNER = "company_owner" # Added company_owner role explicitly if missing, though it was in routers
+
+class NodeRequestAction(str, Enum):
+    CREATE = "create"
+    DELETE = "delete"
+    UPDATE = "update"
 
 class Company(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -68,6 +74,9 @@ class Shipment(BaseModel):
     departure_time: Optional[str] = None
     company_id: Optional[str] = None # Added for multi-tenancy
     customer_id: Optional[str] = None # Link to customer user_id
+    last_approved_route: Optional[List[str]] = None # Track last agent-suggested route that was approved
+    last_approved_at: Optional[datetime] = None
+    reviewed_disruptions: List[str] = [] # Node IDs that have already been reviewed for this shipment
 
 class DecisionLog(BaseModel):
     shipment_id: str
@@ -104,3 +113,16 @@ class RerouteApproval(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     reviewed_at: Optional[datetime] = None
     expires_at: datetime = Field(default_factory=lambda: datetime.utcnow() + timedelta(minutes=30))
+
+class NodeRequest(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    company_id: str
+    requester_id: str # User.username
+    action: NodeRequestAction
+    node_id: Optional[str] = None # For DELETE or UPDATE
+    node_data: Optional[dict] = None # For CREATE or UPDATE (contains NodeCreate fields)
+    status: str = "pending" # pending | approved | rejected
+    reason: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    reviewed_by: Optional[str] = None # User.username
+    reviewed_at: Optional[datetime] = None

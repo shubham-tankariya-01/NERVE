@@ -3,11 +3,11 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LogOut, Package, CheckSquare, AlertTriangle, 
-  MapPin, Cloud, LayoutDashboard, Settings, Menu, X, ChevronRight, User
+  MapPin, Cloud, LayoutDashboard, Settings, Menu, X, ChevronRight, User, ChevronDown
 } from 'lucide-react';
 
 export default function OperatorShell() {
-  const { user, logout } = useAuth();
+  const { user, logout, activeNodeId, setActiveNodeId } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -17,154 +17,41 @@ export default function OperatorShell() {
     navigate('/login');
   };
 
-  const nodeName = user?.assigned_node_ids?.[0] || 'Global Network';
+  const assignedNodes = user?.assigned_node_ids || [];
+  const currentStationName = activeNodeId || 'Global Network';
 
   const styles = {
-    layout: {
-      height: '100vh',
-      width: '100vw',
-      backgroundColor: 'var(--bg-canvas)',
-      display: 'flex',
-      overflow: 'hidden',
-      color: 'var(--text-primary)',
-      fontFamily: "'Inter', sans-serif",
-    },
-    sidebar: {
-      width: sidebarOpen ? '260px' : '0px',
-      height: '100%',
-      backgroundColor: 'var(--bg-surface)',
-      borderRight: '1px solid var(--border)',
-      display: 'flex',
-      flexDirection: 'column',
-      transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      position: 'relative',
-      zIndex: 50,
-      overflow: 'hidden',
-    },
-    sidebarHeader: {
-      padding: '24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      borderBottom: '1px solid var(--border)',
-    },
-    logoIcon: {
-      width: '32px',
-      height: '32px',
-      backgroundColor: 'var(--info)', // Using info blue for operator
-      borderRadius: '6px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#000',
-      fontWeight: '900',
-      fontSize: '20px',
-      fontFamily: "'Space Grotesk', sans-serif",
-    },
-    logoText: {
-      fontSize: '16px',
-      fontWeight: '800',
-      letterSpacing: '1px',
-      fontFamily: "'Space Grotesk', sans-serif",
-      color: 'var(--text-primary)',
-    },
-    navSection: {
-      padding: '24px 12px',
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-    },
-    navItem: (isActive) => ({
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      padding: '12px 16px',
-      borderRadius: '8px',
-      textDecoration: 'none',
-      color: isActive ? 'var(--info)' : 'var(--text-secondary)',
-      backgroundColor: isActive ? 'var(--info-dim)' : 'transparent',
-      fontSize: '14px',
-      fontWeight: '600',
-      transition: 'all 0.2s',
-    }),
-    sidebarFooter: {
-      padding: '16px',
-      borderTop: '1px solid var(--border)',
-    },
-    userCard: {
-      padding: '12px',
-      borderRadius: '12px',
-      backgroundColor: 'var(--bg-elevated)',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      marginBottom: '12px',
-    },
-    userAvatar: {
-      width: '32px',
-      height: '32px',
-      borderRadius: '16px',
-      backgroundColor: 'var(--info-dim)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'var(--info)',
-    },
-    logoutBtn: {
-      width: '100%',
-      background: 'none',
-      border: 'none',
-      color: 'var(--danger)',
-      cursor: 'pointer',
-      padding: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      fontSize: '13px',
-      fontWeight: '700',
-      borderRadius: '8px',
-      transition: 'background 0.2s',
-    },
-    main: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      overflow: 'hidden',
-    },
-    header: {
-      height: '72px',
-      padding: '0 32px',
-      backgroundColor: 'var(--bg-surface)',
-      borderBottom: '1px solid var(--border)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      flexShrink: 0,
-    },
-    breadcrumb: {
+    layout: { height: '100vh', width: '100vw', backgroundColor: 'var(--bg-canvas)', display: 'flex', overflow: 'hidden', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif" },
+    sidebar: { width: sidebarOpen ? '260px' : '0px', height: '100%', backgroundColor: 'var(--bg-surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', zIndex: 50, overflow: 'hidden' },
+    sidebarHeader: { padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border)' },
+    logoIcon: { width: '32px', height: '32px', backgroundColor: 'var(--info)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: '900', fontSize: '20px', fontFamily: "'Space Grotesk', sans-serif" },
+    logoText: { fontSize: '16px', fontWeight: '800', letterSpacing: '1px', fontFamily: "'Space Grotesk', sans-serif", color: 'var(--text-primary)' },
+    navSection: { padding: '24px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' },
+    navItem: (isActive) => ({ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '8px', textDecoration: 'none', color: isActive ? 'var(--info)' : 'var(--text-secondary)', backgroundColor: isActive ? 'var(--info-dim)' : 'transparent', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s' }),
+    sidebarFooter: { padding: '16px', borderTop: '1px solid var(--border)' },
+    userCard: { padding: '12px', borderRadius: '12px', backgroundColor: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' },
+    userAvatar: { width: '32px', height: '32px', borderRadius: '16px', backgroundColor: 'var(--info-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--info)' },
+    logoutBtn: { width: '100%', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '12px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: '700', borderRadius: '8px', transition: 'background 0.2s' },
+    main: { flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' },
+    header: { height: '72px', padding: '0 32px', backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 },
+    breadcrumb: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-muted)' },
+    content: { flex: 1, overflowY: 'auto', padding: '32px', backgroundColor: 'var(--bg-canvas)' },
+    toggleBtn: { background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    stationDropdown: {
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
-      fontSize: '14px',
-      color: 'var(--text-muted)',
-    },
-    content: {
-      flex: 1,
-      overflowY: 'auto',
-      padding: '32px',
-      backgroundColor: 'var(--bg-canvas)',
-    },
-    toggleBtn: {
-      background: 'none',
-      border: 'none',
-      color: 'var(--text-muted)',
+      backgroundColor: 'var(--info-dim)',
+      color: 'var(--info)',
+      padding: '6px 12px',
+      borderRadius: '8px',
+      fontSize: '12px',
+      fontWeight: '700',
+      border: '1px solid rgba(59, 130, 246, 0.2)',
       cursor: 'pointer',
-      padding: '8px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      outline: 'none',
+      appearance: 'none',
+      fontFamily: 'inherit'
     }
   };
 
@@ -179,7 +66,6 @@ export default function OperatorShell() {
 
   return (
     <div style={styles.layout}>
-      {/* Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logoIcon}>N</div>
@@ -207,48 +93,24 @@ export default function OperatorShell() {
             <AlertTriangle size={18} />
             <span>Report Issue</span>
           </NavLink>
-          
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <NavLink to="#" style={styles.navItem(false)}>
-              <Settings size={18} />
-              <span>Settings</span>
-            </NavLink>
-          </div>
         </nav>
 
         <div style={styles.sidebarFooter}>
           <div style={styles.userCard}>
-            <div style={styles.userAvatar}>
-              <User size={18} />
-            </div>
+            <div style={styles.userAvatar}><User size={18} /></div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user?.full_name || 'Operator'}
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {nodeName}
-              </div>
+              <div style={{ fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.full_name || 'Operator'}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStationName}</div>
             </div>
           </div>
-          <button 
-            style={styles.logoutBtn} 
-            onClick={handleLogout}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <LogOut size={18} />
-            <span>Sign Out</span>
-          </button>
+          <button style={styles.logoutBtn} onClick={handleLogout}><LogOut size={18} /><span>Sign Out</span></button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <div style={styles.main}>
         <header style={styles.header}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <button style={styles.toggleBtn} onClick={() => setSidebarOpen(!sidebarOpen)}>
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+            <button style={styles.toggleBtn} onClick={() => setSidebarOpen(!sidebarOpen)}>{sidebarOpen ? <X size={20} /> : <Menu size={20} />}</button>
             <div style={styles.breadcrumb}>
               <span>Operations</span>
               <ChevronRight size={14} />
@@ -257,16 +119,18 @@ export default function OperatorShell() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-             <div style={{ 
-               backgroundColor: 'var(--info-dim)', 
-               color: 'var(--info)', 
-               padding: '6px 12px', 
-               borderRadius: '6px', 
-               fontSize: '12px', 
-               fontWeight: '700',
-               border: '1px solid rgba(59, 130, 246, 0.2)'
-             }}>
-               STATION: {nodeName}
+             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+               <select 
+                 style={styles.stationDropdown} 
+                 value={activeNodeId || ''} 
+                 onChange={(e) => setActiveNodeId(e.target.value)}
+                >
+                 {assignedNodes.map(nodeId => (
+                   <option key={nodeId} value={nodeId}>STATION: {nodeId}</option>
+                 ))}
+                 {assignedNodes.length === 0 && <option value="">NO ASSIGNED STATIONS</option>}
+               </select>
+               <ChevronDown size={14} style={{ position: 'absolute', right: '8px', pointerEvents: 'none' }} />
              </div>
           </div>
         </header>

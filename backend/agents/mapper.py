@@ -51,6 +51,14 @@ class MapperAgent:
                 
                 # Only care if the disruption is ahead of us or right here
                 if disrupted_node in planned[curr_idx:]:
+                    # --- SUPPRESS DUPLICATES ---
+                    # If this disruption was already reviewed and the route is what we approved, skip.
+                    reviewed = ship.get("reviewed_disruptions", [])
+                    if disrupted_node in reviewed:
+                        last_approved = ship.get("last_approved_route")
+                        if last_approved == planned:
+                            continue
+                    # ---------------------------
                     affected_ships.append(ship)
                     
             if affected_ships:

@@ -17,6 +17,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+import os
 
 from dotenv import load_dotenv
 
@@ -53,9 +54,10 @@ logging.basicConfig(
 log = logging.getLogger("nerve")
 
 # ── config ────────────────────────────────────────────────────────
-SCAN_INTERVAL_SECONDS = 10
+SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "10"))
 HOST = "0.0.0.0"
-PORT = 8000
+PORT = int(os.getenv("PORT", "8000"))
+ENABLE_BACKGROUND_SCANNER = os.getenv("ENABLE_BACKGROUND_SCANNER", "true").strip().lower() == "true"
 
 # ── shared state ──────────────────────────────────────────────────
 scg = SupplyChainGraph()
@@ -72,6 +74,8 @@ weather_overrides: dict[str, dict[str, float]] = {}
 
 # Link to app_state for external routers to access shared objects
 from backend import state as app_state
+from backend.state import alert_to_dict
+from backend.serializers import clean_doc, clean_list
 app_state.scg = scg
 app_state.weather_feed = weather_feed
 app_state.detector = detector
@@ -159,8 +163,7 @@ async def scan_loop() -> None:
             agent_logs, _ = await agent_orchestrator.process_anomalies(
                 alerts, scg,
                 risk_scores=risk_scores,
-                cascade_debt=cascade_debt,
-                company_id="company_demo"
+                cascade_debt=cascade_debt
             )
 
             # terminal logging
@@ -190,50 +193,22 @@ async def scan_loop() -> None:
             _last_scan_time = datetime.now(timezone.utc).isoformat()
 
             if app_state.count_clients() > 0:
-                # 1. Prepare full payload for platform admins
-                full_msg = app_state.build_payload(
-                    alerts, agent_logs,
-                    risk_scores=risk_scores,
-                    cascade_debt=cascade_debt,
-                    network_health=network_health,
-                )
-                await app_state.broadcast_to_company(full_msg, "platform_admin")
-
-                # 2. Prepare per-company filtered payloads
-                # Iterate through all connected companies except platform_admin
-                active_companies = [cid for cid in app_state.clients.keys() if cid != "platform_admin"]
-                
+                # Iterate through all connected companies (including platform_admin)
+                active_companies = list(app_state.clients.keys())
                 for cid in active_companies:
-                    # Filter shipments
-                    c_shipments = [s for s in scg.shipments if s.get("company_id") == cid]
+                    # Determine network_health. If platform_admin, pass it through, otherwise recompute inside helper.
+                    c_health = network_health if cid == "platform_admin" else None
                     
-                    # Filter network (Nodes + Edges belonging to company)
-                    c_node_list = [
-                        (nid, n) for nid, n in scg.graph.nodes(data=True)
-                        if n.get("company_id") == cid
-                    ]
-                    c_edge_list = [
-                        (u, v, r) for u, v, r in scg.graph.edges(data=True)
-                        if r.get("company_id") == cid
-                    ]
-
-                    # Filter alerts (only nodes in company's shipment routes)
-                    c_nodes_ids = set(n[0] for n in c_node_list)
-                    c_alerts = [a for a in alerts if a.node_id in c_nodes_ids]
-                    
-                    # Build and broadcast filtered payload
-                    c_msg = app_state.build_payload(
-                        c_alerts, agent_logs,
+                    c_msg = app_state.build_company_payload(
+                        company_id=cid,
+                        agent_logs=agent_logs,
                         risk_scores=risk_scores,
                         cascade_debt=cascade_debt,
-                        network_health=network_health,
-                        shipments=c_shipments,
-                        nodes=c_node_list,
-                        edges=c_edge_list
+                        network_health=c_health
                     )
                     await app_state.broadcast_to_company(c_msg, cid)
                 
-                log.info("Pushed filtered updates to %d company bucket(s)", len(active_companies) + 1)
+                log.info("Pushed filtered updates to %d company bucket(s)", len(active_companies))
             else:
                 log.info("No clients connected, skipping broadcast")
 
@@ -262,9 +237,17 @@ async def lifespan(app: FastAPI):
         sync_client.admin.command('ping')
         log.info("Successfully connected to MongoDB.")
     except Exception:
-        log.warning("!!! MongoDB NOT detected at MONGO_URL. Using local JSON fallback for all operations. !!!")
+        log.warning(
+            "MongoDB is not reachable at the configured MONGO_URL. "
+            "The API will stay online, but network data will remain unavailable "
+            "until the database connection is restored."
+        )
 
-    task = asyncio.create_task(scan_loop())
+    task = asyncio.create_task(scan_loop()) if ENABLE_BACKGROUND_SCANNER else None
+    if ENABLE_BACKGROUND_SCANNER:
+        log.info("Background scanner enabled")
+    else:
+        log.info("Background scanner disabled for this instance")
     log.info(
         "Nerve server ready — ws://localhost:%d/ws  |  "
         "Network: %d nodes, %d edges, %d shipments",
@@ -274,11 +257,12 @@ async def lifespan(app: FastAPI):
         len(scg.shipments),
     )
     yield
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
+    if task is not None:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 # ── FastAPI app ───────────────────────────────────────────────────
@@ -289,9 +273,30 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app_env = os.getenv("APP_ENV", "production").strip().lower()
+cors_origins_str = os.getenv("CORS_ALLOWED_ORIGINS", "")
+
+allowed_origins = [
+    origin.strip() for origin in cors_origins_str.split(",") if origin.strip()
+]
+
+if app_env == "development" and not allowed_origins:
+    allowed_origins = [
+        "http://localhost:5173", 
+        "http://localhost:8000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8000"
+    ]
+
+if "*" in allowed_origins:
+    raise RuntimeError("CORS configuration error: Cannot use wildcard '*' when credentials are enabled. Provide explicit origins in CORS_ALLOWED_ORIGINS.")
+
+if not allowed_origins:
+    raise RuntimeError("CORS configuration error: No allowed origins specified. Provide CORS_ALLOWED_ORIGINS in environment.")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*", "Authorization"],
@@ -305,16 +310,22 @@ async def global_exception_handler(request: Request, exc: Exception):
     log.error(f"Global exception caught: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal Server Error: {str(exc)}"},
+        content={
+            "detail": (
+                f"Internal Server Error: {str(exc)}"
+                if app_env == "development"
+                else "Internal Server Error"
+            )
+        },
     )
 
-from backend.routers import auth, companies, checkins, rerouting, nodes, debug
+from backend.routers import auth, companies, checkins, rerouting, nodes, owner
 app.include_router(auth.router)
 app.include_router(companies.router)
-app.include_router(debug.router)
 app.include_router(checkins.router)
 app.include_router(rerouting.router)
 app.include_router(nodes.router)
+app.include_router(owner.router)
 
 
 # ── REST endpoints ────────────────────────────────────────────────
@@ -375,51 +386,102 @@ async def get_health():
 
 @app.get("/api/network")
 async def get_network(user: dict = Depends(get_current_user)):
-    """Return node + edge data filtered by company ownership."""
+    """Return node + edge data filtered by company ownership and node assignment."""
     is_admin = user.get("role") == "platform_admin"
+    is_operator = user.get("role") == "node_operator"
     comp_id = user.get("company_id")
+    assigned_nodes = set(user.get("assigned_node_ids", []))
     
     # Map to frontend format from scg memory
     node_list = []
     for nid, n in scg.graph.nodes(data=True):
-        if is_admin or n.get("company_id") == comp_id:
-            node_list.append({
-                "id": nid,
-                "name": n.get("name"),
-                "type": n.get("type"),
-                "location": n.get("location"),
-                "capacity": n.get("capacity"),
-                "current_load": n.get("current_load"),
-                "status": n.get("status"),
-                "risk_level": n.get("risk_level")
-            })
+        if is_admin:
+            authorized = True
+        elif is_operator:
+            authorized = nid in assigned_nodes
+        elif comp_id:
+            authorized = n.get("company_id") == comp_id
+        else:
+            authorized = False
+            
+        if authorized:
+            node_list.append({"id": nid, **n})
         
     edge_list = []
     for u, v, r in scg.graph.edges(data=True):
-        # Edge is visible if both nodes are visible or if user is admin
-        # Actually, if the edge belongs to the company, it should be visible
-        if is_admin or r.get("company_id") == comp_id:
-             edge_list.append({
-                "from": u,
-                "to": v,
-                "id": r.get("id"),
-                "transport_mode": r.get("transport_mode"),
-                "distance_km": r.get("distance_km"),
-                "base_transit_time_hrs": r.get("base_transit_time_hrs"),
-                "cost_per_unit": r.get("cost_per_unit"),
-                "risk_factor": r.get("risk_factor")
-            })
-        
-    return {"nodes": node_list, "edges": edge_list}
+        if is_admin:
+            authorized = True
+        elif is_operator:
+            authorized = u in assigned_nodes and v in assigned_nodes
+        elif comp_id:
+            authorized = r.get("company_id") == comp_id
+        else:
+            authorized = False
+            
+        if authorized:
+             edge_list.append({"from": u, "to": v, **r})
+
+    # 3. Weather Data
+    weather_list = []
+    if weather_feed:
+        auth_node_ids = set(n["id"] for n in node_list)
+        for nw in weather_feed.results.values():
+            if nw.fetched and nw.node_id in auth_node_ids:
+                weather_list.append({
+                    "node_id": nw.node_id,
+                    "node_name": nw.node_name,
+                    "temperature_c": nw.temperature_c,
+                    "condition": nw.weather_label
+                })
+    
+    return {
+        "nodes": node_list, 
+        "edges": edge_list,
+        "weather": weather_list
+    }
 
 
 @app.get("/api/shipments")
-async def get_shipments(user: dict = Depends(get_current_user)):
-    """Return shipments, filtered by company if not platform_admin."""
+async def get_shipments(
+    node_id: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    """Return shipments, filtered by company or node assignment."""
     if user.get("role") == "platform_admin":
+        if node_id:
+            return {"shipments": [s for s in scg.shipments if s.get("current_node") == node_id]}
         return {"shipments": scg.shipments}
     
-    company_shipments = [s for s in scg.shipments if s.get("company_id") == user.get("company_id")]
+    if user.get("role") == "node_operator":
+        assigned_nodes = set(user.get("assigned_node_ids", []))
+        
+        # If node_id is provided, verify operator is assigned to it
+        if node_id:
+            if node_id not in assigned_nodes:
+                raise HTTPException(status_code=403, detail="Not authorized to view shipments for this node")
+            
+            # Filter shipments: coming to this node, leaving from this node, or currently AT this node
+            node_shipments = [
+                s for s in scg.shipments 
+                if s.get("company_id") == user.get("company_id") and
+                (s.get("current_node") == node_id or node_id in s.get("planned_route", []))
+            ]
+            return {"shipments": node_shipments}
+
+        # Legacy behavior: all assigned nodes
+        company_shipments = [
+            s for s in scg.shipments 
+            if s.get("company_id") == user.get("company_id") and
+            (set(s.get("planned_route", [])) & assigned_nodes or set(s.get("route_taken", [])) & assigned_nodes)
+        ]
+        return {"shipments": company_shipments}
+    
+    # Manager / Owner
+    query_comp_id = user.get("company_id")
+    company_shipments = [s for s in scg.shipments if s.get("company_id") == query_comp_id]
+    if node_id:
+        company_shipments = [s for s in company_shipments if s.get("current_node") == node_id or node_id in s.get("planned_route", [])]
+        
     return {"shipments": company_shipments}
 
 
@@ -436,7 +498,7 @@ async def get_shipment(shipment_id: str, user: dict = Depends(get_current_user))
 
 
 @app.get("/api/shipments/{shipment_id}/detail")
-async def get_shipment_detail(shipment_id: str, user: dict = Depends(get_current_user)):
+async def get_shipment_detail(shipment_id: str, user: dict = Depends(get_current_user), db = Depends(get_async_db)):
     """Return enriched shipment data, verifying company access."""
     from fastapi import HTTPException
 
@@ -510,10 +572,8 @@ async def get_shipment_detail(shipment_id: str, user: dict = Depends(get_current
             route_alerts.append(alert_to_dict(a))
 
     # ── Reroute history for this shipment ──
-    reroute_history = [
-        entry for entry in agent_orchestrator.reroute_history
-        if entry["shipment_id"] == shipment_id
-    ]
+    history_docs = await db.reroute_history.find({"shipment_id": shipment_id}).to_list(length=None)
+    reroute_history = clean_list(history_docs)
 
     # ── Nodes that were on original route but rerouted away from ──
     original_route = shipment.get("planned_route", [])
@@ -574,14 +634,22 @@ async def get_shipment_detail(shipment_id: str, user: dict = Depends(get_current
 
 @app.get("/api/alerts")
 async def get_alerts(user: dict = Depends(get_current_user)):
-    """Return alerts, filtered by company shipments if not platform_admin."""
+    """Return alerts, filtered by company or assigned nodes."""
     if user.get("role") == "platform_admin":
         return {
             "alerts_count": len(detector.alerts),
             "alerts": [alert_to_dict(a) for a in detector.alerts],
         }
 
-    # Get all nodes in company's shipment routes
+    if user.get("role") == "node_operator":
+        assigned_nodes = set(user.get("assigned_node_ids", []))
+        filtered_alerts = [a for a in detector.alerts if a.node_id in assigned_nodes]
+        return {
+            "alerts_count": len(filtered_alerts),
+            "alerts": [alert_to_dict(a) for a in filtered_alerts],
+        }
+
+    # Logistics Manager: get all nodes in company's shipment routes
     company_shipments = [s for s in scg.shipments if s.get("company_id") == user.get("company_id")]
     company_nodes = set()
     for s in company_shipments:
@@ -628,7 +696,8 @@ async def get_customer_shipments(
 @app.get("/api/customer/shipments/{shipment_id}")
 async def get_customer_shipment_detail(
     shipment_id: str,
-    user: dict = Depends(get_current_user)
+    user: dict = Depends(get_current_user),
+    db = Depends(get_async_db)
 ):
     """Return full shipment detail for a customer-owned shipment."""
     if user.get("role") != "customer":
@@ -711,10 +780,8 @@ async def get_customer_shipment_detail(
             route_alerts.append(alert_to_dict(a))
 
     # ── Reroute history for this shipment ──
-    reroute_history = [
-        entry for entry in agent_orchestrator.reroute_history
-        if entry["shipment_id"] == shipment_id
-    ]
+    history_docs = await db.reroute_history.find({"shipment_id": shipment_id}).to_list(length=None)
+    reroute_history = clean_list(history_docs)
 
     # ── Nodes that were on original route but rerouted away from ──
     original_route = shipment.get("planned_route", [])
@@ -851,7 +918,7 @@ class BookingRequest(BaseModel):
 
 
 @app.post("/api/shipments/book")
-async def book_shipment(payload: BookingRequest):
+async def book_shipment(payload: BookingRequest, user: dict = Depends(get_current_user)):
     """
     Compute the optimal route for a new shipment and create it.
 
@@ -927,7 +994,9 @@ async def book_shipment(payload: BookingRequest):
         "route_taken": [payload.origin],
         "departure_time": now.isoformat(),
         "estimated_arrival": est_arrival.isoformat(),
-        "disruptions": []
+        "disruptions": [],
+        "company_id": user.get("company_id"),
+        "customer_id": user.get("username") if user.get("role") == "customer" else None
     }
 
     try:
@@ -936,16 +1005,13 @@ async def book_shipment(payload: BookingRequest):
     except Exception as e:
         log.warning("Failed to persist shipment %s to MongoDB: %s. It will exist in memory only.", shipment_id, e)
     
-    new_shipment.pop("_id", None)
-    
     # Update memory graph
-    # If DB is down, refresh_from_db will fallback to JSON (wiping memory)
-    # So we must manually ensure the new shipment is in scg.shipments if we want it to stay
     scg.refresh_from_db()
     
-    # Check if it's in scg.shipments after refresh (it won't be if DB was down)
-    if not any(s["id"] == shipment_id for s in scg.shipments):
-        scg.shipments.append(new_shipment)
+    # If DB was down, the new shipment won't be in scg.shipments.
+    # We return the object but don't force mutate scg.shipments anymore, 
+    # as MongoDB is the source of truth.
+
     
     log.info(
         "BOOKED shipment %s: %s → %s (%d hops, %.0fh, $%.0f)",
@@ -968,7 +1034,7 @@ async def book_shipment(payload: BookingRequest):
 
     return {
         "status": "booked",
-        "shipment": new_shipment,
+        "shipment": clean_doc(new_shipment),
         "route_analytics": {
             "total_transit_hrs": best.total_transit_hrs,
             "total_cost": best.total_cost,
@@ -977,6 +1043,7 @@ async def book_shipment(payload: BookingRequest):
             "composite_score": best.composite_score,
             "risk_score": best.risk_score,
             "legs": best.legs,
+            "path": best.path,
         },
         "alternatives": alternatives,
     }
@@ -991,18 +1058,31 @@ class ManualRerouteRequest(BaseModel):
     user_id: str = "admin"
 
 @app.post("/api/admin/shipments/reroute")
-async def manual_reroute(payload: ManualRerouteRequest, db = Depends(get_async_db)):
-    """Manually override a shipment's route."""
+async def manual_reroute(
+    payload: ManualRerouteRequest, 
+    user: dict = Depends(get_current_user),
+    db = Depends(get_async_db)
+):
+    """Manually override a shipment's route with auth and company scoping."""
     shipment = await db.shipments.find_one({"id": payload.shipment_id})
     if not shipment:
         raise HTTPException(status_code=404, detail="Shipment not found")
+
+    # Auth check: Platform admin sees all. Owner/Manager see company.
+    is_admin = user.get("role") == "platform_admin"
+    is_authorized_role = user.get("role") in ["company_owner", "logistics_manager"]
+    is_same_company = shipment.get("company_id") == user.get("company_id")
+
+    if not (is_admin or (is_authorized_role and is_same_company)):
+        raise HTTPException(status_code=403, detail="Not authorized to reroute this shipment")
 
     # Log the decision
     log_entry = {
         "shipment_id": payload.shipment_id,
         "action_type": "MANUAL_REROUTE",
         "reasoning": payload.reason,
-        "performed_by": payload.user_id,
+        "performed_by": user.get("user_id"),
+        "company_id": shipment.get("company_id"),
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     await db.decision_logs.insert_one(log_entry)
@@ -1017,26 +1097,37 @@ async def manual_reroute(payload: ManualRerouteRequest, db = Depends(get_async_d
     except Exception as e:
         log.warning("Failed to persist manual reroute for %s to MongoDB: %s", payload.shipment_id, e)
 
-    # Refresh memory graph
+    # Refresh memory graph from DB (source of truth)
     scg.refresh_from_db()
+
+    # Broadcast update
+    company_id = shipment.get("company_id")
+    if company_id:
+        from backend.state import build_company_payload, broadcast_to_company
+        import json
+        msg = build_company_payload(company_id)
+        await broadcast_to_company(json.loads(msg), company_id)
+        
+    admin_msg = build_company_payload("platform_admin")
+    await broadcast_to_company(json.loads(admin_msg), "platform_admin")
     
-    # Manual override in memory if DB was down
-    for s in scg.shipments:
-        if s["id"] == payload.shipment_id:
-            s["planned_route"] = payload.new_route
-            break
-    
-    log.info("MANUAL REROUTE: %s by %s. Reason: %s", payload.shipment_id, payload.user_id, payload.reason)
+    log.info("MANUAL REROUTE: %s by %s. Reason: %s", payload.shipment_id, user.get("user_id"), payload.reason)
     return {"status": "success", "new_route": payload.new_route}
 
 
 @app.get("/api/admin/logs")
-async def get_decision_logs(db = Depends(get_async_db)):
-    """Return all decision logs for the admin panel."""
-    logs = await db.decision_logs.find({}).sort("timestamp", -1).to_list(length=None)
-    for l in logs:
-        l.pop("_id", None)
-    return {"logs": logs}
+async def get_decision_logs(
+    user: dict = Depends(get_current_user),
+    db = Depends(get_async_db)
+):
+    """Return decision logs, filtered by company for managers/owners."""
+    query = {}
+    if user.get("role") != "platform_admin":
+        query["company_id"] = user.get("company_id")
+
+    logs = await db.decision_logs.find(query).sort("timestamp", -1).to_list(length=None)
+    return {"logs": clean_list(logs)}
+
 
 
 # ── WebSocket endpoint ────────────────────────────────────────────
@@ -1045,9 +1136,8 @@ async def get_decision_logs(db = Depends(get_async_db)):
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
     
-    # Try to get company_id from query parameter token
-    # URL format: ws://localhost:8000/ws?token=<jwt>
-    company_id = "company_demo"  # default for backward compat
+    # REQUIRE token for WebSocket
+    company_id = None
     
     token = ws.query_params.get("token")
     if token:
@@ -1058,22 +1148,29 @@ async def websocket_endpoint(ws: WebSocket):
             if payload.get("role") == "platform_admin":
                 company_id = "platform_admin"
             else:
-                company_id = payload.get("company_id") or "company_demo"
-        except Exception:
-            pass  # Invalid token -> use default company
-    
+                company_id = payload.get("company_id")
+                if not company_id:
+                    log.warning("WS connection attempted with valid token but missing company_id")
+                    await ws.close(code=4003) # Forbidden
+                    return
+        except Exception as e:
+            log.error("WS authentication failed: %s", e)
+            await ws.close(code=4001)
+            return
+    else:
+        log.warning("WS connection attempted without token")
+        await ws.close(code=4001)
+        return
     from backend import state as app_state
     app_state.register_client(ws, company_id)
     log.info("WS client connected: company=%s total=%d", company_id, app_state.count_clients())
     
     # Send immediate snapshot on connect
     try:
-        # Build company-filtered payload
-        # Note: In a production scenario, build_payload would filter shipments by company_id here
-        msg = build_payload(detector.alerts)
+        msg = app_state.build_company_payload(company_id=company_id)
         await ws.send_text(msg)
-    except Exception:
-        pass
+    except Exception as e:
+        log.error("Failed to send initial websocket snapshot for company %s: %s", company_id, e)
     
     try:
         while True:

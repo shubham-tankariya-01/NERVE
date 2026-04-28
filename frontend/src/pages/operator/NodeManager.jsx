@@ -3,10 +3,11 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../context/AuthContext';
-import { fetchOperatorNodes, createNode, deleteNode } from '../../services/api';
+import { fetchOperatorNodes, requestNodeAction } from '../../services/api';
 import { 
   Plus, Trash2, MapPin, Navigation, Info, 
-  Search, Loader, Save, X, ChevronRight, Globe 
+  Search, Loader, Save, X, ChevronRight, Globe,
+  PlusCircle, AlertCircle
 } from 'lucide-react';
 
 // Fix for default marker icons in Leaflet
@@ -48,7 +49,8 @@ export default function NodeManager() {
   const [isAdding, setIsAdding] = useState(false);
   const [newNode, setNewNode] = useState({ name: '', type: 'warehouse', lat: 20.0, lng: 77.0 });
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, user } = useAuth();
+  const canManage = true; // Operators can now "manage" by requesting
 
   const loadNodes = useCallback(async () => {
     setLoading(true);
@@ -68,27 +70,33 @@ export default function NodeManager() {
       return;
     }
     try {
-      await createNode({
-        ...newNode,
-        lat: selectedLocation.lat,
-        lng: selectedLocation.lng
+      await requestNodeAction({
+        action: 'create',
+        node_data: {
+          ...newNode,
+          lat: selectedLocation.lat,
+          lng: selectedLocation.lng
+        }
       }, getAuthHeaders());
+      alert("Node creation request submitted to company owner.");
       setIsAdding(false);
       setNewNode({ name: '', type: 'warehouse', lat: 20.0, lng: 77.0 });
       setSelectedLocation(null);
-      loadNodes();
     } catch (err) {
-      alert("Failed to create node: " + err.message);
+      alert("Failed to submit request: " + err.message);
     }
   };
 
   const handleDelete = async (nodeId) => {
-    if (!window.confirm("Are you sure you want to decommission this node? This action cannot be undone.")) return;
+    if (!window.confirm("Submit a request to decommission this node?")) return;
     try {
-      await deleteNode(nodeId, getAuthHeaders());
-      loadNodes();
+      await requestNodeAction({
+        action: 'delete',
+        node_id: nodeId
+      }, getAuthHeaders());
+      alert("Node deletion request submitted to company owner.");
     } catch (err) {
-      alert("Failed to delete node: " + err.message);
+      alert("Failed to submit request: " + err.message);
     }
   };
 
@@ -171,6 +179,73 @@ export default function NodeManager() {
       border: '1px solid var(--border)',
       color: 'white',
       pointerEvents: 'none',
+    },
+    modalOverlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.85)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+    },
+    modalContent: {
+      width: '900px',
+      height: '650px',
+      backgroundColor: 'var(--bg-secondary)',
+      borderRadius: '20px',
+      border: '1px solid var(--glass-border)',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+    },
+    modalHeader: {
+      padding: '20px 24px',
+      borderBottom: '1px solid var(--glass-border)',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    modalBody: {
+      flex: 1,
+      display: 'grid',
+      gridTemplateColumns: '1fr 320px',
+    },
+    modalMap: {
+      height: '100%',
+      width: '100%',
+      borderRight: '1px solid var(--glass-border)',
+    },
+    modalForm: {
+      padding: '24px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px',
+    },
+    inputModal: {
+      width: '100%',
+      backgroundColor: 'rgba(255,255,255,0.03)',
+      border: '1px solid var(--glass-border)',
+      borderRadius: '12px',
+      padding: '12px 16px',
+      color: 'var(--text-main)',
+      fontSize: '14px',
+      outline: 'none',
+      fontFamily: 'var(--font-mono)',
+    },
+    labelModal: {
+      fontSize: '11px',
+      color: 'var(--text-muted)',
+      fontWeight: '800',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      marginBottom: '8px',
+      display: 'block',
     }
   };
 
@@ -217,114 +292,145 @@ export default function NodeManager() {
       {/* Sidebar Panel */}
       <div style={styles.panel}>
         <div style={styles.panelHeader}>
-          <div style={{ fontSize: '16px', fontWeight: '800' }}>{isAdding ? 'Register New Node' : 'Network Nodes'}</div>
+          <div style={{ fontSize: '16px', fontWeight: '800' }}>Network Nodes</div>
           <button 
-            onClick={() => setIsAdding(!isAdding)}
+            onClick={() => setIsAdding(true)}
             style={{ 
-              background: 'none', 
+              background: 'var(--info)', 
               border: 'none', 
-              color: isAdding ? 'var(--danger)' : 'var(--info)', 
-              cursor: 'pointer' 
+              color: '#000', 
+              padding: '6px 12px',
+              borderRadius: '6px',
+              fontWeight: '800',
+              fontSize: '11px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            {isAdding ? <X size={20} /> : <Plus size={20} />}
+            <Plus size={14} /> REQUEST NEW
           </button>
         </div>
-
-        {isAdding ? (
-          <div style={styles.form}>
-             <div>
-               <label style={styles.label}>Station Name</label>
-               <input 
-                 style={styles.input} 
-                 placeholder="e.g. Mumbai Logistics Hub" 
-                 value={newNode.name}
-                 onChange={e => setNewNode({...newNode, name: e.target.value})}
-               />
-             </div>
-             <div>
-               <label style={styles.label}>Node Classification</label>
-               <select 
-                 style={styles.input}
-                 value={newNode.type}
-                 onChange={e => setNewNode({...newNode, type: e.target.value})}
-               >
-                 {NODE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-               </select>
-             </div>
-             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                <div>
-                   <label style={styles.label}>Latitude</label>
-                   <input style={{...styles.input, backgroundColor:'var(--bg-elevated)'}} readOnly value={selectedLocation?.lat.toFixed(6) || ''} placeholder="Click map" />
-                </div>
-                <div>
-                   <label style={styles.label}>Longitude</label>
-                   <input style={{...styles.input, backgroundColor:'var(--bg-elevated)'}} readOnly value={selectedLocation?.lng.toFixed(6) || ''} placeholder="Click map" />
-                </div>
-             </div>
-             
-             <button 
-              onClick={handleCreate}
-              style={{ 
-                marginTop: '12px',
-                padding: '12px', 
-                backgroundColor: 'var(--info)', 
-                color: '#000', 
-                border: 'none', 
-                borderRadius: '8px', 
-                fontWeight: '800', 
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-             >
-               <Save size={18} />
-               CONFIRM REGISTRATION
-             </button>
-          </div>
-        ) : (
-          <div style={styles.nodeList}>
-            {loading ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                <Loader size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
-                <div style={{ fontSize: '12px' }}>Updating network graph...</div>
-              </div>
-            ) : nodes.length === 0 ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                <Globe size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
-                <div style={{ fontSize: '13px' }}>No nodes registered yet.</div>
-              </div>
-            ) : (
-              nodes.map(n => (
-                <div key={n.id} style={styles.nodeItem}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: '700' }}>{n.name}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '2px' }}>{n.type} • {n.id}</div>
-                    </div>
-                    <button 
-                      onClick={() => handleDelete(n.id)}
-                      style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+        {/* Node List Display */}
+        <div style={styles.nodeList}>
+          {loading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <Loader size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
+              <div style={{ fontSize: '12px' }}>Updating network graph...</div>
+            </div>
+          ) : nodes.length === 0 ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <Globe size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
+              <div style={{ fontSize: '13px' }}>No nodes registered yet.</div>
+            </div>
+          ) : (
+            nodes.map(n => (
+              <div key={n.id} style={styles.nodeItem}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: '700' }}>{n.name}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '2px' }}>{n.type} • {n.id}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '12px', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <MapPin size={12} /> {n.lat.toFixed(3)}, {n.lng.toFixed(3)}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Plus size={12} /> Cap: {n.capacity}
-                    </div>
+                  <button 
+                    onClick={() => handleDelete(n.id)}
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '12px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <MapPin size={12} /> {n.lat.toFixed(3)}, {n.lng.toFixed(3)}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Plus size={12} /> Cap: {n.capacity}
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
+
+      {/* Modal for Adding Node (Request) */}
+      {isAdding && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalHeader}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>REQUEST NEW NODE</h3>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, margin: '4px 0 0 0' }}>POINT ON MAP TO ASSIGN GEOSPATIAL COORDINATES</p>
+              </div>
+              <button onClick={() => setIsAdding(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              <div style={styles.modalMap}>
+                <MapContainer 
+                  center={[20.0, 78.0]} 
+                  zoom={5} 
+                  style={{ height: '100%', width: '100%', filter: 'grayscale(0.8) invert(1) contrast(0.9)' }}
+                  zoomControl={true}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <LocationSelector onLocationSelect={setSelectedLocation} selectedLoc={selectedLocation} />
+                </MapContainer>
+              </div>
+
+              <div style={styles.modalForm}>
+                <div>
+                  <label style={styles.labelModal}>Station Name</label>
+                  <input 
+                    style={styles.inputModal} 
+                    placeholder="e.g. MUMBAI_DIST_ALPHA" 
+                    value={newNode.name}
+                    onChange={e => setNewNode({...newNode, name: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <label style={styles.labelModal}>Node Classification</label>
+                  <select 
+                    style={styles.inputModal}
+                    value={newNode.type}
+                    onChange={e => setNewNode({...newNode, type: e.target.value})}
+                  >
+                    {NODE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={styles.labelModal}>Latitude</label>
+                    <input style={{ ...styles.inputModal, opacity: selectedLocation ? 1 : 0.5 }} readOnly value={selectedLocation?.lat.toFixed(6) || 'NOT SET'} />
+                  </div>
+                  <div>
+                    <label style={styles.labelModal}>Longitude</label>
+                    <input style={{ ...styles.inputModal, opacity: selectedLocation ? 1 : 0.5 }} readOnly value={selectedLocation?.lng.toFixed(6) || 'NOT SET'} />
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '11px', fontWeight: 700, background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '10px' }}>
+                      <AlertCircle size={16} color="var(--accent-primary)" />
+                      <span>YOUR REQUEST WILL BE SENT TO THE OWNER</span>
+                   </div>
+                   <button 
+                    onClick={handleCreate}
+                    style={{ width: '100%', padding: '16px', background: 'var(--info)', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                   >
+                     <Save size={18} />
+                     SUBMIT REQUEST
+                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

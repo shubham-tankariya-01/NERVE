@@ -4,7 +4,7 @@
  * All functions now support optional authentication headers.
  */
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+import { API_BASE } from '../config';
 
 // ← NEW: Utility to get auth headers from localStorage
 const getStoredAuthHeaders = () => {
@@ -89,8 +89,9 @@ export const fetchNetwork = async (headers = {}) => {
   return response.json();
 };
 
-export const fetchShipments = async (headers = {}) => {
-  const response = await fetch(`${API_BASE}/shipments`, { headers });
+export const fetchShipments = async (headers = {}, nodeId = null) => {
+  const url = nodeId ? `${API_BASE}/shipments?node_id=${nodeId}` : `${API_BASE}/shipments`;
+  const response = await fetch(url, { headers });
   if (!response.ok) throw new Error('Failed to fetch shipments');
   return response.json();
 };
@@ -172,6 +173,41 @@ export const deleteNode = async (nodeId, headers) => {
 export const fetchNodeOperator = async (nodeId, headers) => {
   const r = await fetch(`${API_BASE}/operator/nodes/${nodeId}/operator`, { headers });
   if (!r.ok) throw new Error('Failed to fetch node operator');
+  return r.json();
+};
+
+export const requestNodeAction = async (payload, headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes/request`, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error('Failed to submit node request');
+  return r.json();
+};
+
+export const fetchNodeRequests = async (headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes/requests`, { headers });
+  if (!r.ok) throw new Error('Failed to fetch node requests');
+  return r.json();
+};
+
+export const approveNodeRequest = async (requestId, headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes/requests/${requestId}/approve`, {
+    method: 'POST',
+    headers
+  });
+  if (!r.ok) throw new Error('Failed to approve node request');
+  return r.json();
+};
+
+export const rejectNodeRequest = async (requestId, reason, headers) => {
+  const r = await fetch(`${API_BASE}/operator/nodes/requests/${requestId}/reject`, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason })
+  });
+  if (!r.ok) throw new Error('Failed to reject node request');
   return r.json();
 };
 
@@ -325,5 +361,44 @@ export const fetchCustomerShipments = async (status, headers = {}) => {
 export const fetchCustomerShipmentDetail = async (id, headers = {}) => {
   const response = await fetch(`${API_BASE}/customer/shipments/${id}`, { headers });
   if (!response.ok) throw new Error('Failed to fetch shipment detail');
+  return response.json();
+};
+
+// ── Owner Management Endpoints ──
+
+export const fetchOwnerUsers = async () => {
+  const response = await fetch(`${API_BASE}/owner/users`, {
+    headers: getStoredAuthHeaders()
+  });
+  if (!response.ok) await extractError(response, 'Failed to fetch team members');
+  return response.json();
+};
+
+export const createOwnerUser = async (data) => {
+  const response = await fetch(`${API_BASE}/owner/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getStoredAuthHeaders() },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) await extractError(response, 'Failed to create team member');
+  return response.json();
+};
+
+export const deleteOwnerUser = async (username) => {
+  const response = await fetch(`${API_BASE}/owner/users/${username}`, {
+    method: 'DELETE',
+    headers: getStoredAuthHeaders()
+  });
+  if (!response.ok) await extractError(response, 'Failed to delete user');
+  return response.json();
+};
+
+export const updateOwnerUserPassword = async (username, password) => {
+  const response = await fetch(`${API_BASE}/owner/users/${username}/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getStoredAuthHeaders() },
+    body: JSON.stringify({ password }),
+  });
+  if (!response.ok) await extractError(response, 'Failed to update password');
   return response.json();
 };

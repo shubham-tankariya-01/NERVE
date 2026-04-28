@@ -47,38 +47,56 @@ def alert_to_dict(alert: Any) -> dict[str, Any]:
         return d
     return str(alert)
 
-def build_payload(
-    alerts: list[Any],
+def build_company_payload(
+    company_id: str,
     agent_logs: list | None = None,
     risk_scores: dict | None = None,
     cascade_debt: list | None = None,
-    network_health: int = 100,
-    shipments: list | None = None,
-    nodes: list | None = None,
-    edges: list | None = None,
+    network_health: int | None = None,
 ) -> str:
-    """Build the JSON payload that gets pushed over WebSocket."""
+    """Build the JSON payload scoped strictly to a specific company_id."""
     from backend.ml.risk_horizon import generate_risk_horizon
+    from backend.graph.cascade_model import compute_node_risk_scores, compute_network_health
     
-    if agent_logs is None:
-        agent_logs = []
+    agent_logs = agent_logs or []
+    cascade_debt = cascade_debt or []
+    all_alerts = detector.alerts if detector else []
+
+    is_admin = company_id == "platform_admin"
+
+    # 1. Filter shipments
+    shipments = []
+    if scg:
+        shipments = [s for s in scg.shipments if is_admin or s.get("company_id") == company_id]
+        
+    # 2. Filter nodes and edges
+    nodes = []
+    edges = []
+    if scg and hasattr(scg, 'graph'):
+        nodes = [(nid, n) for nid, n in scg.graph.nodes(data=True) if is_admin or (n.get("company_id") and n.get("company_id") == company_id)]
+        edges = [(u, v, r) for u, v, r in scg.graph.edges(data=True) if is_admin or (r.get("company_id") and r.get("company_id") == company_id)]
+
+    log.info(f"[WS_PAYLOAD] CompID: {company_id} | Nodes: {len(nodes)} | Shipments: {len(shipments)} | Admin: {is_admin}")
+
+    # 3. Get authorized node IDs for this view
+    c_nodes_ids = set(n[0] for n in nodes)
+
+    # 4. Filter alerts
+    if is_admin:
+        alerts = all_alerts
+    else:
+        alerts = [a for a in all_alerts if a.node_id in c_nodes_ids]
+
+    # 5. Compute risk and health if not provided
     if risk_scores is None:
-        risk_scores = {}
-    if cascade_debt is None:
-        cascade_debt = []
-    if shipments is None:
-        shipments = scg.shipments if scg else []
-    
-    # NEW: Filtered network extraction
-    if nodes is None:
-        nodes = list(scg.graph.nodes(data=True)) if (scg and hasattr(scg, 'graph')) else []
-    if edges is None:
-        edges = list(scg.graph.edges(data=True)) if (scg and hasattr(scg, 'graph')) else []
+        risk_scores = compute_node_risk_scores(scg, alerts) if scg else {}
+    if network_health is None:
+        network_health = compute_network_health(scg, risk_scores, alerts) if scg else 100
 
     weather_summary = []
     if weather_feed:
         for nw in weather_feed.results.values():
-            if nw.fetched:
+            if nw.fetched and nw.node_id in c_nodes_ids:
                 weather_summary.append({
                     "node_id": nw.node_id,
                     "node_name": nw.node_name,
@@ -91,7 +109,9 @@ def build_payload(
                     "condition": nw.weather_label,
                 })
 
-    # Delivery Metrics for Executive Dashboard
+    # Filter cascade debt by company nodes
+    filtered_cascade_debt = [d for d in (cascade_debt or []) if d.get("node_id") in c_nodes_ids]
+
     delivery_metrics = {
         "in_transit": len([s for s in shipments if s.get("status") == "in_transit"]),
         "delayed": len([s for s in shipments if s.get("status") == "delayed"]),
@@ -105,15 +125,15 @@ def build_payload(
         "alerts_count": len(alerts),
         "alerts": [alert_to_dict(a) for a in alerts],
         "weather": weather_summary,
-        "cascade_debt": cascade_debt,
-        "risk_horizon": generate_risk_horizon(alerts),
+        "cascade_debt": filtered_cascade_debt,
+        "risk_horizon": generate_risk_horizon(alerts) if alerts else [],
         "agent_logs": agent_logs,
         "network_health": network_health,
         "delivery_metrics": delivery_metrics,
         "shipments": shipments,
         "network": {
-            "nodes": nodes,
-            "edges": edges,
+            "nodes": [{**n[1], "id": n[0]} for n in nodes] if nodes and isinstance(nodes[0], tuple) else nodes,
+            "edges": [{**e[2], "from": e[0], "to": e[1]} for e in edges] if edges and isinstance(edges[0], tuple) else edges,
             "shipments_count": len(shipments),
         },
     }
@@ -121,8 +141,8 @@ def build_payload(
 
 async def broadcast_to_company(message: Any, company_id: str) -> None:
     """
-    Send message to all WebSocket clients of a specific company
-    AND to all platform admins.
+    Send message ONLY to WebSocket clients of a specific company.
+    Admins should be broadcast to explicitly with a 'platform_admin' company_id.
     Never raises — disconnected clients are silently removed.
     """
     if isinstance(message, (dict, list)):
@@ -132,10 +152,8 @@ async def broadcast_to_company(message: Any, company_id: str) -> None:
 
     disconnected = set()
     
-    # Targets: this company's clients + platform admins
-    company_clients = clients.get(company_id, set())
-    admin_clients = clients.get("platform_admin", set())
-    targets = company_clients | admin_clients
+    # Targets: ONLY this company's clients
+    targets = clients.get(company_id, set())
     
     for ws in targets:
         try:

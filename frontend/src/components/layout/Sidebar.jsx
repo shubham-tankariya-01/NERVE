@@ -115,8 +115,22 @@ export default function Sidebar() {
       ];
     }
 
+    if (role === 'company_owner') {
+      return [
+        { to: '/owner',             icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+        { to: '/',                  icon: <Map size={20} />,          label: 'Command Center' },
+        { to: '/owner/users',       icon: <Settings size={20} />,      label: 'User Management' },
+        { to: '/owner/nodes',       icon: <PlusCircle size={20} />,   label: 'Node Management' },
+        { to: '/shipments',         icon: <Package size={20} />,      label: 'Shipments' },
+        { to: '/nodes',             icon: <Box size={20} />,          label: 'Nodes' },
+        { to: '/weather',           icon: <CloudRain size={20} />,    label: 'Weather' },
+      ];
+    }
+
     if (role === 'platform_admin') {
       return [
+        { to: '/owner', icon: <LayoutDashboard size={20} />, label: 'Owner View' },
+        { to: '/owner/nodes', icon: <PlusCircle size={20} />, label: 'Node Management' },
         { to: '/', icon: <ArrowLeft size={20} />, label: 'Back to App' },
       ];
     }

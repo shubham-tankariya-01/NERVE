@@ -6,7 +6,17 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status
 
 # Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "nerve_dev_secret_change_in_production")
+APP_ENV = os.getenv("APP_ENV", "production")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not SECRET_KEY:
+    if APP_ENV == "development":
+        SECRET_KEY = "nerve_dev_secret_change_in_production"
+    else:
+        raise RuntimeError("CRITICAL SECURITY ERROR: JWT_SECRET_KEY is missing. "
+                           "You must provide a secure JWT_SECRET_KEY environment variable "
+                           "in staging or production.")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 REFRESH_TOKEN_EXPIRE_DAYS = 7

@@ -8,16 +8,11 @@ import {
 } from 'lucide-react';
 
 export default function NodeWeather() {
-  const { nodes } = useNetwork();
-  const { data } = useAppWebSocket();
-  const { user } = useAuth();
+  const { weatherData, alerts } = useNetwork();
   
-  const assignedNodes = user?.assigned_node_ids || [];
-  const weatherData = data?.weather || [];
-  const activeAlerts = (data?.alerts || []).filter(a => a.type === 'weather');
-
-  // Filter weather for assigned nodes
-  const filteredWeather = weatherData.filter(w => assignedNodes.includes(w.node_id));
+  // Use pre-filtered data from NetworkContext (it's already filtered by assigned nodes in NetworkContext)
+  const activeAlerts = (alerts || []).filter(a => a.type === 'weather');
+  const filteredWeather = weatherData || [];
 
   const styles = {
     header: {

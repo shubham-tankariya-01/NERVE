@@ -23,6 +23,11 @@ import BookShipment from './pages/BookShipment';
 import AdminPanel from './pages/AdminPanel';
 import ReroutingQueue from './pages/ReroutingQueue';
 
+// Owner Pages
+import OwnerDashboard from './pages/owner/OwnerDashboard';
+import UserManagement from './pages/owner/UserManagement';
+import NodeManagement from './pages/owner/NodeManagement';
+
 import './styles/globals.css';
 import './styles/map.css';
 
@@ -61,11 +66,10 @@ export default function App() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/track/:shipmentId" element={<CustomerTracking />} />
 
-                  {/* Protected Routes - Logistics & Admins */}
                   <Route 
                     path="/" 
                     element={
-                      <ProtectedRoute allowedRoles={['logistics_manager', 'platform_admin']}>
+                      <ProtectedRoute allowedRoles={['logistics_manager', 'platform_admin', 'company_owner']}>
                         <AppShell />
                       </ProtectedRoute>
                     }
@@ -81,6 +85,7 @@ export default function App() {
                     <Route path="weather" element={<Weather />} />
                     <Route path="book" element={<BookShipment />} />
                     <Route path="manager/rerouting" element={<ReroutingQueue />} />
+                    <Route path="mission-control" element={<AdminPanel />} />
                   </Route>
 
                   {/* Role-Specific Shells */}
@@ -99,18 +104,18 @@ export default function App() {
                     <Route path="flag" element={<FlagIssue />} />
                   </Route>
 
-                  {/* Admin Shell */}
+                  {/* Owner Shell */}
                   <Route 
-                    path="/admin" 
+                    path="/owner" 
                     element={
-                      <ProtectedRoute allowedRoles={['platform_admin']}>
-                        <AdminShell />
+                      <ProtectedRoute allowedRoles={['platform_admin', 'company_owner']}>
+                        <AppShell />
                       </ProtectedRoute>
                     } 
                   >
-                    <Route index element={<CompanyManagement />} />
-                    <Route path="companies/:id" element={<CompanyDetail />} />
-                    <Route path="mission-control" element={<AdminPanel />} />
+                    <Route index element={<OwnerDashboard />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="nodes" element={<NodeManagement />} />
                   </Route>
 
                   {/* Customer Shell */}

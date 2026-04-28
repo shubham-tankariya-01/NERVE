@@ -37,16 +37,20 @@ export default function RoutesPage() {
               return (
                 <tr key={r.id} style={{ borderBottom: '1px solid var(--border)' }} className="hover-bg">
                   <td style={{ padding: '1rem', fontWeight: 600 }}>{r.id}</td>
-                  <td style={{ padding: '1rem' }}>{origin?.name} ({r.from})</td>
-                  <td style={{ padding: '1rem' }}>{dest?.name} ({r.to})</td>
-                  <td style={{ padding: '1rem' }}>{r.mode}</td>
-                  <td style={{ padding: '1rem' }}>{r.distance}</td>
-                  <td style={{ padding: '1rem' }}>{r.transit}</td>
-                  <td style={{ padding: '1rem' }}>${r.cost}</td>
-                  <td style={{ padding: '1rem', color: r.risk > 15 ? 'var(--danger)' : 'var(--text-primary)' }}>{r.risk}%</td>
-                  <td style={{ padding: '1rem' }}>{r.activeShips}</td>
+                  <td style={{ padding: '1rem' }}>{origin?.name || r.from}</td>
+                  <td style={{ padding: '1rem' }}>{dest?.name || r.to}</td>
+                  <td style={{ padding: '1rem' }}>{r.transport_mode || r.mode}</td>
+                  <td style={{ padding: '1rem' }}>{r.distance_km || 0} km</td>
+                  <td style={{ padding: '1rem' }}>{r.base_transit_time_hrs || 0}h</td>
+                  <td style={{ padding: '1rem' }}>${r.cost_per_unit || 0}</td>
+                  <td style={{ padding: '1rem', color: (r.risk_factor || 0) > 0.15 ? 'var(--danger)' : 'var(--text-primary)' }}>
+                    {Math.round((r.risk_factor || 0) * 100)}%
+                  </td>
+                  <td style={{ padding: '1rem' }}>{r.activeShips || 0}</td>
                   <td style={{ padding: '1rem' }}>
-                    <span className={`badge ${r.status === 'ACTIVE' ? 'green' : 'red'}`}>{r.status}</span>
+                    <span className={`badge ${(r.status || 'ACTIVE').toUpperCase() === 'ACTIVE' ? 'green' : 'red'}`}>
+                      {r.status || 'ACTIVE'}
+                    </span>
                   </td>
                 </tr>
               );

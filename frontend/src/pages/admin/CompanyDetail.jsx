@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { fetchCompanyDetails } from '../../services/api';
+import { useAppWebSocket } from '../../context/WebSocketContext';
+import { API_BASE } from '../../config';
 import { 
   Building2, Users, Package, MapPin, ChevronLeft, 
   Settings, Mail, Calendar, Shield, Trash2, Edit3, 
@@ -20,16 +22,24 @@ export default function CompanyDetail() {
   const [newUser, setNewUser] = useState({ username: '', email: '', full_name: '', role: 'node_operator', password: '' });
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const { data: wsData } = useAppWebSocket();
+
   useEffect(() => {
     loadData();
   }, [id, getAuthHeaders]);
+
+  useEffect(() => {
+    if (wsData && wsData.type === 'admin_user_created' && wsData.company_id === id) {
+      loadData();
+    }
+  }, [wsData, id]);
 
   const [userSearch, setUserSearch] = useState('');
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/companies/${id}/full-data`, {
+      const response = await fetch(`${API_BASE}/companies/${id}/full-data`, {
         headers: getAuthHeaders()
       });
       if (!response.ok) {
@@ -50,7 +60,7 @@ export default function CompanyDetail() {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/companies/${id}/users`, {
+      const response = await fetch(`${API_BASE}/companies/${id}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +87,7 @@ export default function CompanyDetail() {
     if (!window.confirm("Are you sure you want to deactivate this entire organization?")) return;
     setIsProcessing(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/companies/${id}`, {
+      const response = await fetch(`${API_BASE}/companies/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

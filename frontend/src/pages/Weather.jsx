@@ -4,11 +4,10 @@ import { useAppWebSocket } from '../context/WebSocketContext';
 import { Cloud, Wind, Thermometer, Droplets, CloudRain, Zap, MapPin, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export default function Weather() {
-  const { nodes } = useNetwork();
-  const { data } = useAppWebSocket();
+  const { nodes, weatherData, alerts } = useNetwork();
   
-  const weatherData = data?.weather || [];
-  const activeAlerts = (data?.alerts || []).filter(a => a.type === 'weather');
+  // Use pre-filtered data from NetworkContext
+  const activeAlerts = (alerts || []).filter(a => a.type === 'weather');
 
   return (
     <div className="animate-slide-up" style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)', minHeight: '100%' }}>

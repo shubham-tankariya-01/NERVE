@@ -1,25 +1,22 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from backend.auth.jwt_handler import decode_token
+from backend.database import get_async_db
 
-# OAuth2 setup - auto_error=False enables backward compatibility
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+# OAuth2 setup
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=True)
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
+async def get_current_user(token: str = Depends(oauth2_scheme), db = Depends(get_async_db)) -> dict:
     """
-    FastAPI dependency to extract the user from the JWT.
-    
-    Backward compatibility: If no token is provided, returns a default system user
-    allowing existing unauthenticated behavior to continue.
+    FastAPI dependency to extract the user from the JWT and verify against DB.
+    Returns 401 if token is missing/invalid or user not found.
     """
     if not token:
-        # Backward compatibility: Return a system admin user if no token is sent
-        return {
-            "user_id": "system",
-            "email": "system@nerve.internal",
-            "role": "platform_admin",
-            "company_id": None
-        }
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     
     payload = decode_token(token)
     user_id: str = payload.get("user_id")
@@ -29,11 +26,19 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
             detail="Token missing user information",
         )
     
+    user = await db.users.find_one({"username": user_id})
+    if not user:
+         raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
     return {
         "user_id": user_id,
-        "email": payload.get("email"),
-        "role": payload.get("role"),
-        "company_id": payload.get("company_id")
+        "email": user.get("email"),
+        "role": user.get("role"),
+        "company_id": user.get("company_id"),
+        "assigned_node_ids": user.get("assigned_node_ids", [])
     }
 
 def require_role(*roles: str):

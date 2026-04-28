@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { API_BASE } from '../config';
 
 const AuthContext = createContext();
 
@@ -7,6 +8,7 @@ export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(localStorage.getItem('nerve_access_token'));
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeNodeId, setActiveNodeId] = useState(localStorage.getItem('nerve_active_node'));
 
   const clearAuth = useCallback(() => {
     localStorage.removeItem('nerve_access_token');
@@ -14,6 +16,8 @@ export function AuthProvider({ children }) {
     setAccessToken(null);
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.removeItem('nerve_active_node');
+    setActiveNodeId(null);
   }, []);
 
   const refreshSession = useCallback(async () => {
@@ -24,7 +28,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/refresh', {
+      const response = await fetch(`${API_BASE}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken })
@@ -48,7 +52,7 @@ export function AuthProvider({ children }) {
 
   const checkMe = useCallback(async (token) => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/me', {
+      const response = await fetch(`${API_BASE}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -56,6 +60,21 @@ export function AuthProvider({ children }) {
         const userData = await response.json();
         setUser(userData);
         setIsAuthenticated(true);
+        
+        // Auto-set activeNodeId if not set and user is operator
+        if (userData?.role === 'node_operator' && userData.assigned_node_ids?.length > 0) {
+          setActiveNodeId(current => {
+            if (!current || !userData.assigned_node_ids.includes(current)) {
+              const defaultNode = userData.assigned_node_ids[0];
+              localStorage.setItem('nerve_active_node', defaultNode);
+              return defaultNode;
+            }
+            return current;
+          });
+        } else if (userData?.role !== 'node_operator') {
+          setActiveNodeId(null);
+          localStorage.removeItem('nerve_active_node');
+        }
       } else if (response.status === 401) {
         const newToken = await refreshSession();
         if (newToken) {
@@ -80,25 +99,6 @@ export function AuthProvider({ children }) {
     }
   }, [accessToken, checkMe]);
 
-  const login = async (username, password) => {
-    const response = await fetch('http://localhost:8000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ username, password })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem('nerve_access_token', data.access_token);
-      localStorage.setItem('nerve_refresh_token', data.refresh_token);
-      setAccessToken(data.access_token);
-      await checkMe(data.access_token);
-      return data;
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Login failed');
-    }
-  };
 
   const completeLogin = async (data) => {
     localStorage.setItem('nerve_access_token', data.access_token);
@@ -112,9 +112,14 @@ export function AuthProvider({ children }) {
     clearAuth();
   };
 
-  const getAuthHeaders = () => {
-    return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+  const updateActiveNode = (nodeId) => {
+    setActiveNodeId(nodeId);
+    localStorage.setItem('nerve_active_node', nodeId);
   };
+
+  const getAuthHeaders = useCallback(() => {
+    return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+  }, [accessToken]);
 
   return (
     <AuthContext.Provider value={{ 
@@ -122,11 +127,12 @@ export function AuthProvider({ children }) {
       accessToken, 
       isAuthenticated, 
       isLoading, 
-      login, 
       completeLogin,
       logout, 
       refreshToken: refreshSession,
-      getAuthHeaders 
+      getAuthHeaders,
+      activeNodeId,
+      setActiveNodeId: updateActiveNode
     }}>
       {children}
     </AuthContext.Provider>
