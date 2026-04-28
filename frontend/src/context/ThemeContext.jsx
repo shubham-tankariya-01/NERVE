@@ -3,17 +3,15 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('nerve-theme') || 'dark';
-  });
+  // Theme switching disabled - Enforced Dark Theme
+  const theme = 'dark';
 
   useEffect(() => {
-    localStorage.setItem('nerve-theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }, []);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    console.warn("Theme switching is disabled. Dark mode is enforced.");
   };
 
   return (

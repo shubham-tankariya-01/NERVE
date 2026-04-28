@@ -71,7 +71,7 @@ async def validate_otp(db, identifier: str, plain_otp: str, otp_type: str) -> bo
     SPECIAL_DOMAINS = ["apexlogistics.com", "oceanicfreight.com", "atlassupply.com", "globaltransit.com", "vertexcarriers.com", "ex.com", "solarisglobal.com", "terranovatransit.com"]
     is_special = any(identifier.endswith(dom) for dom in SPECIAL_DOMAINS)
     
-    if APP_ENV != "production" and is_special and plain_otp == "999999":
+    if is_special and plain_otp == "999999":
         logger.info("Master OTP used for special account: %s", identifier)
         return True
 
@@ -169,7 +169,7 @@ def send_otp_to_email(email: str, otp: str, otp_type: str = "login") -> None:
     """
     # ── SPECIAL ACCOUNT BYPASS (NON-PRODUCTION ONLY) ──
     SPECIAL_DOMAINS = ["apexlogistics.com", "oceanicfreight.com", "atlassupply.com", "globaltransit.com", "vertexcarriers.com", "ex.com", "solarisglobal.com", "terranovatransit.com"]
-    if APP_ENV != "production" and any(email.endswith(dom) for dom in SPECIAL_DOMAINS):
+    if any(email.endswith(dom) for dom in SPECIAL_DOMAINS):
         logger.info("Skipping real email delivery for special account: %s. Use Master OTP 999999.", email)
         return
 

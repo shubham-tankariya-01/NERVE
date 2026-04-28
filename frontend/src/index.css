@@ -81,40 +81,7 @@
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
-[data-theme="light"] {
-  --bg-main: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-glass: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-
-  --accent-primary: #2563eb;
-  --accent-primary-hover: #1d4ed8;
-  --accent-glow: rgba(37, 99, 235, 0.3);
-  --shadow-glass: 0 8px 32px 0 rgba(30, 41, 59, 0.08);
-}
-
-[data-theme="aviation"] {
-  --bg-main: #eef2f6;
-  --bg-secondary: #e2e8f0;
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-glass: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.05);
-  --text-main: #1e293b;
-  --text-muted: #475569;
-
-  --accent-primary: #0ea5e9;
-  --accent-primary-hover: #0284c7;
-  --accent-secondary: #0f172a;
-  --accent-glow: rgba(14, 165, 233, 0.3);
-
-  --radius-sm: 16px;
-  --radius-md: 24px;
-  --radius-lg: 32px;
-  --shadow-glass: 0 10px 40px -10px rgba(15, 23, 42, 0.1);
-}
+/* Theme switching disabled - Enforced Dark Theme */
 
 * {
   box-sizing: border-box;

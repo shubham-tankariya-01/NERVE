@@ -112,16 +112,12 @@ export default function Topbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <UserInfoChip />
 
-        <button onClick={toggleTheme} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', color: 'inherit' }}>
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
 
         {user?.role === 'platform_admin' && (
           <button 
             onClick={async () => {
               if (window.confirm('This will reset all demo accounts and data. Continue?')) {
                 const { restoreDemoData } = await import('../../services/api');
-                const { logout } = await import('../../context/AuthContext');
                 try {
                   await restoreDemoData({ Authorization: `Bearer ${localStorage.getItem('nerve_access_token')}` });
                   alert('Demo data restored. You will be logged out to refresh the state.');
