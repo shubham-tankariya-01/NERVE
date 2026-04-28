@@ -23,6 +23,7 @@ export default function Dashboard() {
   const backendMetrics = wsData?.delivery_metrics || {};
   const deliveryStatus = [
     { name: 'In Transit', value: backendMetrics.in_transit || 0 },
+    { name: 'At Station', value: (shipments.filter(s => s.status === 'arrived_at_node').length) || 0 },
     { name: 'Delayed', value: backendMetrics.delayed || 0 },
     { name: 'Blocked', value: backendMetrics.blocked || 0 },
     { name: 'Delivered', value: backendMetrics.delivered || 0 },

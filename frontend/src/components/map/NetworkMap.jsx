@@ -59,10 +59,16 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
           const destNode = nodes.find(n => n.id === r.to);
           if (!originNode || !destNode) return null;
           
-          const originPos = [originNode.location?.lat || originNode.lat, originNode.location?.lng || originNode.lng];
-          const destPos = [destNode.location?.lat || destNode.lat, destNode.location?.lng || destNode.lng];
+          const originPos = [
+            originNode.lat ?? originNode.location?.lat, 
+            originNode.lng ?? originNode.location?.lng
+          ];
+          const destPos = [
+            destNode.lat ?? destNode.location?.lat, 
+            destNode.lng ?? destNode.location?.lng
+          ];
 
-          if (!originPos[0] || !destPos[0]) return null;
+          if (originPos[0] === undefined || destPos[0] === undefined) return null;
 
           return (
             <Polyline 
@@ -77,8 +83,11 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
 
         {/* Draw Nodes */}
         {nodes.map(node => {
-          const pos = [node.location?.lat || node.lat, node.location?.lng || node.lng];
-          if (!pos[0]) return null;
+          const pos = [
+            node.lat ?? node.location?.lat, 
+            node.lng ?? node.location?.lng
+          ];
+          if (pos[0] === undefined) return null;
 
           const isCritical = node.status === 'alert' || node.risk_level === 'critical';
           const isWarning = node.status === 'congested' || node.risk_level === 'high';

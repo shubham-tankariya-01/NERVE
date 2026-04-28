@@ -3,6 +3,7 @@ from typing import List, Optional
 from datetime import datetime, timezone, date
 import asyncio
 import uuid
+import json
 from backend.database import get_async_db
 from backend.auth.dependencies import get_current_user, require_role, get_company_filter
 from backend import state as app_state
@@ -17,6 +18,8 @@ class NodeCheckinCreate(BaseModel):
     notes: Optional[str] = None
     weight_verified: Optional[float] = None
     condition: str = "good"
+
+from backend.state import broadcast_to_company, build_payload, detector
 
 @router.post("")
 async def create_checkin(
@@ -70,12 +73,15 @@ async def create_checkin(
     await db.node_checkins.insert_one(checkin)
 
     # 6. Update Shipment state
-    if payload.event_type == "arrived":
+    if payload.event_type in ["arrived", "arrival"]:
         # Update current node and append to route_taken
         await db.shipments.update_one(
             {"id": payload.shipment_id},
             {
-                "$set": {"current_node": payload.node_id},
+                "$set": {
+                    "current_node": payload.node_id, 
+                    "status": "completed"
+                },
                 "$addToSet": {"route_taken": payload.node_id}
             }
         )
@@ -85,8 +91,34 @@ async def create_checkin(
             {"id": payload.shipment_id},
             {"$set": {"status": "in_transit"}}
         )
+    elif payload.event_type in ["flagged", "delayed"]:
+        await db.shipments.update_one(
+            {"id": payload.shipment_id},
+            {"$set": {"status": payload.event_type}}
+        )
 
-    # 7. Sync memory graph (non-blocking)
+    # 7. Notify Manager via WebSocket (IMMEDIATE)
+    # We broadcast a full "disruption_scan" type payload so the UI context updates instantly
+    # Filter shipments for this company
+    c_shipments = [s for s in app_state.scg.shipments if s.get("company_id") == user["company_id"]]
+    
+    # Filter alerts for this company (using standard detector alerts)
+    c_nodes = set()
+    for s in c_shipments:
+        c_nodes.update(s.get("planned_route", []))
+        c_nodes.update(s.get("route_taken", []))
+    c_alerts = [a for a in detector.alerts if a.node_id in c_nodes]
+
+    update_payload = build_payload(
+        c_alerts, 
+        shipments=c_shipments,
+        network_health=100 # Placeholder as it will be recomputed by scan loop
+    )
+    
+    # Direct broadcast to ensure UI consistency
+    await broadcast_to_company(json.loads(update_payload), user["company_id"])
+
+    # 8. Sync memory graph (non-blocking)
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, app_state.scg.refresh_from_db)
     

@@ -49,6 +49,13 @@
   --status-critical-glow: rgba(239, 71, 111, 0.4);
   --status-info: #118ab2;
 
+  /* Node Type Colors */
+  --node-factory: #ff9f43;
+  --node-port: #48dbfb;
+  --node-warehouse: #5f27cd;
+  --node-retail: #1dd1a1;
+  --node-distribution_center: #ff6b6b;
+
   /* Gradients for KPI Cards */
   --grad-blue: linear-gradient(135deg, #2196f3, #00bcd4);
   --grad-purple: linear-gradient(135deg, #9c27b0, #673ab7);

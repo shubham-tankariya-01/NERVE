@@ -15,18 +15,49 @@ export default function CompanyManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [planFilter, setPlanFilter] = useState('all');
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newCompany, setNewCompany] = useState({ name: '', plan: 'starter', owner_email: '' });
+  const [isCreating, setIsCreating] = useState(false);
+
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await fetchCompanies(getAuthHeaders());
-        setCompanies(data || []);
-      } catch (err) {
-        console.error('Failed to load companies:', err);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    loadCompanies();
   }, [getAuthHeaders]);
+
+  const loadCompanies = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchCompanies(getAuthHeaders());
+      setCompanies(data || []);
+    } catch (err) {
+      console.error('Failed to load companies:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setIsCreating(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/companies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(newCompany)
+      });
+      if (!response.ok) throw new Error('Failed to create company');
+      
+      setIsModalOpen(false);
+      setNewCompany({ name: '', plan: 'starter', owner_email: '' });
+      loadCompanies();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const filtered = companies.filter(c => {
     const matchesSearch = c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -63,7 +94,7 @@ export default function CompanyManagement() {
     filterBar: { marginBottom: '2.5rem', display: 'flex', gap: '1rem', alignItems: 'center' },
     statsRow: { marginBottom: '2.5rem', display: 'flex', gap: '1.5rem' },
     btnNoGlow: {
-      background: '#ef476f', // Red for admin
+      background: '#ef476f',
       color: '#fff',
       border: 'none',
       borderRadius: '10px',
@@ -74,12 +105,30 @@ export default function CompanyManagement() {
       display: 'flex',
       alignItems: 'center',
       gap: '0.5rem',
-      boxShadow: 'none', // Remove glow
+      boxShadow: 'none',
       transition: 'background 0.2s'
+    },
+    modal: {
+      position: 'fixed',
+      top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0,0,0,0.8)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      backdropFilter: 'blur(8px)'
+    },
+    modalContent: {
+      background: 'var(--bg-surface)',
+      padding: '2.5rem',
+      borderRadius: '20px',
+      width: '100%',
+      maxWidth: '500px',
+      border: '1px solid var(--border)'
     }
   };
 
-  if (loading) {
+  if (loading && companies.length === 0) {
     return (
       <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Loader className="animate-spin" size={32} color="#ef476f" />
@@ -98,10 +147,58 @@ export default function CompanyManagement() {
           style={styles.btnNoGlow}
           onMouseOver={e => e.currentTarget.style.background = '#d93d5f'}
           onMouseOut={e => e.currentTarget.style.background = '#ef476f'}
+          onClick={() => setIsModalOpen(true)}
         >
           <Plus size={18} /> REGISTER NEW ENTITY
         </button>
       </header>
+
+      {isModalOpen && (
+        <div style={styles.modal} onClick={() => setIsModalOpen(false)}>
+          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+             <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem' }}>REGISTER NEW ORGANIZATION</h2>
+             <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>COMPANY NAME</label>
+                  <input 
+                    required
+                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.75rem', color: 'var(--text-main)' }}
+                    value={newCompany.name}
+                    onChange={e => setNewCompany({...newCompany, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>OWNER EMAIL</label>
+                  <input 
+                    required
+                    type="email"
+                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.75rem', color: 'var(--text-main)' }}
+                    value={newCompany.owner_email}
+                    onChange={e => setNewCompany({...newCompany, owner_email: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>SUBSCRIPTION PLAN</label>
+                  <select 
+                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.75rem', color: 'var(--text-main)' }}
+                    value={newCompany.plan}
+                    onChange={e => setNewCompany({...newCompany, plan: e.target.value})}
+                  >
+                    <option value="starter">STARTER</option>
+                    <option value="professional">PROFESSIONAL</option>
+                    <option value="enterprise">ENTERPRISE</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer' }}>CANCEL</button>
+                  <button type="submit" disabled={isCreating} style={{ ...styles.btnNoGlow, flex: 2 }}>
+                    {isCreating ? 'PROCESSING...' : 'INITIALIZE ENTITY'}
+                  </button>
+                </div>
+             </form>
+          </div>
+        </div>
+      )}
 
       <div style={styles.filterBar}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '500px' }}>

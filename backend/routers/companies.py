@@ -107,26 +107,38 @@ async def create_company_user(company_id: str, payload: UserCreate, db = Depends
     new_user.pop("hashed_password", None)
     return new_user
 
-@router.get("/{company_id}/details", dependencies=[Depends(require_role("platform_admin"))])
+@router.get("/{company_id}/full-data", dependencies=[Depends(require_role("platform_admin"))])
 async def get_company_full_details(company_id: str, db = Depends(get_async_db)):
-    """Returns nodes, shipments, and users for a company."""
+    """Returns nodes, shipments, and users for a company with detailed logging."""
+    import logging
+    logger = logging.getLogger("nerve")
+    logger.info(f"Fetching full details for company: {company_id}")
+
     company = await db.companies.find_one({"id": company_id})
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        logger.error(f"Company not found in DB: {company_id}")
+        raise HTTPException(status_code=404, detail=f"Company '{company_id}' not found in registry")
     
     company.pop("_id", None)
     
-    nodes = await db.nodes.find({"company_id": company_id}).to_list(length=None)
-    shipments = await db.shipments.find({"company_id": company_id}).to_list(length=None)
-    users = await db.users.find({"company_id": company_id}).to_list(length=None)
-    
-    for item in nodes + shipments + users:
-        item.pop("_id", None)
-        item.pop("hashed_password", None)
+    try:
+        nodes = await db.nodes.find({"company_id": company_id}).to_list(length=None)
+        shipments = await db.shipments.find({"company_id": company_id}).to_list(length=None)
+        users = await db.users.find({"company_id": company_id}).to_list(length=None)
         
-    return {
-        "company": company,
-        "nodes": nodes,
-        "shipments": shipments,
-        "users": users
-    }
+        logger.info(f"Found {len(nodes)} nodes, {len(shipments)} shipments, {len(users)} users")
+
+        for item in nodes + shipments + users:
+            item.pop("_id", None)
+            item.pop("hashed_password", None)
+            # Ensure all objects are JSON serializable (handle datetimes if needed)
+            
+        return {
+            "company": company,
+            "nodes": nodes,
+            "shipments": shipments,
+            "users": users
+        }
+    except Exception as e:
+        logger.exception(f"Error aggregating company data for {company_id}")
+        raise HTTPException(status_code=500, detail=str(e))

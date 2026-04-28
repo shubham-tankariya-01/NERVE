@@ -258,7 +258,7 @@ export const fetchCompanies = async (headers = {}) => {
 };
 
 export const fetchCompanyDetails = async (companyId, headers = {}) => {
-  const r = await fetch(`${API_BASE}/companies/${companyId}/details`, { headers });
+  const r = await fetch(`${API_BASE}/companies/${companyId}/full-data`, { headers });
   if (!r.ok) throw new Error('Failed to fetch company details');
   return r.json();
 };

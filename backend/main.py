@@ -88,78 +88,8 @@ _last_scan_time: str | None = None
 
 # ── helpers ───────────────────────────────────────────────────────
 
-def alert_to_dict(alert: DisruptionAlert) -> dict[str, Any]:
-    """Serialize a DisruptionAlert to a JSON-safe dict."""
-    d = asdict(alert)
-    d["severity"] = alert.severity.value
-    return d
-
-
-def build_payload(
-    alerts: list[DisruptionAlert],
-    agent_logs: list | None = None,
-    risk_scores: dict | None = None,
-    cascade_debt: list | None = None,
-    network_health: int = 100,
-    shipments: list | None = None,
-) -> str:
-    """Build the JSON payload that gets pushed over WebSocket."""
-    if agent_logs is None:
-        agent_logs = []
-    if risk_scores is None:
-        risk_scores = {}
-    if cascade_debt is None:
-        cascade_debt = []
-    if shipments is None:
-        shipments = scg.shipments
-
-    weather_summary = []
-    for nw in weather_feed.results.values():
-        if nw.fetched:
-            weather_summary.append({
-                "node_id": nw.node_id,
-                "node_name": nw.node_name,
-                "temperature_c": nw.temperature_c,
-                "humidity_pct": nw.humidity_pct,
-                "precipitation_mm": nw.precipitation_mm,
-                "wind_speed_kmh": nw.wind_speed_kmh,
-                "wind_gusts_kmh": nw.wind_gusts_kmh,
-                "weather_code": nw.weather_code,
-                "condition": nw.weather_label,
-            })
-
-    # Delivery Metrics for Executive Dashboard
-    delivery_metrics = {
-        "in_transit": len([s for s in scg.shipments if s.get("status") == "in_transit"]),
-        "delayed": len([s for s in scg.shipments if s.get("status") == "delayed"]),
-        "blocked": len([s for s in scg.shipments if s.get("status") == "blocked"]),
-        "delivered": len([s for s in scg.shipments if s.get("status") == "delivered"]),
-    }
-
-    payload = {
-        "type": "disruption_scan",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "alerts_count": len(alerts),
-        "alerts": [alert_to_dict(a) for a in alerts],
-        "weather": weather_summary,
-        "cascade_debt": cascade_debt,
-        "risk_horizon": generate_risk_horizon(alerts),
-        "agent_logs": agent_logs,
-        "network_health": network_health,
-        "delivery_metrics": delivery_metrics,
-        "shipments": shipments,
-        "network": {
-            "nodes": scg.graph.number_of_nodes(),
-            "edges": scg.graph.number_of_edges(),
-            "shipments_count": len(scg.shipments),
-        },
-    }
-    return json.dumps(payload, default=str)
-
-
 async def broadcast(message: str) -> None:
     """Send a message to every connected WebSocket client via shared state."""
-    from backend import state as app_state
     await app_state.broadcast_to_all(message)
 
 
@@ -261,7 +191,7 @@ async def scan_loop() -> None:
 
             if app_state.count_clients() > 0:
                 # 1. Prepare full payload for platform admins
-                full_msg = build_payload(
+                full_msg = app_state.build_payload(
                     alerts, agent_logs,
                     risk_scores=risk_scores,
                     cascade_debt=cascade_debt,
@@ -277,21 +207,29 @@ async def scan_loop() -> None:
                     # Filter shipments
                     c_shipments = [s for s in scg.shipments if s.get("company_id") == cid]
                     
+                    # Filter network (Nodes + Edges belonging to company)
+                    c_node_list = [
+                        (nid, n) for nid, n in scg.graph.nodes(data=True)
+                        if n.get("company_id") == cid
+                    ]
+                    c_edge_list = [
+                        (u, v, r) for u, v, r in scg.graph.edges(data=True)
+                        if r.get("company_id") == cid
+                    ]
+
                     # Filter alerts (only nodes in company's shipment routes)
-                    c_nodes = set()
-                    for s in c_shipments:
-                        c_nodes.update(s.get("planned_route", []))
-                        c_nodes.update(s.get("route_taken", []))
-                    
-                    c_alerts = [a for a in alerts if a.node_id in c_nodes]
+                    c_nodes_ids = set(n[0] for n in c_node_list)
+                    c_alerts = [a for a in alerts if a.node_id in c_nodes_ids]
                     
                     # Build and broadcast filtered payload
-                    c_msg = build_payload(
+                    c_msg = app_state.build_payload(
                         c_alerts, agent_logs,
                         risk_scores=risk_scores,
                         cascade_debt=cascade_debt,
                         network_health=network_health,
-                        shipments=c_shipments
+                        shipments=c_shipments,
+                        nodes=c_node_list,
+                        edges=c_edge_list
                     )
                     await app_state.broadcast_to_company(c_msg, cid)
                 
@@ -370,9 +308,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": f"Internal Server Error: {str(exc)}"},
     )
 
-from backend.routers import auth, companies, checkins, rerouting, nodes
+from backend.routers import auth, companies, checkins, rerouting, nodes, debug
 app.include_router(auth.router)
 app.include_router(companies.router)
+app.include_router(debug.router)
 app.include_router(checkins.router)
 app.include_router(rerouting.router)
 app.include_router(nodes.router)
@@ -435,34 +374,41 @@ async def get_health():
 
 
 @app.get("/api/network")
-async def get_network():
-    """Return full node + edge data for the frontend map."""
+async def get_network(user: dict = Depends(get_current_user)):
+    """Return node + edge data filtered by company ownership."""
+    is_admin = user.get("role") == "platform_admin"
+    comp_id = user.get("company_id")
+    
     # Map to frontend format from scg memory
     node_list = []
     for nid, n in scg.graph.nodes(data=True):
-        node_list.append({
-            "id": nid,
-            "name": n.get("name"),
-            "type": n.get("type"),
-            "location": n.get("location"),
-            "capacity": n.get("capacity"),
-            "current_load": n.get("current_load"),
-            "status": n.get("status"),
-            "risk_level": n.get("risk_level")
-        })
+        if is_admin or n.get("company_id") == comp_id:
+            node_list.append({
+                "id": nid,
+                "name": n.get("name"),
+                "type": n.get("type"),
+                "location": n.get("location"),
+                "capacity": n.get("capacity"),
+                "current_load": n.get("current_load"),
+                "status": n.get("status"),
+                "risk_level": n.get("risk_level")
+            })
         
     edge_list = []
     for u, v, r in scg.graph.edges(data=True):
-        edge_list.append({
-            "from": u,
-            "to": v,
-            "id": r.get("id"),
-            "transport_mode": r.get("transport_mode"),
-            "distance_km": r.get("distance_km"),
-            "base_transit_time_hrs": r.get("base_transit_time_hrs"),
-            "cost_per_unit": r.get("cost_per_unit"),
-            "risk_factor": r.get("risk_factor")
-        })
+        # Edge is visible if both nodes are visible or if user is admin
+        # Actually, if the edge belongs to the company, it should be visible
+        if is_admin or r.get("company_id") == comp_id:
+             edge_list.append({
+                "from": u,
+                "to": v,
+                "id": r.get("id"),
+                "transport_mode": r.get("transport_mode"),
+                "distance_km": r.get("distance_km"),
+                "base_transit_time_hrs": r.get("base_transit_time_hrs"),
+                "cost_per_unit": r.get("cost_per_unit"),
+                "risk_factor": r.get("risk_factor")
+            })
         
     return {"nodes": node_list, "edges": edge_list}
 
@@ -478,24 +424,27 @@ async def get_shipments(user: dict = Depends(get_current_user)):
 
 
 @app.get("/api/shipments/{shipment_id}")
-async def get_shipment(shipment_id: str):
-    """Return details for a specific shipment by ID."""
+async def get_shipment(shipment_id: str, user: dict = Depends(get_current_user)):
+    """Return details for a specific shipment, verifying company access."""
     for s in scg.shipments:
         if s["id"] == shipment_id:
+            if user.get("role") != "platform_admin" and s.get("company_id") != user.get("company_id"):
+                raise HTTPException(status_code=403, detail="Access denied")
             return s
     
-    from fastapi import HTTPException
     raise HTTPException(status_code=404, detail="Shipment not found")
 
 
 @app.get("/api/shipments/{shipment_id}/detail")
-async def get_shipment_detail(shipment_id: str):
-    """Return enriched shipment data for the detail page."""
+async def get_shipment_detail(shipment_id: str, user: dict = Depends(get_current_user)):
+    """Return enriched shipment data, verifying company access."""
     from fastapi import HTTPException
 
     shipment = None
     for s in scg.shipments:
         if s["id"] == shipment_id:
+            if user.get("role") != "platform_admin" and s.get("company_id") != user.get("company_id"):
+                raise HTTPException(status_code=403, detail="Access denied")
             shipment = s
             break
     if not shipment:

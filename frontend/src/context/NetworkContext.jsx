@@ -91,6 +91,19 @@ export function NetworkProvider({ children }) {
       if (wsData.shipments) {
         setShipments(filterShipmentsByRole(wsData.shipments));
       }
+      if (wsData.network) {
+        if (wsData.network.nodes) {
+          setNodes(wsData.network.nodes.map(([id, attrs]) => ({ id, ...attrs })));
+        }
+        if (wsData.network.edges) {
+          setRoutes(wsData.network.edges.map(([from, to, attrs]) => ({
+            id: `${from}-${to}`,
+            from,
+            to,
+            mode: attrs.transport_mode || attrs.mode
+          })));
+        }
+      }
       if (wsData.weather) {
         setWeatherData(wsData.weather);
       }

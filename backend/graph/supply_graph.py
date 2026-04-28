@@ -48,6 +48,7 @@ class SupplyChainGraph:
                     current_load=n["current_load"],
                     status=n["status"],
                     risk_level=n["risk_level"],
+                    company_id=n.get("company_id"),
                     processing_time_hrs=n.get("capacity", 100) / 20,
                 )
 
@@ -61,6 +62,7 @@ class SupplyChainGraph:
                     base_transit_time_hrs=r["base_transit_time_hrs"],
                     cost_per_unit=r["cost_per_unit"],
                     risk_factor=r["risk_factor"],
+                    company_id=r.get("company_id"),
                     status="active",
                 )
 
