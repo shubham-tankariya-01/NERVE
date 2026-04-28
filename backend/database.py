@@ -12,14 +12,17 @@ if not MONGO_URL:
         MONGO_URL = "mongodb://localhost:27017"
     else:
         raise RuntimeError(
-            "MONGO_URL is required when APP_ENV is staging or production."
+            "CRITICAL STARTUP ERROR: MONGO_URL is not defined. "
+            "Please add your MongoDB connection string to the 'MONGO_URL' "
+            "Environment Variable in your hosting dashboard (e.g., Render)."
         )
 
 import certifi
+is_local = "localhost" in MONGO_URL or "127.0.0.1" in MONGO_URL
 CLIENT_OPTIONS = {
     "serverSelectionTimeoutMS": 5000,
-    "tls": True,
-    "tlsCAFile": certifi.where()
+    "tls": not is_local,
+    "tlsCAFile": certifi.where() if not is_local else None
 }
 
 # Async client for FastAPI
