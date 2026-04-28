@@ -73,8 +73,8 @@ export default function Register() {
   };
 
   const s = {
-    container: { height: '100vh', width: '100vw', backgroundColor: '#060b19', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", color: '#e2e8f0', overflow: 'auto', padding: '20px', boxSizing: 'border-box' },
-    card: { width: '100%', maxWidth: '480px', backgroundColor: '#0a1128', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '40px', boxShadow: '0 24px 80px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '24px' },
+    container: { height: '100vh', width: '100vw', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-sans)', color: 'var(--text-main)', overflow: 'auto', padding: '20px', boxSizing: 'border-box' },
+    card: { width: '100%', maxWidth: '480px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '40px', boxShadow: 'var(--shadow-glass)', display: 'flex', flexDirection: 'column', gap: '24px' },
     header: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
     logoRow: { display: 'flex', alignItems: 'center', gap: '12px' },
     logoIcon: { 
