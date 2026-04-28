@@ -96,6 +96,24 @@ async def broadcast(message: str) -> None:
     await app_state.broadcast_to_all(message)
 
 
+# ── auto-seeding ──────────────────────────────────────────────────
+async def ensure_seeded():
+    """Seed the database with initial nodes and demo users if empty."""
+    from backend.database import get_async_db
+    db = get_async_db()
+    try:
+        user_count = await db.users.count_documents({})
+        if user_count == 0:
+            log.info("Database is empty. Running auto-seed...")
+            from backend.seed_data import seed_data
+            await seed_data()
+            log.info("Auto-seed successful.")
+        else:
+            log.info("Database already contains data (%d users). Skipping auto-seed.", user_count)
+    except Exception as e:
+        log.error("Auto-seed check/execution failed: %s", e)
+
+
 # ── background scanner ────────────────────────────────────────────
 
 import time
@@ -242,11 +260,15 @@ async def lifespan(app: FastAPI):
             "until the database connection is restored."
         )
 
-    task = asyncio.create_task(scan_loop()) if ENABLE_BACKGROUND_SCANNER else None
+    # Startup
+    log.info("Nerve Backend starting up...")
+    await ensure_seeded() # New: Ensure DB has data
     if ENABLE_BACKGROUND_SCANNER:
-        log.info("Background scanner enabled")
+        scan_task = asyncio.create_task(scan_loop())
     else:
-        log.info("Background scanner disabled for this instance")
+        log.warning("Background scanner is DISABLED.")
+        scan_task = None
+    
     log.info(
         "Nerve server ready — PORT: %d | "
         "Network: %d nodes, %d edges, %d shipments",

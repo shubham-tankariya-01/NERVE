@@ -18,6 +18,14 @@ load_dotenv(_env_path)
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.getenv("MONGO_DB_NAME", "nerve_db")
 
+import certifi
+is_local = "localhost" in MONGO_URL or "127.0.0.1" in MONGO_URL
+CLIENT_OPTIONS = {
+    "serverSelectionTimeoutMS": 5000,
+    "tls": not is_local,
+    "tlsCAFile": certifi.where() if not is_local else None
+}
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 COMPANIES = [
@@ -53,7 +61,7 @@ def get_land_coord():
     return round(random.uniform(*bounds["lat"]), 4), round(random.uniform(*bounds["lng"]), 4)
 
 async def seed_data():
-    client = AsyncIOMotorClient(MONGO_URL)
+    client = AsyncIOMotorClient(MONGO_URL, **CLIENT_OPTIONS)
     db = client[DB_NAME]
 
     # Clear existing data
