@@ -15,7 +15,12 @@ if not MONGO_URL:
             "MONGO_URL is required when APP_ENV is staging or production."
         )
 
-CLIENT_OPTIONS = {"serverSelectionTimeoutMS": 5000}
+import certifi
+CLIENT_OPTIONS = {
+    "serverSelectionTimeoutMS": 5000,
+    "tls": True,
+    "tlsCAFile": certifi.where()
+}
 
 # Async client for FastAPI
 async_client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL, **CLIENT_OPTIONS)

@@ -8,6 +8,7 @@ requests==2.33.1
 motor==3.7.1
 pymongo==4.17.0
 dnspython==2.8.0
+certifi
 
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.5.0
