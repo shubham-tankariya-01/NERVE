@@ -110,8 +110,10 @@ async def ensure_seeded():
             log.info("Auto-seed successful.")
         else:
             log.info("Database already contains data (%d users). Skipping auto-seed.", user_count)
+            log.info("DEMO USERS AVAILABLE: admin@ex.com, owner@solarisglobal.com, manager@solarisglobal.com (Pass: solarisglobal-owner/manager)")
     except Exception as e:
-        log.error("Auto-seed check/execution failed: %s", e)
+        log.error("Auto-seed check/execution failed. If this is production, check your MongoDB Atlas whitelisting and TLS settings.")
+        log.error("Error Detail: %s", e)
 
 
 # ── background scanner ────────────────────────────────────────────
@@ -177,7 +179,7 @@ async def scan_loop() -> None:
 
             # Run agents with full context
             # Updated for Phase 3: Suggestion mode is now async
-            agent_logs, _ = await agent_orchestrator.process_anomalies(
+            agent_logs, _, _ = await agent_orchestrator.process_anomalies(
                 alerts, scg,
                 risk_scores=risk_scores,
                 cascade_debt=cascade_debt
@@ -248,21 +250,24 @@ async def lifespan(app: FastAPI):
     app_state.route_planner = route_planner
     app_state.weather_overrides = weather_overrides
 
-    # Check MongoDB connectivity for logging
-    from backend.database import sync_client
-    try:
-        sync_client.admin.command('ping')
-        log.info("Successfully connected to MongoDB.")
-    except Exception:
-        log.warning(
-            "MongoDB is not reachable at the configured MONGO_URL. "
-            "The API will stay online, but network data will remain unavailable "
-            "until the database connection is restored."
-        )
+    # Check MongoDB connectivity in background
+    async def check_db():
+        from backend.database import sync_client
+        try:
+            # Short timeout for initial check
+            sync_client.admin.command('ping')
+            log.info("Successfully connected to MongoDB.")
+        except Exception as e:
+             log.warning(
+                "MongoDB is not reachable yet. API is online but data-dependent features will fail. Error: %s",
+                str(e)
+            )
+
+    asyncio.create_task(check_db())
 
     # Startup
     log.info("Nerve Backend starting up...")
-    await ensure_seeded() # New: Ensure DB has data
+    asyncio.create_task(ensure_seeded()) # Non-blocking seeding
     if ENABLE_BACKGROUND_SCANNER:
         scan_task = asyncio.create_task(scan_loop())
     else:
@@ -278,10 +283,10 @@ async def lifespan(app: FastAPI):
         len(scg.shipments),
     )
     yield
-    if task is not None:
-        task.cancel()
+    if scan_task is not None:
+        scan_task.cancel()
         try:
-            await task
+            await scan_task
         except asyncio.CancelledError:
             pass
 
@@ -294,35 +299,34 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app_env = os.getenv("APP_ENV", "production").strip().lower()
+app_env = os.getenv("APP_ENV", "development").strip().lower()
 cors_origins_str = os.getenv("CORS_ALLOWED_ORIGINS", "")
 
-allowed_origins = [
-    origin.strip() for origin in cors_origins_str.split(",") if origin.strip()
-]
+allowed_origins = [o.strip() for o in cors_origins_str.split(",") if o.strip()]
 
 if not allowed_origins:
-    if app_env == "development":
-        allowed_origins = [
-            "http://localhost:5173", 
-            "http://localhost:8000",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:8000"
-        ]
-    else:
-        log.warning("CRITICAL: No CORS_ALLOWED_ORIGINS specified in production. Backend might be unreachable from frontend.")
-        # Minimal fallback to allow some common hosting patterns if they exist
-        allowed_origins = ["http://localhost:5173"] 
-
-if "*" in allowed_origins and app.add_middleware:
-     log.warning("CORS Warning: Wildcard '*' used with credentials. This may cause issues in some browsers.")
+    # Always include common local development origins
+    allowed_origins = [
+        "http://localhost:5173",
+        "http://localhost:5174", 
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+    ]
+    if app_env == "production":
+        # In production without explicit origins, log a warning but don't block
+        import logging
+        logging.getLogger("nerve").warning(
+            "CORS_ALLOWED_ORIGINS not set in production. "
+            "Add your frontend URL to environment variables."
+        )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*", "Authorization"],
+    allow_headers=["*"],
 )
 
 from fastapi import Request

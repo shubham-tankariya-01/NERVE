@@ -41,6 +41,7 @@ export default function Login() {
       if (role === 'node_operator') navigate('/operator');
       else if (role === 'platform_admin' || role === 'company_owner') navigate('/owner');
       else if (role === 'customer') navigate('/customer');
+      else if (role === 'logistics_manager') navigate('/app');
       else navigate('/');
     }
   }, [isAuthenticated, user, navigate]);
@@ -78,6 +79,8 @@ export default function Login() {
           navigate('/owner');
         } else if (userRole === 'customer') {
           navigate('/customer');
+        } else if (userRole === 'logistics_manager') {
+          navigate('/app');
         } else {
           navigate('/');
         }
@@ -115,6 +118,8 @@ export default function Login() {
         navigate('/owner');
       } else if (userRole === 'customer') {
         navigate('/customer');
+      } else if (userRole === 'logistics_manager') {
+        navigate('/app');
       } else {
         navigate('/');
       }

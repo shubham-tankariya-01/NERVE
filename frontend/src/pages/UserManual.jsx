@@ -77,9 +77,23 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   );
 };
 
+import { useAuth } from '../context/AuthContext';
+
 export default function UserManual() {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [activeModal, setActiveModal] = useState(null);
+
+  // Auto-redirect if already logged in
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      const role = user.role;
+      if (role === 'node_operator') navigate('/operator');
+      else if (role === 'platform_admin' || role === 'company_owner') navigate('/owner');
+      else if (role === 'customer') navigate('/customer');
+      else if (role === 'logistics_manager') navigate('/app');
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const modules = [
     {

@@ -50,12 +50,12 @@ class AgentOrchestrator:
         scg: SupplyChainGraph,
         risk_scores: dict[str, float] | None = None,
         cascade_debt: list[dict] | None = None,
-    ) -> tuple[list[dict], dict]:
+    ) -> tuple[list[dict], dict, dict]:
         """
         Run the full agent pipeline via LangGraph.
         Saves suggestions for human approval instead of auto-applying.
 
-        Returns (agent_event_logs, reroutes_dict).
+        Returns (agent_event_logs, reroutes_dict, stats).
         """
         global_logs: list[dict] = []
         db = get_async_db()
@@ -82,7 +82,7 @@ class AgentOrchestrator:
                         })
                 self.processed_shipments.clear()
                 self._last_disrupted_nodes = frozenset()
-            return global_logs, {}
+            return global_logs, {}, {}
 
         # ── Detect disruption landscape changes ──────────────────
         # Fingerprint the landscape: (node_id, severity, summary of reasons)
@@ -309,6 +309,8 @@ class AgentOrchestrator:
         """
         Heuristic fallback pipeline — used when LangGraph fails.
         Fallback mode: routes applied without approval queue (graceful degradation).
+
+        Returns (agent_event_logs, reroutes_dict, stats).
         """
         from backend.agents.scout import ScoutAgent
         from backend.agents.mapper import MapperAgent
@@ -341,14 +343,14 @@ class AgentOrchestrator:
         if s_logs:
             append_logs(s_logs)
         if not actionable:
-            return global_logs, {}
+            return global_logs, {}, {}
 
         # 2. Mapper
         impacts, m_logs = mapper.map_impact(actionable, scg.shipments)
         if m_logs:
             append_logs(m_logs)
         if not impacts:
-            return global_logs, {}
+            return global_logs, {}, {}
 
         # 3. Optimizer
         reroutes, o_logs = optimizer.optimize(
@@ -406,4 +408,11 @@ class AgentOrchestrator:
             # 3. Refresh in-memory cache from the new source of truth
             scg.refresh_from_db()
 
-        return global_logs, reroutes
+        # Calculate final stats for this run
+        stats = {
+            "rerouted": len(reroutes),
+            "blocked": sum(1 for info in self.processed_shipments.values() if info.get("result") == "blocked"),
+            "optimal": sum(1 for info in self.processed_shipments.values() if info.get("result") == "optimal")
+        }
+
+        return global_logs, reroutes, stats

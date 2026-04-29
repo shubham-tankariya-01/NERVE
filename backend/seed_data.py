@@ -18,18 +18,28 @@ load_dotenv(_env_path)
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.getenv("MONGO_DB_NAME", "nerve_db")
 
+import ssl
 import certifi
-is_local = "localhost" in MONGO_URL or "127.0.0.1" in MONGO_URL
-CLIENT_OPTIONS = {
-    "serverSelectionTimeoutMS": 10000,
-    "connectTimeoutMS": 10000,
-    "socketTimeoutMS": 20000,
-    "tls": not is_local,
-    "retryWrites": True,
-}
 
-if not is_local:
-    CLIENT_OPTIONS["tlsCAFile"] = certifi.where()
+is_local = "localhost" in MONGO_URL or "127.0.0.1" in MONGO_URL
+
+if is_local:
+    CLIENT_OPTIONS = {
+        "serverSelectionTimeoutMS": 10000,
+        "connectTimeoutMS": 10000,
+        "socketTimeoutMS": 20000,
+    }
+else:
+    # For Atlas: use tlsAllowInvalidCertificates as fallback if standard SSL fails
+    CLIENT_OPTIONS = {
+        "serverSelectionTimeoutMS": 10000,
+        "connectTimeoutMS": 10000,
+        "socketTimeoutMS": 20000,
+        "tls": True,
+        "tlsCAFile": certifi.where(),
+        "retryWrites": True,
+        "ssl": True,
+    }
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

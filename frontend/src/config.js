@@ -14,16 +14,30 @@ const getBackendUrl = () => {
     return 'http://localhost:8000';
   }
 
-  const { protocol, hostname } = window.location;
-  const port = '8000'; // Default backend port
+  const { protocol, hostname, port: currentPort } = window.location;
+  const backendPort = '8000'; // Default backend port
   
-  // If we are running on localhost/127.0.0.1, assume backend is on port 8000
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `${protocol}//${hostname}:${port}`;
+  // If we are on a local-ish hostname or IP, and no port is specified in the URL,
+  // assume the backend is on port 8000.
+  const isLocal = 
+    hostname === 'localhost' || 
+    hostname === '127.0.0.1' || 
+    hostname.startsWith('192.168.') || 
+    hostname.startsWith('10.') ||
+    !hostname.includes('.'); // Handles machine names like 'my-computer'
+
+  if (isLocal) {
+    // Force http for local backend unless specifically overridden, 
+    // as uvicorn usually runs without SSL locally.
+    const targetHost = hostname === 'localhost' ? '127.0.0.1' : hostname;
+    return `http://${targetHost}:${backendPort}`;
+
   }
 
-  // Same-origin fallback (e.g. if served by Nginx on the same domain)
-  return `${protocol}//${hostname}`;
+
+  // Same-origin fallback (e.g. if served by Nginx on the same domain in production)
+  return `${protocol}//${hostname}${currentPort ? `:${currentPort}` : ''}`;
+
 };
 
 const BACKEND_URL = getBackendUrl();
