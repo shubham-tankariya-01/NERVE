@@ -45,7 +45,10 @@ export function RiskyNodesPanel({ onSelectNode }) {
                     <div style={{ width: `${Math.min(100, score)}%`, height: '100%', background: color, boxShadow: `0 0 8px ${color}44` }}></div>
                   </div>
                 </div>
-                <span style={{ textAlign: 'right', fontWeight: 700, color, fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>{score.toFixed(1)}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                   <span style={{ textAlign: 'right', fontWeight: 700, color, fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>{score.toFixed(1)}</span>
+                   <Link to={`/app/node/${item.node_id || item.id}`} onClick={(e) => e.stopPropagation()} style={{ fontSize: '9px', color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 800 }}>DETAILS</Link>
+                </div>
               </div>
             );
           })
@@ -105,9 +108,19 @@ export function RiskHorizonPanel({ selectedNode }) {
     <div className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', minHeight: '280px', flex: 1 }}>
       <div style={{ marginBottom: '1.25rem' }}>
         <h2 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', margin: '0 0 0.25rem 0', textTransform: 'uppercase', color: 'var(--status-critical)', fontWeight: 800 }}>Risk Horizon Forecast</h2>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-critical)' }}></div>
-          {targetNode ? (targetNode.node_name || targetNode.name) : 'Network Baseline'}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-critical)' }}></div>
+            {targetNode ? (targetNode.node_name || targetNode.name) : 'Network Baseline'}
+          </div>
+          {targetNode && (
+            <Link 
+              to={`/app/node/${targetNode.node_id || targetNode.id}`}
+              style={{ fontSize: '9px', fontWeight: 900, color: 'var(--accent-primary)', textDecoration: 'none', background: 'rgba(0,180,216,0.1)', padding: '2px 8px', borderRadius: '4px', letterSpacing: '0.5px' }}
+            >
+              VIEW FULL DETAILS
+            </Link>
+          )}
         </div>
       </div>
       

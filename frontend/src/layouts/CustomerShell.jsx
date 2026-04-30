@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  LogOut, Package, MapPin, Bell, LayoutDashboard, 
-  Settings, HelpCircle, User, ChevronRight, Menu, X 
+  LogOut, Package, Bell, LayoutDashboard, 
+  Settings, HelpCircle, User, ChevronRight, Menu, X, BookOpen, RefreshCw 
 } from 'lucide-react';
 import FloatingManualButton from '../components/common/FloatingManualButton';
+import BottomNav from '../components/layout/BottomNav';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 
 export default function CustomerShell() {
-  const { user, logout } = useAuth();
+  const { user, logout, getAuthHeaders } = useAuth();
+  const { isMobile } = useBreakpoint();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -26,16 +29,17 @@ export default function CustomerShell() {
       width: '100vw',
       backgroundColor: 'var(--bg-canvas)',
       display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
       overflow: 'hidden',
       color: 'var(--text-primary)',
       fontFamily: "'Inter', sans-serif",
     },
     sidebar: {
-      width: sidebarOpen ? '260px' : '0px',
+      width: isMobile ? '0px' : (sidebarOpen ? '260px' : '0px'),
       height: '100%',
       backgroundColor: 'var(--bg-surface)',
       borderRight: '1px solid var(--border)',
-      display: 'flex',
+      display: isMobile ? 'none' : 'flex',
       flexDirection: 'column',
       transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       position: 'relative',
@@ -113,12 +117,12 @@ export default function CustomerShell() {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
+      height: isMobile ? 'calc(100vh - 64px)' : '100%',
       overflow: 'hidden',
     },
     header: {
-      height: '72px',
-      padding: '0 32px',
+      height: isMobile ? '64px' : '72px',
+      padding: isMobile ? '0 16px' : '0 32px',
       backgroundColor: 'var(--bg-surface)',
       borderBottom: '1px solid var(--border)',
       display: 'flex',
@@ -130,13 +134,14 @@ export default function CustomerShell() {
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
-      fontSize: '14px',
+      fontSize: isMobile ? '12px' : '14px',
       color: 'var(--text-muted)',
     },
     content: {
       flex: 1,
       overflowY: 'auto',
-      padding: '32px',
+      padding: isMobile ? '16px' : '32px',
+      paddingBottom: isMobile ? '80px' : '32px',
       backgroundColor: 'var(--bg-canvas)',
     },
     toggleBtn: {
@@ -145,22 +150,22 @@ export default function CustomerShell() {
       color: 'var(--text-muted)',
       cursor: 'pointer',
       padding: '8px',
-      display: 'flex',
+      display: isMobile ? 'none' : 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     }
   };
 
   const getPageTitle = () => {
-    if (location.pathname === '/customer') return 'My Shipments';
-    if (location.pathname.includes('/track/')) return 'Shipment Tracking';
-    if (location.pathname === '/customer/alerts') return 'Disruption Alerts';
-    return 'Customer Portal';
+    if (location.pathname === '/customer') return 'Shipments';
+    if (location.pathname.includes('/track/')) return 'Tracking';
+    if (location.pathname === '/customer/alerts') return 'Alerts';
+    return 'Portal';
   };
 
   return (
     <div style={styles.layout}>
-      {/* Sidebar */}
+      {/* Sidebar - Hidden on mobile */}
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logoIcon}>N</div>
@@ -217,28 +222,59 @@ export default function CustomerShell() {
       {/* Main Content */}
       <div style={styles.main}>
         <header style={styles.header}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <button style={styles.toggleBtn} onClick={() => setSidebarOpen(!sidebarOpen)}>
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '20px' }}>
+            {!isMobile && (
+              <button style={styles.toggleBtn} onClick={() => setSidebarOpen(!sidebarOpen)}>
+                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            )}
+            {isMobile && (
+              <div style={styles.logoIcon}>N</div>
+            )}
             <div style={styles.breadcrumb}>
-              <span>Customer Portal</span>
+              <span>Portal</span>
               <ChevronRight size={14} />
               <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{getPageTitle()}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
+             {!isMobile && (
+               <button 
+                 onClick={async () => {
+                   if (window.confirm('Re-initialize entire demo data? This will reset all your shipments.')) {
+                     try {
+                       await restoreDemoData(getAuthHeaders());
+                       window.location.reload();
+                     } catch (err) {
+                       alert('Sync failed: ' + err.message);
+                     }
+                   }
+                 }}
+                 style={{ 
+                   background: 'none', border: '1px solid var(--border)', 
+                   color: 'var(--text-muted)', padding: '6px 12px', 
+                   borderRadius: '8px', fontSize: '11px', fontWeight: '800',
+                   display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer',
+                   letterSpacing: '0.5px'
+                 }}
+                >
+                 <RefreshCw size={14} />
+                 <span>REFRESH DATA</span>
+               </button>
+             )}
              <div style={{ 
-               backgroundColor: 'var(--brand-dim)', 
+               backgroundColor: 'rgba(0, 229, 160, 0.1)', 
                color: 'var(--brand)', 
-               padding: '6px 12px', 
-               borderRadius: '6px', 
-               fontSize: '12px', 
-               fontWeight: '700',
-               border: '1px solid rgba(0, 229, 160, 0.2)'
+               padding: isMobile ? '6px 12px' : '8px 16px', 
+               borderRadius: '10px', 
+               fontSize: isMobile ? '10px' : '12px', 
+               fontWeight: '800',
+               border: '1px solid rgba(0, 229, 160, 0.2)',
+               letterSpacing: '1px',
+               boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
              }}>
-               {user?.company_id || 'DEMO_CORP'}
+               {user?.company_id || 'DEMO'}
              </div>
           </div>
         </header>
@@ -249,6 +285,7 @@ export default function CustomerShell() {
           </div>
         </main>
       </div>
+      {isMobile && <BottomNav />}
       <FloatingManualButton />
     </div>
   );

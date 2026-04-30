@@ -1,12 +1,15 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Building2, Users, Activity, LogOut, ArrowLeft } from 'lucide-react';
+import { useBreakpoint } from '../hooks/useBreakpoint';
+import { Shield, Building2, Users, Activity, LogOut, ArrowLeft, Menu } from 'lucide-react';
 import FloatingManualButton from '../components/common/FloatingManualButton';
+import BottomNav from '../components/layout/BottomNav';
 
 export default function AdminShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { isMobile } = useBreakpoint();
 
   const handleLogout = () => {
     logout();
@@ -16,20 +19,30 @@ export default function AdminShell() {
   const styles = {
     layout: {
       display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
       height: '100vh',
       width: '100vw',
-      backgroundColor: 'var(--bg-main)',
-      color: 'var(--text-main)',
+      backgroundColor: 'var(--bg-canvas)',
+      color: 'var(--text-primary)',
       fontFamily: 'var(--font-sans)',
     },
     sidebar: {
       width: '280px',
-      backgroundColor: 'var(--bg-secondary)',
-      borderRight: '1px solid var(--glass-border)',
-      display: 'flex',
+      backgroundColor: 'var(--bg-surface)',
+      borderRight: '1px solid var(--border)',
+      display: isMobile ? 'none' : 'flex',
       flexDirection: 'column',
       padding: '24px 0',
       flexShrink: 0,
+    },
+    mobileHeader: {
+      display: isMobile ? 'flex' : 'none',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '16px 20px',
+      backgroundColor: 'var(--bg-surface)',
+      borderBottom: '1px solid var(--border)',
+      zIndex: 100,
     },
     header: {
       padding: '0 24px',
@@ -42,7 +55,7 @@ export default function AdminShell() {
       fontSize: '20px',
       fontWeight: '900',
       letterSpacing: '1px',
-      color: '#ef476f', // Nerve Red
+      color: 'var(--status-critical)',
     },
     nav: {
       flex: 1,
@@ -59,8 +72,8 @@ export default function AdminShell() {
       borderRadius: '8px',
       textDecoration: 'none',
       color: isActive ? '#fff' : 'var(--text-muted)',
-      backgroundColor: isActive ? 'rgba(239, 71, 111, 0.2)' : 'transparent',
-      borderLeft: isActive ? '3px solid #ef476f' : '3px solid transparent',
+      backgroundColor: isActive ? 'var(--status-critical-dim)' : 'transparent',
+      borderLeft: isActive ? '3px solid var(--status-critical)' : '3px solid transparent',
       fontSize: '14px',
       fontWeight: '600',
       transition: 'all 0.2s',
@@ -68,7 +81,7 @@ export default function AdminShell() {
     }),
     footer: {
       padding: '24px',
-      borderTop: '1px solid var(--glass-border)',
+      borderTop: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '16px',
@@ -82,7 +95,7 @@ export default function AdminShell() {
       width: '32px',
       height: '32px',
       borderRadius: '8px',
-      backgroundColor: '#ef476f',
+      backgroundColor: 'var(--status-critical)',
       color: '#fff',
       display: 'flex',
       alignItems: 'center',
@@ -107,11 +120,24 @@ export default function AdminShell() {
       flex: 1,
       overflowY: 'auto',
       position: 'relative',
+      paddingBottom: isMobile ? '64px' : '0px',
     }
   };
 
   return (
     <div style={styles.layout}>
+      {/* Mobile Header */}
+      <header style={styles.mobileHeader}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Shield size={24} color="var(--status-critical)" />
+          <span style={{ fontSize: '16px', fontWeight: '900', letterSpacing: '0.5px' }}>NERVE ADMIN</span>
+        </div>
+        <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }}>
+          <LogOut size={20} />
+        </button>
+      </header>
+
+      {/* Desktop Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.header}>
           <Shield size={28} color="var(--status-critical)" />
@@ -151,6 +177,8 @@ export default function AdminShell() {
       <main style={styles.main}>
         <Outlet />
       </main>
+
+      {isMobile && <BottomNav />}
       <FloatingManualButton />
     </div>
   );

@@ -106,6 +106,7 @@ export default function App() {
                     <Route index element={<ExpectedShipments />} />
                     <Route path="today" element={<TodayCheckins />} />
                     <Route path="nodes" element={<NodeManager />} />
+                    <Route path="node/:id" element={<NodeDetail />} />
                     <Route path="weather" element={<NodeWeather />} />
                     <Route path="flag" element={<FlagIssue />} />
                   </Route>
@@ -122,6 +123,7 @@ export default function App() {
                     <Route index element={<OwnerDashboard />} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="nodes" element={<NodeManagement />} />
+                    <Route path="node/:id" element={<NodeDetail />} />
                   </Route>
 
                   {/* Customer Shell */}

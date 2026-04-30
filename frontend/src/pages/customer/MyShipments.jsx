@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { fetchCustomerShipments } from '../../services/api';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { 
   Package, MapPin, ArrowRight, Clock, Loader, 
   Search, Filter, TrendingUp, AlertTriangle, CheckCircle, ChevronRight
@@ -27,6 +28,7 @@ export default function MyShipments() {
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const { getAuthHeaders } = useAuth();
+  const { isMobile } = useBreakpoint();
   const navigate = useNavigate();
 
   const loadShipments = useCallback(async () => {
@@ -43,7 +45,6 @@ export default function MyShipments() {
 
   useEffect(() => { loadShipments(); }, [loadShipments]);
 
-  // Client-side search and additional filtering
   const filteredShipments = useMemo(() => {
     return shipments.filter(s => {
       const matchesSearch = s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -53,7 +54,6 @@ export default function MyShipments() {
     });
   }, [shipments, searchQuery]);
 
-  // Statistics Calculation
   const stats = useMemo(() => {
     return {
       total: shipments.length,
@@ -65,9 +65,9 @@ export default function MyShipments() {
 
   if (loading && shipments.length === 0) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'120px 20px', color:'var(--text-muted)', gap:'16px' }}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding: isMobile ? '80px 20px' : '120px 20px', color:'var(--text-muted)', gap:'16px' }}>
         <Loader size={32} style={{ animation:'spin 1s linear infinite' }} />
-        <span style={{ fontSize:'15px', fontWeight:'600', letterSpacing:'1px' }}>SYNCHRONIZING LOGISTICS DATA...</span>
+        <span style={{ fontSize:'13px', fontWeight:'700', letterSpacing:'1px' }}>SYNCHRONIZING FLEET...</span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -76,48 +76,48 @@ export default function MyShipments() {
   const styles = {
     statsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-      gap: '20px',
-      marginBottom: '32px',
+      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(240px, 1fr))',
+      gap: isMobile ? '12px' : '20px',
+      marginBottom: isMobile ? '24px' : '32px',
     },
     statCard: {
       backgroundColor: 'var(--bg-surface)',
       border: '1px solid var(--border)',
       borderRadius: '12px',
-      padding: '24px',
+      padding: isMobile ? '16px' : '24px',
       display: 'flex',
       alignItems: 'center',
-      gap: '20px',
+      gap: isMobile ? '12px' : '20px',
     },
     statIcon: (color) => ({
-      width: '48px',
-      height: '48px',
-      borderRadius: '10px',
-      backgroundColor: `${color}-dim` || 'var(--bg-elevated)',
+      width: isMobile ? '40px' : '48px',
+      height: isMobile ? '40px' : '48px',
+      borderRadius: '8px',
+      backgroundColor: `${color}11`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: color || 'var(--text-primary)',
+      color: color,
     }),
     toolbar: {
       display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: isMobile ? 'stretch' : 'center',
       marginBottom: '24px',
-      gap: '20px',
-      flexWrap: 'wrap',
+      gap: isMobile ? '16px' : '20px',
     },
     searchContainer: {
       position: 'relative',
       flex: 1,
-      minWidth: '300px',
+      minWidth: isMobile ? '100%' : '300px',
     },
     searchInput: {
       width: '100%',
       backgroundColor: 'var(--bg-surface)',
       border: '1px solid var(--border)',
       borderRadius: '10px',
-      padding: '12px 16px 12px 44px',
+      padding: '12px 16px 12px 40px',
       color: 'var(--text-primary)',
       fontSize: '14px',
       outline: 'none',
@@ -125,14 +125,14 @@ export default function MyShipments() {
     },
     shipmentGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-      gap: '20px',
+      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))',
+      gap: isMobile ? '16px' : '20px',
     },
     shipmentCard: {
       backgroundColor: 'var(--bg-surface)',
       border: '1px solid var(--border)',
-      borderRadius: '12px',
-      padding: '20px',
+      borderRadius: '14px',
+      padding: '16px',
       transition: 'all 0.2s',
       cursor: 'pointer',
       position: 'relative',
@@ -145,56 +145,56 @@ export default function MyShipments() {
       {/* Statistics Section */}
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <div style={styles.statIcon('var(--info)')}><TrendingUp size={24} /></div>
+          <div style={styles.statIcon('var(--info)')}><TrendingUp size={isMobile ? 18 : 24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Active Shipments</div>
-            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.active}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Active</div>
+            <div style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '800' }}>{stats.active}</div>
           </div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statIcon('var(--warning)')}><AlertTriangle size={24} /></div>
+          <div style={styles.statIcon('var(--warning)')}><AlertTriangle size={isMobile ? 18 : 24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Delayed</div>
-            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.delayed}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Delayed</div>
+            <div style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '800' }}>{stats.delayed}</div>
           </div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statIcon('var(--brand)')}><CheckCircle size={24} /></div>
+          <div style={styles.statIcon('var(--brand)')}><CheckCircle size={isMobile ? 18 : 24} /></div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Delivered</div>
-            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.delivered}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Delivered</div>
+            <div style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '800' }}>{stats.delivered}</div>
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon('var(--text-secondary)')}><Package size={24} /></div>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Total Managed</div>
-            <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.total}</div>
+        {!isMobile && (
+          <div style={styles.statCard}>
+            <div style={styles.statIcon('var(--text-secondary)')}><Package size={24} /></div>
+            <div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Total Managed</div>
+              <div style={{ fontSize: '24px', fontWeight: '800' }}>{stats.total}</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Toolbar */}
       <div style={styles.toolbar}>
         <div style={styles.searchContainer}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text" 
-            placeholder="Search by Shipment ID, Origin, or Destination..." 
+            placeholder="Search manifests..." 
             style={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = 'var(--brand)'}
-            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
           />
         </div>
 
-        <div style={{ display:'flex', gap:'8px', overflowX:'auto', paddingBottom:'4px' }}>
+        <div style={{ display:'flex', gap:'6px', overflowX:'auto', paddingBottom:'4px', WebkitOverflowScrolling: 'touch' }}>
           {FILTERS.map(f => (
             <button key={f} onClick={() => setActiveFilter(f)} style={{
-              padding:'10px 18px', borderRadius:'8px', border:`1px solid ${activeFilter === f ? 'var(--brand)' : 'var(--border)'}`,
+              padding:'8px 14px', borderRadius:'8px', border:`1px solid ${activeFilter === f ? 'var(--brand)' : 'var(--border)'}`,
               backgroundColor: activeFilter === f ? 'var(--brand-dim)' : 'var(--bg-surface)', color: activeFilter === f ? 'var(--brand)' : 'var(--text-secondary)',
-              fontSize:'12px', fontWeight:'700', cursor:'pointer', whiteSpace:'nowrap', transition:'all 0.2s', letterSpacing:'0.5px',
+              fontSize:'11px', fontWeight:'800', cursor:'pointer', whiteSpace:'nowrap', transition:'all 0.2s', letterSpacing:'0.5px',
             }}>{f.replace('_',' ')}</button>
           ))}
         </div>
@@ -202,17 +202,14 @@ export default function MyShipments() {
 
       {/* Shipments List */}
       {filteredShipments.length === 0 ? (
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'100px 20px', backgroundColor: 'var(--bg-surface)', borderRadius: '12px', border: '1px dashed var(--border)', color:'var(--text-muted)', gap:'16px' }}>
-          <Package size={48} strokeWidth={1} />
-          <div style={{ fontSize:'16px', fontWeight:'700', color: 'var(--text-primary)' }}>No matching shipments found</div>
-          <div style={{ fontSize:'14px', textAlign:'center', maxWidth: '400px' }}>
-            We couldn't find any shipments matching your current filters or search query. Try adjusting your search term.
-          </div>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'60px 20px', backgroundColor: 'var(--bg-surface)', borderRadius: '12px', border: '1px dashed var(--border)', color:'var(--text-muted)', gap:'12px' }}>
+          <Package size={40} strokeWidth={1} />
+          <div style={{ fontSize:'15px', fontWeight:'700', color: 'var(--text-primary)' }}>No manifests found</div>
           <button 
             onClick={() => { setSearchQuery(''); setActiveFilter('ALL'); }}
-            style={{ padding: '10px 20px', backgroundColor: 'var(--brand-dim)', color: 'var(--brand)', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}
+            style={{ padding: '8px 16px', backgroundColor: 'var(--brand-dim)', color: 'var(--brand)', border: 'none', borderRadius: '6px', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}
           >
-            Clear All Filters
+            Clear Filters
           </button>
         </div>
       ) : (
@@ -225,56 +222,34 @@ export default function MyShipments() {
               onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--brand)'}
               onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
             >
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'16px' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'12px' }}>
                 <div>
-                  <div style={{ fontSize:'11px', color:'var(--text-muted)', fontWeight:'700', textTransform:'uppercase', letterSpacing:'1px', marginBottom: '4px' }}>Shipment ID</div>
-                  <div style={{ fontSize:'16px', fontWeight:'800', fontFamily:"'JetBrains Mono', monospace", color: 'var(--brand)' }}>{s.id}</div>
+                  <div style={{ fontSize:'9px', color:'var(--text-muted)', fontWeight:'800', textTransform:'uppercase', letterSpacing:'1px', marginBottom: '2px' }}>ID: {s.id}</div>
+                  <div style={{ fontSize:'15px', fontWeight:'850', color: 'var(--text-primary)' }}>{s.cargo_type}</div>
                 </div>
-                <div style={{ padding:'4px 12px', borderRadius:'6px', fontSize:'11px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.5px', backgroundColor: STATUS_BG[s.status] || 'var(--bg-elevated)', color: STATUS_COLORS[s.status] || 'var(--text-secondary)' }}>
+                <div style={{ padding:'3px 8px', borderRadius:'4px', fontSize:'9px', fontWeight:'900', textTransform:'uppercase', backgroundColor: STATUS_BG[s.status] || 'var(--bg-elevated)', color: STATUS_COLORS[s.status] || 'var(--text-secondary)' }}>
                   {s.status?.replace('_',' ')}
                 </div>
               </div>
 
-              <div style={{ display:'flex', alignItems:'center', gap:'12px', padding: '12px', backgroundColor: 'var(--bg-canvas)', borderRadius: '8px', marginBottom: '16px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap: '8px', padding: '10px', backgroundColor: 'var(--bg-canvas)', borderRadius: '8px', marginBottom: '12px' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Origin</div>
-                  <div style={{ fontSize: '13px', fontWeight: '700' }}>{s.origin}</div>
+                  <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: '700' }}>ORIGIN</div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.origin}</div>
                 </div>
-                <ArrowRight size={16} color="var(--text-muted)" />
+                <ArrowRight size={14} color="var(--text-muted)" />
                 <div style={{ flex: 1, textAlign: 'right' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Destination</div>
-                  <div style={{ fontSize: '13px', fontWeight: '700' }}>{s.destination}</div>
+                  <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: '700' }}>DEST</div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.destination}</div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                   <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <Package size={14} color="var(--text-secondary)" />
-                   </div>
-                   <div style={{ fontSize: '12px', fontWeight: '600' }}>{s.cargo_type || 'General'}</div>
-                </div>
-                {s.estimated_arrival && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Clock size={14} color="var(--text-secondary)" />
-                    </div>
-                    <div style={{ fontSize: '12px', fontWeight: '600' }}>
-                      {new Date(s.estimated_arrival).toLocaleDateString('en-US', { month:'short', day:'numeric' })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ 
-                borderTop: '1px solid var(--border)', 
-                paddingTop: '12px', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
-              }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>View live tracking details</span>
-                <ChevronRight size={16} color="var(--brand)" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={12} />
+                    <span>ETA: {s.estimated_arrival ? new Date(s.estimated_arrival).toLocaleDateString() : 'TBD'}</span>
+                 </div>
+                 <ChevronRight size={14} color="var(--brand)" />
               </div>
             </div>
           ))}

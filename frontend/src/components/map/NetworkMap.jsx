@@ -3,36 +3,49 @@ import { useNetwork } from '../../context/NetworkContext';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from 'react-leaflet';
 import { useTheme } from '../../hooks/useTheme';
 
-function MapResizer({ rightPanelOpen }) {
+function MapResizer({ rightPanelOpen, isMobile, isTablet }) {
   const map = useMap();
   React.useEffect(() => {
-    setTimeout(() => {
-      map.invalidateSize({ animate: true });
-    }, 300); // match transition duration
-  }, [rightPanelOpen, map]);
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 400); 
+    return () => clearTimeout(timer);
+  }, [rightPanelOpen, isMobile, isTablet, map]);
   return null;
 }
 
-export default function NetworkMap({ height = '100%', showPanels = true, onNodeClick, rightPanelOpen }) {
-  const { nodes, routes, shipments } = useNetwork();
+function ZoomControls() {
+  const map = useMap();
+  return (
+    <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <button 
+        onClick={(e) => { e.stopPropagation(); map.zoomIn(); }}
+        style={{ width: '36px', height: '36px', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', borderRadius: '8px', cursor: 'pointer', fontWeight: 900, fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+      >+</button>
+      <button 
+        onClick={(e) => { e.stopPropagation(); map.zoomOut(); }}
+        style={{ width: '36px', height: '36px', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', borderRadius: '8px', cursor: 'pointer', fontWeight: 900, fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+      >-</button>
+    </div>
+  );
+}
+
+export default function NetworkMap({ height = '100%', onNodeClick, rightPanelOpen, isMobile, isTablet }) {
+  const { nodes, routes } = useNetwork();
   const { theme } = useTheme();
 
-  // Dark tile URL: CartoDB DarkMatter
   const DARK_TILE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-  // Light tile URL: CartoDB Positron
   const LIGHT_TILE = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
-  const tileUrl = theme === 'dark' ? DARK_TILE : LIGHT_TILE;
-
   const getNodeColor = (type, status) => {
-    if (status === 'alert') return 'var(--danger)';
-    if (status === 'congested') return 'var(--warning)';
+    if (status === 'alert') return 'var(--status-critical)';
+    if (status === 'congested') return 'var(--status-warning)';
     switch (type) {
       case 'factory': return 'var(--node-factory)';
       case 'port': return 'var(--node-port)';
       case 'warehouse': return 'var(--node-warehouse)';
       case 'retail': return 'var(--node-retail)';
-      default: return 'var(--info)';
+      default: return 'var(--accent-primary)';
     }
   };
 
@@ -40,33 +53,26 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
     <div style={{ width: '100%', height, position: 'relative' }}>
       <MapContainer 
         center={[20, 85]} 
-        zoom={3} 
+        zoom={isMobile ? 2 : 3} 
         minZoom={2} 
-        maxZoom={8} 
+        maxZoom={10} 
         zoomControl={false}
-        style={{ width: '100%', height: '100%', background: 'var(--map-bg)' }}
-        key={theme} // Force remount on theme change
+        style={{ width: '100%', height: '100%', background: 'var(--bg-canvas)' }}
+        key={`${theme}-${isMobile}`} 
       >
-        <MapResizer rightPanelOpen={rightPanelOpen} />
+        <MapResizer rightPanelOpen={rightPanelOpen} isMobile={isMobile} isTablet={isTablet} />
+        <ZoomControls />
         <TileLayer
-          url={tileUrl}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url={theme === 'dark' ? DARK_TILE : LIGHT_TILE}
         />
         
-        {/* Draw Routes */}
         {routes.map(r => {
           const originNode = nodes.find(n => n.id === r.from);
           const destNode = nodes.find(n => n.id === r.to);
           if (!originNode || !destNode) return null;
           
-          const originPos = [
-            originNode.lat ?? originNode.location?.lat, 
-            originNode.lng ?? originNode.location?.lng
-          ];
-          const destPos = [
-            destNode.lat ?? destNode.location?.lat, 
-            destNode.lng ?? destNode.location?.lng
-          ];
+          const originPos = [originNode.lat ?? originNode.location?.lat, originNode.lng ?? originNode.location?.lng];
+          const destPos = [destNode.lat ?? destNode.location?.lat, destNode.lng ?? destNode.location?.lng];
 
           if (originPos[0] === undefined || destPos[0] === undefined) return null;
 
@@ -74,87 +80,58 @@ export default function NetworkMap({ height = '100%', showPanels = true, onNodeC
             <Polyline 
               key={r.id} 
               positions={[originPos, destPos]} 
-              color="rgba(0, 180, 216, 0.3)" 
-              weight={1.5} 
-              opacity={0.8}
+              color="var(--accent-primary)" 
+              weight={isMobile ? 1 : 1.5} 
+              opacity={0.15}
             />
           );
         })}
 
-        {/* Draw Nodes */}
         {nodes.map(node => {
-          const pos = [
-            node.lat ?? node.location?.lat, 
-            node.lng ?? node.location?.lng
-          ];
+          const pos = [node.lat ?? node.location?.lat, node.lng ?? node.location?.lng];
           if (pos[0] === undefined) return null;
 
           const isCritical = node.status === 'alert' || node.risk_level === 'critical';
           const isWarning = node.status === 'congested' || node.risk_level === 'high';
 
           return (
-          <CircleMarker
-            key={node.id}
-            center={pos}
-            radius={isCritical ? 7 : 5}
-            fillColor={getNodeColor(node.type, node.status)}
-            color={isCritical ? 'var(--status-critical)' : isWarning ? 'var(--status-warning)' : 'rgba(255,255,255,0.2)'}
-            weight={isCritical ? 2 : 1}
-            fillOpacity={1}
-            className={`custom-marker ${isCritical ? 'blink-red' : ''}`}
-            eventHandlers={{
-              click: () => onNodeClick && onNodeClick(node)
-            }}
-          >
-            <Popup className="custom-popup">
-              <div style={{ padding: '1rem', minWidth: '220px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{node.id}</span>
-                  <span className="badge" style={{ backgroundColor: 'var(--bg-hover)' }}>{node.type}</span>
-                </div>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{node.name}</h3>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem' }}>
-                  <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Status</div>
-                    <div style={{ color: isCritical ? 'var(--status-critical)' : node.status === 'congested' ? 'var(--status-warning)' : 'var(--brand)', textTransform: 'uppercase' }}>{node.status}</div>
+            <CircleMarker
+              key={node.id}
+              center={pos}
+              radius={isCritical ? (isMobile ? 6 : 8) : (isMobile ? 4 : 5)}
+              fillColor={getNodeColor(node.type, node.status)}
+              color={isCritical ? 'var(--status-critical)' : isWarning ? 'var(--status-warning)' : 'rgba(255,255,255,0.1)'}
+              weight={isCritical ? 2 : 1}
+              fillOpacity={0.9}
+              className={`custom-marker ${isCritical ? 'blink-red' : ''}`}
+              eventHandlers={{
+                click: () => onNodeClick && onNodeClick(node)
+              }}
+            >
+              <Popup className="custom-popup">
+                <div style={{ padding: '0.75rem', minWidth: '200px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <span style={{ fontWeight: 900, fontSize: '0.8rem', letterSpacing: '0.05em' }}>{node.id}</span>
+                    <span style={{ fontSize: '0.6rem', fontWeight: 900, background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>{node.type}</span>
                   </div>
-                  <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Risk</div>
-                    <div>{node.risk_level || 'Low'}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Load</div>
-                    <div>{node.current_load}/{node.capacity}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: 'var(--text-muted)' }}>Proc. Time</div>
-                    <div>{node.processing_time_hrs}h</div>
-                  </div>
-                </div>
-
-                {node.weather && (
-                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.8rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>{node.weather.condition || 'Clear'}</span>
-                      <span style={{ fontWeight: 'bold' }}>{node.weather.temperature_c || node.weather.temp || 0}°C</span>
+                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', fontWeight: 800 }}>{node.name}</h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.7rem' }}>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.6rem', textTransform: 'uppercase', marginBottom: '2px' }}>Status</div>
+                      <div style={{ color: isCritical ? 'var(--status-critical)' : node.status === 'congested' ? 'var(--status-warning)' : 'var(--status-live)', fontWeight: 800 }}>{node.status.toUpperCase()}</div>
                     </div>
-                    <div style={{ color: 'var(--text-muted)' }}>Wind: {node.weather.wind_speed_kmh || node.weather.wind || 0} km/h</div>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.6rem', textTransform: 'uppercase', marginBottom: '2px' }}>Risk</div>
+                      <div style={{ fontWeight: 800 }}>{node.risk_level?.toUpperCase() || 'LOW'}</div>
+                    </div>
                   </div>
-                )}
-              </div>
-            </Popup>
-          </CircleMarker>
+                </div>
+              </Popup>
+            </CircleMarker>
           );
         })}
       </MapContainer>
-      
-      {showPanels && (
-        <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 1000, display: 'flex', gap: '0.5rem' }}>
-          <button style={{ background: 'var(--bg-surface)', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.875rem' }}>+ Zoom</button>
-          <button style={{ background: 'var(--bg-surface)', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.875rem' }}>- Zoom</button>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,17 +1,20 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 
 export default function FloatingManualButton() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Don't show on the User Manual page itself
-  if (location.pathname === '/') return null;
+  const { isMobile } = useBreakpoint();
+
+  // Don't show on the User Manual page itself or on mobile (since it's in bottom nav)
+  if (location.pathname === '/' || isMobile) return null;
 
   return (
     <button
-      onClick={() => navigate('/')}
+      onClick={() => navigate('/?manual=true')}
       style={{
         position: 'fixed',
         bottom: '24px',

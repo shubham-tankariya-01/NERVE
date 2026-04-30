@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNetwork } from '../../context/NetworkContext';
 import { useAuth } from '../../context/AuthContext';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { fetchShipments, fetchDecisionLogs, manualReroute } from '../../services/api';
-import { Package, Activity, AlertTriangle, CheckCircle, Search, Terminal, Save, History, MessageSquare, Shield, ArrowRight } from 'lucide-react';
+import { Package, Activity, AlertTriangle, CheckCircle, Search, Terminal, Save, History, MessageSquare, Shield, ArrowRight, Loader, ChevronRight } from 'lucide-react';
 
 export default function OwnerDashboard() {
   const { networkHealth, alerts } = useNetwork();
   const { getAuthHeaders, user: currentUser } = useAuth();
+  const { isMobile } = useBreakpoint();
   
   const [shipments, setShipments] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -67,170 +69,202 @@ export default function OwnerDashboard() {
   };
 
   const stats = [
-    { label: 'Network Health', value: `${networkHealth}%`, icon: <Activity size={18} />, color: networkHealth > 80 ? '#00E5A0' : '#FFD166' },
-    { label: 'Active Alerts', value: alerts.length, icon: <AlertTriangle size={18} />, color: alerts.length > 0 ? '#EF476F' : '#94A3B8' },
-    { label: 'Shipments', value: shipments.length, icon: <Package size={18} />, color: '#00B4D8' },
-    { label: 'Audit Events', value: logs.length, icon: <History size={18} />, color: '#BB86FC' },
+    { label: 'Health', value: `${networkHealth}%`, icon: <Activity size={18} />, color: networkHealth > 80 ? 'var(--status-live)' : 'var(--status-warning)' },
+    { label: 'Alerts', value: alerts.length, icon: <AlertTriangle size={18} />, color: alerts.length > 0 ? 'var(--status-critical)' : 'var(--text-muted)' },
+    { label: 'Units', value: shipments.length, icon: <Package size={18} />, color: 'var(--accent-primary)' },
+    { label: 'Audits', value: logs.length, icon: <History size={18} />, color: 'var(--accent-secondary)' },
   ];
 
-  const s = {
-    container: { padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', backgroundColor: '#060b19', minHeight: '100vh', color: '#e2e8f0', fontFamily: "'Inter', sans-serif" },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontSize: '24px', fontWeight: '800', letterSpacing: '-0.5px' },
-    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' },
-    statCard: { backgroundColor: '#0a1128', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '20px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' },
-    mainContent: { display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '24px' },
-    panel: { backgroundColor: '#0a1128', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' },
-    table: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
-    th: { textAlign: 'left', padding: '12px', color: '#64748b', borderBottom: '1px solid rgba(255,255,255,0.06)', textTransform: 'uppercase', fontSize: '10px', fontWeight: '800', letterSpacing: '0.5px' },
-    td: { padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.04)' },
-    status: (type) => ({ padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', 
-      backgroundColor: type === 'delayed' ? 'rgba(255, 209, 102, 0.1)' : type === 'completed' ? 'rgba(0, 229, 160, 0.1)' : 'rgba(0, 180, 216, 0.1)',
-      color: type === 'delayed' ? '#FFD166' : type === 'completed' ? '#00E5A0' : '#00B4D8'
-    }),
-    input: { width: '100%', padding: '12px', backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#e2e8f0', fontSize: '13px', outline: 'none' },
-    label: { fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' },
-    btn: { padding: '12px', background: 'linear-gradient(135deg, #EF476F, #FF8A00)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
-    logItem: { padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '8px' }
+  const styles = {
+    container: { 
+      padding: isMobile ? '16px' : '24px', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: isMobile ? '16px' : '24px', 
+      backgroundColor: 'var(--bg-canvas)', 
+      color: 'var(--text-primary)', 
+      fontFamily: "'Inter', sans-serif" 
+    },
+    header: { 
+      display: 'flex', 
+      flexDirection: isMobile ? 'column' : 'row',
+      justifyContent: 'space-between', 
+      alignItems: isMobile ? 'stretch' : 'center',
+      gap: isMobile ? '16px' : '0'
+    },
+    title: { fontSize: isMobile ? '20px' : '24px', fontWeight: '900', letterSpacing: '-0.5px' },
+    grid: { 
+      display: 'grid', 
+      gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(240px, 1fr))', 
+      gap: isMobile ? '12px' : '20px' 
+    },
+    statCard: { 
+      backgroundColor: 'var(--bg-surface)', 
+      border: '1px solid var(--border)', 
+      borderRadius: '14px', 
+      padding: isMobile ? '16px' : '20px', 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: isMobile ? '12px' : '20px', 
+      boxShadow: '0 4px 20px rgba(0,0,0,0.1)' 
+    },
+    mainContent: { 
+      display: 'grid', 
+      gridTemplateColumns: isMobile ? '1fr' : '2fr 1.2fr', 
+      gap: isMobile ? '16px' : '24px' 
+    },
+    panel: { 
+      backgroundColor: 'var(--bg-surface)', 
+      border: '1px solid var(--border)', 
+      borderRadius: '16px', 
+      padding: isMobile ? '20px' : '24px', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: isMobile ? '16px' : '20px' 
+    },
+    shipmentCard: {
+      padding: '12px',
+      borderRadius: '10px',
+      backgroundColor: 'var(--bg-elevated)',
+      border: '1px solid var(--border)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '10px'
+    },
+    input: { width: '100%', padding: '12px', backgroundColor: 'var(--bg-canvas)', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '13px', outline: 'none' },
+    label: { fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px', display: 'block' },
+    btn: { padding: '12px', background: 'var(--status-critical)', color: '#000', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
+    logItem: { padding: '14px', backgroundColor: 'var(--bg-canvas)', borderRadius: '10px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '8px' }
   };
 
-  const filteredShipments = shipments.filter(s => 
-    s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (s.cargo_type || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const getStatusStyle = (type) => ({
+    padding: '3px 8px', borderRadius: '4px', fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', 
+    backgroundColor: type === 'delayed' ? 'var(--status-warning-dim)' : type === 'completed' ? 'var(--brand-dim)' : 'var(--info-dim)',
+    color: type === 'delayed' ? 'var(--status-warning)' : type === 'completed' ? 'var(--brand)' : 'var(--info)'
+  });
+
+  if (loading) {
+     return (
+       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'100px 20px', color:'var(--text-muted)', gap:'16px' }}>
+         <Loader size={32} style={{ animation:'spin 1s linear infinite' }} />
+         <div style={{ fontSize: '12px', fontWeight: '800' }}>SYNCING COMMAND DATA...</div>
+         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+       </div>
+     );
+  }
 
   return (
-    <div style={s.container}>
-      <div style={s.header}>
+    <div style={styles.container}>
+      <div style={styles.header}>
         <div>
-          <h1 style={s.title}>COMMAND CENTER</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>Strategic oversight for <b style={{ color: '#00E5A0' }}>{currentUser?.company_id || 'Global'}</b></p>
+          <h1 style={styles.title}>COMMAND CENTER</h1>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Control interface for <span style={{ color: 'var(--brand)' }}>{currentUser?.company_id || 'Global'}</span></p>
         </div>
-        <div style={{ position: 'relative', width: '300px' }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
-          <input style={s.input} placeholder="Search network assets..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+        <div style={{ position: 'relative', width: isMobile ? '100%' : '300px' }}>
+          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input style={styles.input} placeholder="Search network assets..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
       </div>
 
-      <div style={s.grid}>
+      <div style={styles.grid}>
         {stats.map((stat, i) => (
-          <div key={i} style={s.statCard}>
-            <div style={{ color: stat.color, backgroundColor: `${stat.color}15`, padding: '12px', borderRadius: '10px' }}>{stat.icon}</div>
+          <div key={i} style={styles.statCard}>
+            <div style={{ color: stat.color, backgroundColor: `${stat.color}15`, padding: '10px', borderRadius: '8px' }}>{stat.icon}</div>
             <div>
-              <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>{stat.label}</div>
-              <div style={{ fontSize: '22px', fontWeight: '900' }}>{stat.value}</div>
+              <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>{stat.label}</div>
+              <div style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: '900' }}>{stat.value}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={s.mainContent}>
+      <div style={styles.mainContent}>
         {/* Shipments & Operations */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={s.panel}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
+          <div style={styles.panel}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Package size={20} style={{ color: '#00B4D8' }} /> ACTIVE OPERATIONS
+              <h2 style={{ fontSize: '14px', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Package size={18} color="var(--info)" /> OPERATIONS
               </h2>
-              <span style={{ fontSize: '11px', color: '#64748b', backgroundColor: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '4px' }}>LIVE UPDATES</span>
+              <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: '800' }}>LIVE HUB</span>
             </div>
             
-            <div style={{ overflowX: 'auto' }}>
-              <table style={s.table}>
-                <thead>
-                  <tr>
-                    <th style={s.th}>Shipment</th>
-                    <th style={s.th}>Path</th>
-                    <th style={s.th}>Status</th>
-                    <th style={s.th}>Cargo</th>
-                    <th style={s.th}>Priority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredShipments.slice(0, 8).map(shp => (
-                    <tr key={shp.id}>
-                      <td style={s.td}>
-                        <div style={{ fontWeight: '800', color: '#fff' }}>{shp.id}</div>
-                        <div style={{ fontSize: '10px', color: '#64748b' }}>{new Date(shp.departure_time).toLocaleDateString()}</div>
-                      </td>
-                      <td style={s.td}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
-                          <span style={{ color: '#00E5A0', fontWeight: '600' }}>{shp.origin}</span>
-                          <ArrowRight size={12} style={{ color: '#64748b' }} />
-                          <span style={{ color: '#EF476F', fontWeight: '600' }}>{shp.destination}</span>
-                        </div>
-                      </td>
-                      <td style={s.td}><span style={s.status(shp.status)}>{shp.status}</span></td>
-                      <td style={s.td}>{shp.cargo_type}</td>
-                      <td style={s.td}>
-                         <div style={{ fontSize: '11px', fontWeight: '700', color: shp.priority === 'critical' ? '#EF476F' : '#e2e8f0' }}>{shp.priority?.toUpperCase()}</div>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredShipments.length === 0 && (
-                    <tr>
-                      <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>No shipments found</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {shipments.slice(0, 5).map(shp => (
+                <div key={shp.id} style={styles.shipmentCard}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '900', fontFamily: 'monospace' }}>{shp.id}</span>
+                      <span style={getStatusStyle(shp.status)}>{shp.status}</span>
+                   </div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: '700' }}>
+                      <span style={{ color: 'var(--brand)' }}>{shp.origin}</span>
+                      <ArrowRight size={12} color="var(--text-muted)" />
+                      <span style={{ color: 'var(--status-critical)' }}>{shp.destination}</span>
+                   </div>
+                   <div style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>{shp.cargo_type}</span>
+                      <span style={{ color: shp.priority === 'critical' ? 'var(--status-critical)' : 'inherit' }}>{shp.priority?.toUpperCase()}</span>
+                   </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div style={s.panel}>
-            <h2 style={{ fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Terminal size={20} style={{ color: '#EF476F' }} /> MANUAL INTERVENTION
+          <div style={styles.panel}>
+            <h2 style={{ fontSize: '14px', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Terminal size={18} color="var(--status-critical)" /> INTERVENTION
             </h2>
-            <form onSubmit={handleReroute} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '16px', alignItems: 'flex-end' }}>
-              <div>
-                <label style={s.label}>Shipment</label>
-                <select style={s.input} value={selectedShipment} onChange={e => setSelectedShipment(e.target.value)}>
-                  <option value="">Select ID...</option>
-                  {shipments.filter(s => s.status !== 'completed').map(s => (
-                    <option key={s.id} value={s.id}>{s.id}</option>
-                  ))}
-                </select>
+            <form onSubmit={handleReroute} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={styles.label}>Manifest ID</label>
+                  <select style={styles.input} value={selectedShipment} onChange={e => setSelectedShipment(e.target.value)}>
+                    <option value="">Select...</option>
+                    {shipments.filter(s => s.status !== 'completed').map(s => (
+                      <option key={s.id} value={s.id}>{s.id}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={styles.label}>Intervention Path</label>
+                  <input style={styles.input} placeholder="N01, N04..." value={newRoute} onChange={e => setNewRoute(e.target.value)} />
+                </div>
               </div>
               <div>
-                <label style={s.label}>New Path (Comma Sep)</label>
-                <input style={s.input} placeholder="e.g. N01, N04" value={newRoute} onChange={e => setNewRoute(e.target.value)} />
+                <label style={styles.label}>Strategic Rationale</label>
+                <input style={styles.input} placeholder="Enter reason for bypass..." value={reason} onChange={e => setReason(e.target.value)} />
               </div>
-              <div>
-                <label style={s.label}>Reasoning</label>
-                <input style={s.input} placeholder="Strategic bypass..." value={reason} onChange={e => setReason(e.target.value)} />
-              </div>
-              <button type="submit" style={s.btn}><Save size={18} /> APPLY</button>
+              <button type="submit" style={styles.btn}><Save size={16} /> COMMIT OVERRIDE</button>
             </form>
             {statusMsg.text && (
-              <div style={{ fontSize: '13px', color: statusMsg.type === 'error' ? '#EF476F' : '#00E5A0', backgroundColor: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                {statusMsg.text}
+              <div style={{ fontSize: '11px', color: statusMsg.type === 'error' ? 'var(--status-critical)' : 'var(--brand)', backgroundColor: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', textAlign: 'center', fontWeight: '800' }}>
+                {statusMsg.text.toUpperCase()}
               </div>
             )}
           </div>
         </div>
 
         {/* Audit Trail */}
-        <div style={s.panel}>
-          <h2 style={{ fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <History size={20} style={{ color: '#BB86FC' }} /> AUDIT TRAIL
+        <div style={styles.panel}>
+          <h2 style={{ fontSize: '14px', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <History size={18} color="var(--accent-secondary)" /> AUDIT LOG
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '600px', overflowY: 'auto', paddingRight: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: isMobile ? '400px' : '600px', overflowY: 'auto' }}>
             {logs.map((log, i) => (
-              <div key={i} style={s.logItem}>
+              <div key={i} style={styles.logItem}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '11px', fontWeight: '900', color: log.action_type?.includes('MANUAL') ? '#EF476F' : '#00B4D8' }}>{log.action_type}</span>
-                  <span style={{ fontSize: '10px', color: '#64748b' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
+                  <span style={{ fontSize: '9px', fontWeight: '900', color: log.action_type?.includes('MANUAL') ? 'var(--status-critical)' : 'var(--info)' }}>{log.action_type}</span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: '800' }}>{log.shipment_id}</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', backgroundColor: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                  <MessageSquare size={12} style={{ display: 'inline', marginRight: '6px' }} />
+                <div style={{ fontSize: '13px', fontWeight: '850', fontFamily: 'monospace' }}>{log.shipment_id}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', backgroundColor: 'rgba(0,0,0,0.1)', padding: '10px', borderRadius: '8px', lineHeight: '1.4' }}>
                   {log.reasoning}
                 </div>
-                <div style={{ fontSize: '10px', color: '#64748b', alignSelf: 'flex-end', textTransform: 'uppercase', fontWeight: '700' }}>Auth: {log.performed_by}</div>
+                <div style={{ fontSize: '9px', color: 'var(--text-muted)', alignSelf: 'flex-end', fontWeight: '700' }}>BY: {log.performed_by}</div>
               </div>
             ))}
             {logs.length === 0 && (
-              <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>No audit records</div>
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>No audit trail detected.</div>
             )}
           </div>
         </div>

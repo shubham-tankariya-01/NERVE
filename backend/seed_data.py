@@ -251,7 +251,7 @@ async def seed_data():
             "planned_route": [origin["id"], dest["id"]],
             "route_taken": [origin["id"]],
             "company_id": comp_id,
-            "customer_id": f"customer_{random.randint(1, 20)}",
+            "customer_id": f"{comp['safe_name']}_customer",
             "estimated_arrival": (datetime.now() + timedelta(days=random.randint(3, 12))).isoformat(),
             "departure_time": (datetime.now() - timedelta(days=random.randint(1, 4))).isoformat()
         }

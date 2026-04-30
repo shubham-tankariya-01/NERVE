@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNetwork } from '../context/NetworkContext';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import { Search, MapPin, Box, Zap, Activity, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Nodes() {
   const { nodes } = useNetwork();
+  const { isMobile, isTablet } = useBreakpoint();
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -27,26 +29,37 @@ export default function Nodes() {
   };
 
   return (
-    <div className="animate-slide-up" style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', borderLeft: '4px solid var(--accent-primary)', paddingLeft: '1.5rem' }}>
+    <div className="animate-slide-up" style={{ padding: isMobile ? '1rem' : '2rem', maxWidth: '1600px', margin: '0 auto', background: 'var(--bg-main)' }}>
+      <header style={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        justifyContent: isMobile ? 'flex-start' : 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'flex-end', 
+        marginBottom: isMobile ? '1.5rem' : '3rem', 
+        borderLeft: '4px solid var(--accent-primary)', 
+        paddingLeft: '1.5rem',
+        gap: isMobile ? '0.5rem' : '0'
+      }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>NETWORK INFRASTRUCTURE</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', fontWeight: 600 }}>Active Node Telemetry · Global Distribution</p>
+          <h1 style={{ fontSize: isMobile ? '1.25rem' : '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>
+            {isMobile ? 'NETWORK INFRA' : 'NETWORK INFRASTRUCTURE'}
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem', fontWeight: 600 }}>Active Node Telemetry · Global Distribution</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 1 }}>{nodes.length}</div>
+          <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+            <div style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 1 }}>{nodes.length}</div>
             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800 }}>TOTAL NODES</div>
           </div>
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2.5rem', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1.5rem', marginBottom: isMobile ? '1.5rem' : '2.5rem', alignItems: isMobile ? 'stretch' : 'center' }}>
+        <div style={{ position: 'relative', flex: 1, maxWidth: isMobile ? '100%' : '400px' }}>
           <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text" 
-            placeholder="FILTER BY NODE_ID OR LOCATION..." 
+            placeholder="SEARCH BY ID OR NAME..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ 
@@ -58,11 +71,19 @@ export default function Nodes() {
               fontSize: '0.75rem',
               fontWeight: 700,
               borderRadius: '4px',
-              fontFamily: 'var(--font-mono)'
+              fontFamily: 'var(--font-mono)',
+              minHeight: '44px'
             }} 
           />
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '0.5rem', 
+          overflowX: 'auto', 
+          paddingBottom: isMobile ? '4px' : '0',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
           {nodeTypes.map(t => (
             <button 
               key={t} 
@@ -77,7 +98,9 @@ export default function Nodes() {
                 color: filterType === t ? '#000' : 'var(--text-muted)',
                 border: `1px solid ${filterType === t ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
                 transition: 'all 0.2s',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               {t}
@@ -86,7 +109,11 @@ export default function Nodes() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1.5rem' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(380px, 1fr))'), 
+        gap: isMobile ? '1rem' : '1.5rem' 
+      }}>
         {filteredNodes.map(node => {
           const loadRatio = node.current_load / node.capacity;
           const statusColor = getStatusColor(node.status);
@@ -94,15 +121,15 @@ export default function Nodes() {
           return (
             <Link 
               key={node.id} 
-              to={`/node/${node.id}`}
+              to={`/app/node/${node.id}`}
               className="glass-panel" 
               style={{ 
-                padding: '1.5rem', 
+                padding: isMobile ? '1rem' : '1.5rem', 
                 textDecoration: 'none',
                 borderLeft: `4px solid ${statusColor}`,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.25rem',
+                gap: '1rem',
                 transition: 'transform 0.2s, background 0.2s'
               }}
               onMouseEnter={(e) => {
@@ -117,7 +144,7 @@ export default function Nodes() {
                     <div style={{ padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-muted)', border: '1px solid var(--glass-border)' }}>
                       {node.type?.toUpperCase()}
                     </div>
-                    <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{node.id}</span>
+                    <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{node.id}</span>
                  </div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: statusColor }}></div>
@@ -126,7 +153,7 @@ export default function Nodes() {
               </div>
               
               <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{node.name}</h3>
+                <h3 style={{ fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{node.name}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
                    <MapPin size={12} /> {node.location?.lat.toFixed(2)}, {node.location?.lng.toFixed(2)}
                 </div>
@@ -154,7 +181,7 @@ export default function Nodes() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
-                 <div style={{ display: 'flex', gap: '1.25rem' }}>
+                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                        <Activity size={12} style={{ color: 'var(--accent-primary)' }} />
                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-main)' }}>{node.processing_time_hrs}H</span>
