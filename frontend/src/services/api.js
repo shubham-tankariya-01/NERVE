@@ -12,21 +12,33 @@ const getStoredAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// ← NEW: Utility to perform fetch with better error handling for network failures
+const safeFetch = async (url, options) => {
+  try {
+    const response = await fetch(url, options);
+    return response;
+  } catch (e) {
+    if (e.message === 'Failed to fetch' || e.name === 'TypeError') {
+      throw new Error(`Network Error: Cannot reach backend at "${url}". Check if the backend is running and CORS is allowed.`);
+    }
+    throw e;
+  }
+};
+
 // ← NEW: Extract detailed error message from backend response
 const extractError = async (response, fallback) => {
   try {
     const data = await response.json();
     throw new Error(data.detail || fallback);
   } catch (e) {
-    if (e instanceof Error && e.message !== fallback) throw e;
-    throw new Error(fallback);
+    throw new Error(`${fallback}: ${e.message || 'Server returned an invalid response'}`);
   }
 };
 
 // ── Auth Endpoints (Multi-Step) ── //
 
 export const loginStep1 = async (data) => {
-  const response = await fetch(`${API_BASE}/auth/login/step1`, {
+  const response = await safeFetch(`${API_BASE}/auth/login/step1`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

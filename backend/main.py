@@ -314,12 +314,9 @@ if not allowed_origins:
         "http://127.0.0.1:3000",
     ]
     if app_env == "production":
-        # In production without explicit origins, log a warning but don't block
-        import logging
-        logging.getLogger("nerve").warning(
-            "CORS_ALLOWED_ORIGINS not set in production. "
-            "Add your frontend URL to environment variables."
-        )
+        # Wildcard fallback for production debug
+        log.warning("CORS_ALLOWED_ORIGINS not set in production. Using wildcard '*' for debug.")
+        allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
